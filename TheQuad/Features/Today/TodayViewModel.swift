@@ -24,7 +24,18 @@ final class TodayViewModel {
         self.engine = engine
         self.enrollments = enrollments
         self.courses = courses
+
+        // DEBUG: set QUAD_DEBUG_DATE=yyyy-MM-dd in scheme env vars to pin the date.
+        #if DEBUG
+        let debugDate: Date? = {
+            guard let s = ProcessInfo.processInfo.environment["QUAD_DEBUG_DATE"] else { return nil }
+            let f = DateFormatter(); f.dateFormat = "yyyy-MM-dd HH:mm"
+            return f.date(from: s) ?? { let g = DateFormatter(); g.dateFormat = "yyyy-MM-dd"; return g.date(from: s) }()
+        }()
+        self.now = previewDate ?? debugDate ?? Date()
+        #else
         self.now = previewDate ?? Date()
+        #endif
 
         if previewDate == nil {
             // Start a repeating timer that keeps `now` current.
@@ -51,11 +62,25 @@ final class TodayViewModel {
     }
 
     var dayBadge: String {
-        if let type = engine.dayType(for: now), let n = type.rotationIndex {
-            return "Day \(n + 1)"
+        guard let type = engine.dayType(for: now) else { return "No School" }
+        if let n = type.rotationIndex { return "Day \(n + 1)" }
+        switch type {
+        case .halfDay:         return "Half Day"
+        case .delayedOpening: return "Delayed Start"
+        case .assembly:       return "Assembly"
+        case .examSchedule:   return "Exams"
+        default:              return "Special"
         }
-        if engine.dayType(for: now) == nil { return "No School" }
-        return "Special"
+    }
+
+    var isSchoolDay: Bool {
+        engine.dayType(for: now) != nil
+    }
+
+    /// The first upcoming school day visible in the calendar, for long-break empty states.
+    var nextCalendarSchoolDay: SchoolCalendarDate? {
+        guard !isSchoolDay else { return nil }
+        return engine.nextCalendarSchoolDay(after: now)
     }
 
     var currentSession: CourseSession? {
@@ -129,8 +154,10 @@ final class TodayViewModel {
 
     // MARK: - Friend free-block preview
 
-    /// Up to 2 friends who share the next (or current) free block with me today.
-    var friendsFreeSoon: [(friend: User, sharedBlock: AvailabilityInterval)] {
+    /// Up to 2 friends who share a free block overlapping the given slot.
+    /// Returns non-empty only for the first upcoming free slot — prevents the
+    /// same friend names from duplicating across every free row.
+    func friendsFreeSoon(forSlot slot: MeetingSlot) -> [(friend: User, sharedBlock: AvailabilityInterval)] {
         let today = now
         let allSlotsList = engine.meetings(for: today)
         guard !allSlotsList.isEmpty else { return [] }
@@ -139,26 +166,33 @@ final class TodayViewModel {
         let freeEngine = FreeBlockEngine()
         let myFree = freeEngine.freeBlocks(for: today, allSlots: allSlotsList, studentSessions: mySessions)
 
-        // Find the next free block at or after now (includes currently-in-progress free blocks)
-        let minutesNow = Calendar.current.component(.hour, from: now) * 60
-            + Calendar.current.component(.minute, from: now)
-        guard let nextFree = myFree.first(where: {
-            let endMin = (Calendar.current.component(.hour, from: $0.end) * 60
-                + Calendar.current.component(.minute, from: $0.end))
-            return endMin > minutesNow
+        // Find the AvailabilityInterval that corresponds to this slot.
+        let slotStartMin = (slot.startTime.hour ?? 0) * 60 + (slot.startTime.minute ?? 0)
+        let slotEndMin   = (slot.endTime.hour ?? 0) * 60 + (slot.endTime.minute ?? 0)
+        guard let matchingFree = myFree.first(where: {
+            let freeStart = Calendar.current.component(.hour, from: $0.start) * 60
+                          + Calendar.current.component(.minute, from: $0.start)
+            let freeEnd   = Calendar.current.component(.hour, from: $0.end) * 60
+                          + Calendar.current.component(.minute, from: $0.end)
+            return freeStart == slotStartMin && freeEnd == slotEndMin
         }) else {
             return []
         }
+
+        // Only show overlap for slots that haven't ended yet.
+        let minutesNow = Calendar.current.component(.hour, from: now) * 60
+                       + Calendar.current.component(.minute, from: now)
+        guard slotEndMin > minutesNow else { return [] }
 
         var result: [(User, AvailabilityInterval)] = []
         for friend in AppState.shared.friends.prefix(3) {
             guard let theirCourses = AppState.shared.friendCourses[friend.id] else { continue }
             let theirEnrollments = theirCourses.map {
-                Enrollment(id: UUID(), studentId: friend.id, courseId: $0.id, schoolYear: "2025-26")
+                Enrollment(id: UUID(), studentId: friend.id, courseId: $0.id, schoolYear: "2026-27")
             }
             let theirSessions = engine.studentMeetings(for: today, enrollments: theirEnrollments, courses: theirCourses)
             let theirFree = freeEngine.freeBlocks(for: today, studentId: friend.id, allSlots: allSlotsList, studentSessions: theirSessions)
-            let shared = freeEngine.sharedFreeBlocks(studentA: [nextFree], studentB: theirFree)
+            let shared = freeEngine.sharedFreeBlocks(studentA: [matchingFree], studentB: theirFree)
             if let overlap = shared.first {
                 result.append((friend, overlap))
             }

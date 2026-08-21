@@ -10,6 +10,7 @@
 		0649D61944A64AA83330CD98 /* GradesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E64BDEDB03B011A1346FFBB /* GradesViewModel.swift */; };
 		0C107189E96A17307C2BB74C /* MeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87287C193BE3984FF601EA90 /* MeViewModel.swift */; };
 		0C16F246D4A042DEFC18A625 /* FreeBlockEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 746954D16064124E120AC8C2 /* FreeBlockEngineTests.swift */; };
+		11197C0458E2D6DB599DF0AD /* EventKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00676B6B8CFDC1CEDFDB0868 /* EventKit.framework */; };
 		1F0863B2C8873528D38A864E /* AskView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F8A9B15CBD00F0B41BD5FC7 /* AskView.swift */; };
 		29788781D744C8DE61917970 /* FreeBlockEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29644A60BCA02609A4C72931 /* FreeBlockEngine.swift */; };
 		3C13E51D05EFC15516632A5F /* AddWorkSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5794819B906BCBC73CBE0300 /* AddWorkSheet.swift */; };
@@ -33,6 +34,7 @@
 		976FC86B140E1B2EAE463164 /* WidgetDataWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90AC704263DD3BE6D7F5645E /* WidgetDataWriter.swift */; };
 		9E69D4FED0C1F7F2F93B2057 /* ScheduleSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A06E280EC187019BA20EA0 /* ScheduleSource.swift */; };
 		A384DFC70BAA4FF6DEA5D29B /* SchoolViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3317C9B5B7A1BEC64B46DCCE /* SchoolViewModel.swift */; };
+		AA8046499561DE5EE6C196C2 /* CalendarSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77E1FE0631B3FA442E3690A0 /* CalendarSync.swift */; };
 		AB94549BBB8C2253CDBFF607 /* ScheduleEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E19CAE60666F970F955B4A1 /* ScheduleEngine.swift */; };
 		AC63A842B5E5C0D0379FCE2F /* PlannerEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D649CEF3E7F5634BF7E07213 /* PlannerEngine.swift */; };
 		B0A0B42D754EBF320E8FF240 /* MeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FC9F7A09125CEF80E9F18BB /* MeView.swift */; };
@@ -67,6 +69,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		00676B6B8CFDC1CEDFDB0868 /* EventKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EventKit.framework; path = System/Library/Frameworks/EventKit.framework; sourceTree = SDKROOT; };
 		014E3E235B9AD42A19E99AF0 /* NotificationScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationScheduler.swift; sourceTree = "<group>"; };
 		02420D1692C3DB3E250BE06D /* AssignmentProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssignmentProvider.swift; sourceTree = "<group>"; };
 		042D1AF2FDC49ABC4AD63751 /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
@@ -90,6 +93,7 @@
 		5F8A9B15CBD00F0B41BD5FC7 /* AskView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskView.swift; sourceTree = "<group>"; };
 		6F584D1D0287CCB69ACC5160 /* Assignment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Assignment.swift; sourceTree = "<group>"; };
 		746954D16064124E120AC8C2 /* FreeBlockEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FreeBlockEngineTests.swift; sourceTree = "<group>"; };
+		77E1FE0631B3FA442E3690A0 /* CalendarSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSync.swift; sourceTree = "<group>"; };
 		7E64BDEDB03B011A1346FFBB /* GradesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradesViewModel.swift; sourceTree = "<group>"; };
 		8252ED1241C77EEDFAC16DD0 /* WorkViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkViewModel.swift; sourceTree = "<group>"; };
 		85EEDB1B2EB261762B523989 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
@@ -126,6 +130,7 @@
 			files = (
 				7F956E3A6359AA3E15B11124 /* WidgetKit.framework in Frameworks */,
 				EDE5B6C0BF2EF0D322C8807E /* UserNotifications.framework in Frameworks */,
+				11197C0458E2D6DB599DF0AD /* EventKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -292,6 +297,7 @@
 			isa = PBXGroup;
 			children = (
 				C60D0F3815F27620A5410252 /* AskEngine.swift */,
+				77E1FE0631B3FA442E3690A0 /* CalendarSync.swift */,
 				29644A60BCA02609A4C72931 /* FreeBlockEngine.swift */,
 				FB67714A66208BC72979A067 /* GradeEngine.swift */,
 				DAB0081380D99E9C0753DB11 /* ICSGenerator.swift */,
@@ -304,6 +310,7 @@
 		D9CD7BE90138CD246DC1E249 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				00676B6B8CFDC1CEDFDB0868 /* EventKit.framework */,
 				C3B101238DA687695F4ACB61 /* UserNotifications.framework */,
 				85EEDB1B2EB261762B523989 /* WidgetKit.framework */,
 			);
@@ -457,6 +464,7 @@
 				F132F251801C926C876A62B6 /* Assignment.swift in Sources */,
 				BD0E1690EF83798AF0443560 /* AssignmentProvider.swift in Sources */,
 				42495D44820AAE6A0D4B1452 /* CalendarProvider.swift in Sources */,
+				AA8046499561DE5EE6C196C2 /* CalendarSync.swift in Sources */,
 				FFCBE28AE92C3F7569377788 /* ClassroomAssignmentProvider.swift in Sources */,
 				8C4CF993EAADAEBABE558D08 /* Course.swift in Sources */,
 				5874C80D1A48FB6479D16406 /* CourseColors.swift in Sources */,

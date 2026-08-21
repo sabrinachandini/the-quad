@@ -119,6 +119,17 @@ struct ScheduleEngine {
         return nil
     }
 
+    /// The first upcoming school day from `date` (inclusive), with no lookahead cap.
+    /// Used for summer/vacation empty states where the 14-day `nextMeeting` cap
+    /// would return nil even though school starts in the near future.
+    func nextCalendarSchoolDay(after date: Date) -> SchoolCalendarDate? {
+        let start = calendar.startOfDay(for: date)
+        return calendarDates
+            .filter { $0.dayType.isSchoolDay && $0.date >= start }
+            .sorted { $0.date < $1.date }
+            .first
+    }
+
     // MARK: - Lookups
 
     private func override(for date: Date) -> ScheduleOverride? {

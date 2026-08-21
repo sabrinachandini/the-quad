@@ -58,7 +58,7 @@ struct TodayView: View {
                 .foregroundStyle(.white)
                 .padding(.horizontal, DesignTokens.Spacing.md)
                 .padding(.vertical, DesignTokens.Spacing.sm)
-                .background(DesignTokens.Colors.accent)
+                .background(model.isSchoolDay ? DesignTokens.Colors.accent : DesignTokens.Colors.secondary)
                 .clipShape(Capsule())
         }
     }
@@ -125,13 +125,47 @@ struct TodayView: View {
     }
 
     // MARK: - Full day list
+    @ViewBuilder
     private var fullDay: some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
-            Text("Full Day")
-                .font(DesignTokens.Typography.quadHeadline)
-                .foregroundStyle(DesignTokens.Colors.primary)
-            ForEach(model.allSlots) { slot in
-                slotRow(slot)
+        if model.allSlots.isEmpty {
+            VStack(alignment: .center, spacing: DesignTokens.Spacing.sm) {
+                Image(systemName: "sun.max")
+                    .font(.system(size: 32))
+                    .foregroundStyle(DesignTokens.Colors.secondary)
+                if let next = model.nextSession {
+                    Text("Next up: \(next.course.name)")
+                        .font(DesignTokens.Typography.quadBody.weight(.medium))
+                        .foregroundStyle(DesignTokens.Colors.primary)
+                    Text(next.startDateTime.formatted(.dateTime.weekday(.wide).month().day().hour().minute()))
+                        .font(DesignTokens.Typography.quadCaption)
+                        .foregroundStyle(DesignTokens.Colors.secondary)
+                } else if let schoolDay = model.nextCalendarSchoolDay {
+                    Text("School starts \(schoolDay.date.formatted(.dateTime.weekday(.wide).month().day()))")
+                        .font(DesignTokens.Typography.quadBody.weight(.medium))
+                        .foregroundStyle(DesignTokens.Colors.primary)
+                    if schoolDay.isVerified == false {
+                        Text("Provisional — check lps.org for updates")
+                            .font(DesignTokens.Typography.quadCaption)
+                            .foregroundStyle(DesignTokens.Colors.secondary)
+                    }
+                } else {
+                    Text("No upcoming classes")
+                        .font(DesignTokens.Typography.quadBody)
+                        .foregroundStyle(DesignTokens.Colors.secondary)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding(DesignTokens.Spacing.xl)
+            .background(DesignTokens.Colors.surface)
+            .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large))
+        } else {
+            VStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
+                Text("Full Day")
+                    .font(DesignTokens.Typography.quadHeadline)
+                    .foregroundStyle(DesignTokens.Colors.primary)
+                ForEach(model.allSlots) { slot in
+                    slotRow(slot)
+                }
             }
         }
     }
@@ -145,8 +179,8 @@ struct TodayView: View {
             let color = CourseColors.color(atIndex: course.colorIndex)
             row(time: time, title: course.name, subtitle: course.room, color: color, isFree: false)
         } else {
-            // free block — airy, no card background; show friend overlap if any
-            let freeSoon = model.friendsFreeSoon
+            // Free block — only show friend overlap for the NEXT upcoming free block.
+            let freeSoon = model.friendsFreeSoon(forSlot: slot)
             VStack(alignment: .leading, spacing: 2) {
                 HStack {
                     Text(time)

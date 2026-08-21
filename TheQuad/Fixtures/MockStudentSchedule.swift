@@ -1,7 +1,8 @@
 import Foundation
 
 /// A realistic fictional LHS student schedule for development and previews.
-/// Six courses, one per block A–F, each with a stable course color.
+/// Eight courses across blocks A–H. Only 6 meet per day on the rotating schedule —
+/// which 6 depends on the day type (Day 1 = A–F, Day 2 = B–G, Day 3 = C–H, etc.).
 enum MockStudentSchedule {
 
     static let studentId = UUID(uuidString: "11111111-1111-1111-1111-111111111111")!
@@ -36,19 +37,31 @@ enum MockStudentSchedule {
         name: "Spanish IV", teacher: "Mr. Garcia", room: "127",
         block: .f, classCode: nil, colorIndex: 5, provenance: .parsedSchedule
     )
+    static let physics = Course(
+        id: UUID(uuidString: "AA000000-0000-0000-0000-000000000007")!,
+        name: "Physics", teacher: "Ms. Larson", room: "241",
+        block: .g, classCode: nil, colorIndex: 6, provenance: .parsedSchedule
+    )
+    static let pe = Course(
+        id: UUID(uuidString: "AA000000-0000-0000-0000-000000000008")!,
+        name: "PE", teacher: "Mr. Wallace", room: "Gym",
+        block: .h, classCode: nil, colorIndex: 7, provenance: .parsedSchedule
+    )
 
     static let courses: [Course] = [
-        apChemistry, apUSHistory, orchestra, english11, preCalculus, spanishIV
+        apChemistry, apUSHistory, orchestra, english11,
+        preCalculus, spanishIV, physics, pe
     ]
 
     static let enrollments: [Enrollment] = courses.map { course in
-        Enrollment(id: UUID(), studentId: studentId, courseId: course.id, schoolYear: "2025-26")
+        Enrollment(id: UUID(), studentId: studentId, courseId: course.id, schoolYear: "2026-27")
     }
 
     /// A ScheduleEngine seeded with reference fixtures + the mock student's data.
     static func engine() -> ScheduleEngine {
         ScheduleEngine(
-            calendarDates: LHSFixtures_2025_26.calendarDates_2025_26,
+            calendarDates: LHSFixtures_2025_26.calendarDates_2025_26
+                        + LHSFixtures_2025_26.calendarDates_2026_27,
             overrides: [],
             bellSchedules: LHSFixtures_2025_26.allBellSchedules
         )

@@ -29,14 +29,16 @@ enum LHSFixtures_2025_26 {
     private static let standardPeriods: [Period] = [p1, p2, p3, p4, p5, p6]
 
     // MARK: - Rotating block order by day (reference_2025_26)
-    // The block letter identifies the COURSE; its slot depends on the Day.
+    // LHS has 8 academic blocks (A–H). Only 6 meet per day, advancing by one
+    // block each rotation day. G and H do not appear on Day 1; A and B do not
+    // appear on Days 2–3, etc. A course in block G meets 4 out of every 6 days.
     static let blockOrder: [DayType: [AcademicBlock]] = [
         .day1: [.a, .b, .c, .d, .e, .f],
-        .day2: [.b, .c, .d, .e, .f, .a],
-        .day3: [.c, .d, .e, .f, .a, .b],
-        .day4: [.d, .e, .f, .a, .b, .c],
-        .day5: [.e, .f, .a, .b, .c, .d],
-        .day6: [.f, .a, .b, .c, .d, .e]
+        .day2: [.b, .c, .d, .e, .f, .g],
+        .day3: [.c, .d, .e, .f, .g, .h],
+        .day4: [.d, .e, .f, .g, .h, .a],
+        .day5: [.e, .f, .g, .h, .a, .b],
+        .day6: [.f, .g, .h, .a, .b, .c],
     ]
 
     // MARK: - Bell schedules
@@ -260,4 +262,80 @@ enum LHSFixtures_2025_26 {
 
     /// Full 2025-26 school year calendar: Sept 2, 2025 – June 12, 2026.
     static let calendarDates_2025_26: [SchoolCalendarDate] = generateCalendarDates()
+
+    // MARK: - Full 2026-27 calendar (reference_2026_27)
+
+    /// Generates school calendar dates from Sept 8, 2026 through June 11, 2027.
+    /// Rotation continues from Day 1 on the first day. isVerified=false — needs
+    /// admin confirmation once the official LHS calendar is published.
+    private static func generateCalendarDates_2026_27() -> [SchoolCalendarDate] {
+        let cal = Calendar.current
+
+        let holidays: Set<String> = [
+            "2026-09-07", // Labor Day
+            "2026-10-12", // Columbus/Indigenous Peoples Day
+            "2026-11-11", // Veterans Day
+            "2026-11-25", // Day before Thanksgiving
+            "2026-11-26", // Thanksgiving Day
+            "2026-11-27", // Day after Thanksgiving
+            // Winter break: Dec 23 – Jan 1
+            "2026-12-23", "2026-12-24", "2026-12-25", "2026-12-26", "2026-12-27",
+            "2026-12-28", "2026-12-29", "2026-12-30", "2026-12-31",
+            "2027-01-01",
+            "2027-01-18", // MLK Day
+            // February break: Feb 15–19
+            "2027-02-15", "2027-02-16", "2027-02-17", "2027-02-18", "2027-02-19",
+            // April break: Apr 19–23
+            "2027-04-19", "2027-04-20", "2027-04-21", "2027-04-22", "2027-04-23",
+            "2027-05-31"  // Memorial Day
+        ]
+
+        let rotationDays: [DayType] = [.day1, .day2, .day3, .day4, .day5, .day6]
+
+        var results: [SchoolCalendarDate] = []
+        var rotationIndex = 0
+
+        guard
+            let startDate = cal.date(from: DateComponents(year: 2026, month: 9, day: 8)),
+            let endDate   = cal.date(from: DateComponents(year: 2027, month: 6, day: 11))
+        else { return [] }
+
+        var current = startDate
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+
+        while current <= endDate {
+            let weekday = cal.component(.weekday, from: current)
+            let key = formatter.string(from: current)
+
+            if weekday == 1 || weekday == 7 {
+                current = cal.date(byAdding: .day, value: 1, to: current) ?? current
+                continue
+            }
+
+            let dayType: DayType
+            if holidays.contains(key) {
+                dayType = .noSchool
+            } else {
+                dayType = rotationDays[rotationIndex % 6]
+                rotationIndex += 1
+            }
+
+            results.append(SchoolCalendarDate(
+                id: UUID(),
+                date: current,
+                dayType: dayType,
+                bellScheduleOverride: nil,
+                note: nil,
+                isVerified: false
+            ))
+
+            current = cal.date(byAdding: .day, value: 1, to: current) ?? current
+        }
+
+        return results
+    }
+
+    /// Full 2026-27 school year calendar: Sept 8, 2026 – June 11, 2027.
+    static let calendarDates_2026_27: [SchoolCalendarDate] = generateCalendarDates_2026_27()
 }

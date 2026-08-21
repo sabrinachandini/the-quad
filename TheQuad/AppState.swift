@@ -33,7 +33,8 @@ final class AppState {
 
     var scheduleEngine: ScheduleEngine {
         ScheduleEngine(
-            calendarDates: LHSFixtures_2025_26.calendarDates_2025_26,
+            calendarDates: LHSFixtures_2025_26.calendarDates_2025_26
+                        + LHSFixtures_2025_26.calendarDates_2026_27,
             overrides: [],
             bellSchedules: LHSFixtures_2025_26.allBellSchedules
         )

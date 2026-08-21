@@ -22,6 +22,8 @@
 	<true/>
 	<key>NSUserNotificationsUsageDescription</key>
 	<string>The Quad sends reminders before your classes and when assignments are due.</string>
+	<key>NSCalendarsWriteOnlyAccessUsageDescription</key>
+	<string>The Quad adds your rotating class schedule to Apple Calendar so you always know where to be.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

@@ -1,11 +1,15 @@
 import SwiftUI
+import EventKit
 
 struct MeView: View {
     @State private var appState = AppState.shared
     @State private var showClassroomSheet = false
     @State private var showAspenSheet = false
-    @State private var icsExportURL: URL? = nil
-    @State private var showShareSheet = false
+    @State private var calendarSyncState: CalendarSyncState = .idle
+
+    enum CalendarSyncState {
+        case idle, syncing, done, denied, failed(String)
+    }
 
     var body: some View {
         List {
@@ -24,7 +28,7 @@ struct MeView: View {
                         Text(appState.displayName)
                             .font(DesignTokens.Typography.quadHeadline)
                             .foregroundStyle(DesignTokens.Colors.primary)
-                        Text("Class of \(appState.graduationYear) · LHS")
+                        Text("Class of \(String(appState.graduationYear)) · LHS")
                             .font(DesignTokens.Typography.quadCaption)
                             .foregroundStyle(DesignTokens.Colors.secondary)
                     }
@@ -131,46 +135,81 @@ struct MeView: View {
                 sectionHeader("Notifications")
             }
 
-            // MARK: - Calendar Export
+            // MARK: - Calendar
             Section {
                 VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
-                    Text("Subscribe to your rotating schedule in any calendar app.")
+                    Text("Add your rotating schedule to Apple Calendar. The Quad keeps it updated automatically.")
                         .font(DesignTokens.Typography.quadCaption)
                         .foregroundStyle(DesignTokens.Colors.secondary)
                         .fixedSize(horizontal: false, vertical: true)
 
-                    if let url = icsExportURL {
-                        ShareLink(
-                            item: url,
-                            preview: SharePreview("LHS Schedule", image: Image(systemName: "calendar"))
-                        ) {
+                    switch calendarSyncState {
+                    case .idle:
+                        Button { syncCalendar() } label: {
                             HStack {
-                                Image(systemName: "calendar.badge.checkmark")
+                                Image(systemName: "calendar.badge.plus")
                                     .foregroundStyle(DesignTokens.Colors.accent)
-                                Text("Share .ics File")
+                                Text("Add to Apple Calendar")
                                     .font(DesignTokens.Typography.quadBody)
                                     .foregroundStyle(DesignTokens.Colors.accent)
                             }
                         }
                         .buttonStyle(.plain)
-                    } else {
-                        Button {
-                            generateICSFile()
-                        } label: {
-                            HStack {
-                                Image(systemName: "calendar.badge.plus")
-                                    .foregroundStyle(DesignTokens.Colors.accent)
-                                Text("Export .ics File")
-                                    .font(DesignTokens.Typography.quadBody)
-                                    .foregroundStyle(DesignTokens.Colors.accent)
-                            }
+
+                    case .syncing:
+                        HStack(spacing: DesignTokens.Spacing.sm) {
+                            ProgressView()
+                                .scaleEffect(0.8)
+                            Text("Syncing schedule…")
+                                .font(DesignTokens.Typography.quadBody)
+                                .foregroundStyle(DesignTokens.Colors.secondary)
+                        }
+
+                    case .done:
+                        HStack(spacing: DesignTokens.Spacing.sm) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundStyle(.green)
+                            Text("Schedule synced to Calendar")
+                                .font(DesignTokens.Typography.quadBody)
+                                .foregroundStyle(DesignTokens.Colors.primary)
+                        }
+                        Button { syncCalendar() } label: {
+                            Text("Sync again")
+                                .font(DesignTokens.Typography.quadCaption)
+                                .foregroundStyle(DesignTokens.Colors.accent)
+                        }
+                        .buttonStyle(.plain)
+
+                    case .denied:
+                        HStack(alignment: .top, spacing: DesignTokens.Spacing.sm) {
+                            Image(systemName: "exclamationmark.circle")
+                                .foregroundStyle(.orange)
+                            Text("Calendar access denied. Enable it in Settings → Privacy → Calendars.")
+                                .font(DesignTokens.Typography.quadCaption)
+                                .foregroundStyle(DesignTokens.Colors.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+
+                    case .failed(let msg):
+                        HStack(alignment: .top, spacing: DesignTokens.Spacing.sm) {
+                            Image(systemName: "exclamationmark.triangle")
+                                .foregroundStyle(.red)
+                            Text(msg)
+                                .font(DesignTokens.Typography.quadCaption)
+                                .foregroundStyle(DesignTokens.Colors.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        Button { syncCalendar() } label: {
+                            Text("Try again")
+                                .font(DesignTokens.Typography.quadCaption)
+                                .foregroundStyle(DesignTokens.Colors.accent)
                         }
                         .buttonStyle(.plain)
                     }
                 }
                 .padding(.vertical, DesignTokens.Spacing.xs)
             } header: {
-                sectionHeader("Calendar Export")
+                sectionHeader("Calendar")
             }
 
             // MARK: - About
@@ -203,25 +242,26 @@ struct MeView: View {
         }
     }
 
-    private func generateICSFile() {
+    private func syncCalendar() {
+        calendarSyncState = .syncing
+        let courses = appState.courses
+        let enrollments = appState.enrollments
         let engine = appState.scheduleEngine
-        let today = Date()
-        guard let sixMonths = Calendar.current.date(byAdding: .month, value: 6, to: today) else { return }
-
-        let icsString = ICSGenerator().generate(
-            courses: appState.courses,
-            enrollments: appState.enrollments,
-            engine: engine,
-            from: today,
-            to: sixMonths
-        )
-
-        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("LHS_Schedule.ics")
-        do {
-            try icsString.write(to: tempURL, atomically: true, encoding: .utf8)
-            icsExportURL = tempURL
-        } catch {
-            // If write fails, silently no-op — button remains visible for retry
+        Task {
+            do {
+                let result = try await CalendarSync.shared.sync(
+                    courses: courses,
+                    enrollments: enrollments,
+                    engine: engine
+                )
+                await MainActor.run {
+                    calendarSyncState = result == .denied ? .denied : .done
+                }
+            } catch {
+                await MainActor.run {
+                    calendarSyncState = .failed(error.localizedDescription)
+                }
+            }
         }
     }
 
