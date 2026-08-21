@@ -1,18 +1,53 @@
 import Foundation
 import Observation
 
+enum WorkFilter: String, CaseIterable {
+    case all = "All"
+    case today = "Today"
+    case thisWeek = "This Week"
+}
+
 @Observable
 final class WorkViewModel {
-    var assignments: [Assignment]
+    var filter: WorkFilter = .all
 
-    init(assignments: [Assignment]? = nil) {
-        self.assignments = assignments ?? WorkViewModel.mockAssignments()
+    var assignments: [Assignment] {
+        get { AppState.shared.assignments }
+        set { AppState.shared.assignments = newValue }
     }
 
-    /// Assignments grouped by due day, sorted by due date. Undated go last.
+    init() {
+        if AppState.shared.assignments.isEmpty {
+            AppState.shared.assignments = WorkViewModel.mockAssignments()
+        }
+    }
+
+    /// Assignments grouped by due day, sorted by due date, filtered by the current filter.
+    /// Undated items go last (only shown in .all).
     var groupedByDueDate: [(date: Date?, items: [Assignment])] {
         let cal = Calendar.current
-        let grouped = Dictionary(grouping: assignments.filter { !$0.isCompleted }) { assignment -> Date? in
+        let today = Date()
+        let startOfToday = cal.startOfDay(for: today)
+        let startOfNextWeek = cal.date(byAdding: .day, value: 7, to: startOfToday) ?? startOfToday
+
+        let filtered: [Assignment]
+        switch filter {
+        case .all:
+            filtered = assignments.filter { !$0.isCompleted }
+        case .today:
+            filtered = assignments.filter { a in
+                guard !a.isCompleted, let due = a.dueDate else { return false }
+                return cal.isDate(due, inSameDayAs: today)
+            }
+        case .thisWeek:
+            filtered = assignments.filter { a in
+                guard !a.isCompleted, let due = a.dueDate else { return false }
+                let startOfDue = cal.startOfDay(for: due)
+                return startOfDue >= startOfToday && startOfDue < startOfNextWeek
+            }
+        }
+
+        let grouped = Dictionary(grouping: filtered) { assignment -> Date? in
             guard let due = assignment.dueDate else { return nil }
             return cal.startOfDay(for: due)
         }
@@ -27,12 +62,46 @@ final class WorkViewModel {
             .map { (date: $0.key, items: $0.value.sorted { ($0.dueDate ?? .distantFuture) < ($1.dueDate ?? .distantFuture) }) }
     }
 
-    var isEmpty: Bool { assignments.allSatisfy { $0.isCompleted } }
+    var isEmpty: Bool {
+        groupedByDueDate.isEmpty
+    }
+
+    var todayDueCount: Int {
+        let cal = Calendar.current
+        let today = Date()
+        return AppState.shared.assignments.filter { a in
+            !a.isCompleted && a.dueDate.map { cal.isDate($0, inSameDayAs: today) } ?? false
+        }.count
+    }
 
     func toggleComplete(_ assignment: Assignment) {
-        if let idx = assignments.firstIndex(where: { $0.id == assignment.id }) {
-            assignments[idx].isCompleted.toggle()
+        if let idx = AppState.shared.assignments.firstIndex(where: { $0.id == assignment.id }) {
+            AppState.shared.assignments[idx].isCompleted.toggle()
         }
+    }
+
+    func addAssignment(_ a: Assignment) {
+        AppState.shared.assignments.append(a)
+    }
+
+    func deleteAssignment(_ a: Assignment) {
+        AppState.shared.assignments.removeAll { $0.id == a.id }
+    }
+
+    func addStudentTask(_ t: StudentTask) {
+        let a = Assignment(
+            id: t.id,
+            title: t.title,
+            description: t.notes,
+            courseId: t.courseId,
+            dueDate: t.dueDate,
+            classroomURL: nil,
+            submissionState: .notStarted,
+            estimatedMinutes: t.estimatedMinutes,
+            provenance: .student,
+            isCompleted: t.isCompleted
+        )
+        addAssignment(a)
     }
 
     static func mockAssignments() -> [Assignment] {

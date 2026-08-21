@@ -2,9 +2,10 @@ import SwiftUI
 
 struct WorkView: View {
     @State private var model = WorkViewModel()
+    @State private var showAddSheet = false
 
     private func courseColor(_ id: UUID?) -> Color {
-        guard let id, let c = MockStudentSchedule.courses.first(where: { $0.id == id }) else {
+        guard let id, let c = AppState.shared.courses.first(where: { $0.id == id }) else {
             return DesignTokens.Colors.secondary
         }
         return CourseColors.color(atIndex: c.colorIndex)
@@ -18,29 +19,62 @@ struct WorkView: View {
     var body: some View {
         ZStack {
             DesignTokens.Colors.background.ignoresSafeArea()
-            if model.isEmpty {
-                emptyState
-            } else {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: DesignTokens.Spacing.xl) {
-                        Text("Work")
-                            .font(DesignTokens.Typography.quadTitle)
-                            .foregroundStyle(DesignTokens.Colors.primary)
-                        ForEach(model.groupedByDueDate, id: \.date) { group in
-                            VStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
-                                Text(dueLabel(group.date))
-                                    .font(DesignTokens.Typography.quadHeadline)
-                                    .foregroundStyle(DesignTokens.Colors.primary)
-                                ForEach(group.items) { assignment in
-                                    row(assignment)
+            VStack(spacing: 0) {
+                // Header row with title and add button
+                HStack {
+                    Text("Work")
+                        .font(DesignTokens.Typography.quadTitle)
+                        .foregroundStyle(DesignTokens.Colors.primary)
+                    Spacer()
+                    Button {
+                        showAddSheet = true
+                    } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.system(size: 28))
+                            .foregroundStyle(DesignTokens.Colors.accent)
+                    }
+                }
+                .padding(.horizontal, DesignTokens.Spacing.lg)
+                .padding(.top, DesignTokens.Spacing.lg)
+                .padding(.bottom, DesignTokens.Spacing.md)
+
+                // Filter picker
+                Picker("Filter", selection: $model.filter) {
+                    ForEach(WorkFilter.allCases, id: \.self) { f in
+                        Text(f.rawValue).tag(f)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .padding(.horizontal, DesignTokens.Spacing.lg)
+                .padding(.bottom, DesignTokens.Spacing.sm)
+
+                if model.isEmpty {
+                    Spacer()
+                    emptyState
+                    Spacer()
+                } else {
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: DesignTokens.Spacing.xl) {
+                            ForEach(model.groupedByDueDate, id: \.date) { group in
+                                VStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
+                                    Text(dueLabel(group.date))
+                                        .font(DesignTokens.Typography.quadHeadline)
+                                        .foregroundStyle(DesignTokens.Colors.primary)
+                                    ForEach(group.items) { assignment in
+                                        row(assignment)
+                                    }
                                 }
                             }
                         }
+                        .padding(.horizontal, DesignTokens.Spacing.lg)
+                        .padding(.top, DesignTokens.Spacing.md)
+                        .padding(.bottom, DesignTokens.Spacing.xxxl)
                     }
-                    .padding(DesignTokens.Spacing.lg)
-                    .padding(.bottom, DesignTokens.Spacing.xxxl)
                 }
             }
+        }
+        .sheet(isPresented: $showAddSheet) {
+            AddWorkSheet(model: model)
         }
     }
 
@@ -68,6 +102,13 @@ struct WorkView: View {
         .padding(DesignTokens.Spacing.lg)
         .background(DesignTokens.Colors.surface)
         .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large))
+        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+            Button(role: .destructive) {
+                model.deleteAssignment(assignment)
+            } label: {
+                Label("Delete", systemImage: "trash")
+            }
+        }
     }
 
     private var emptyState: some View {

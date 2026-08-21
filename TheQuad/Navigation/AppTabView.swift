@@ -3,9 +3,19 @@ import SwiftUI
 struct AppTabView: View {
     @State private var selectedTab: Tab = .today
     @State private var showAsk: Bool = false
+    // Hold a reference so @Observable tracking fires on AppState changes
+    @State private var appState = AppState.shared
 
     enum Tab {
         case today, work, grades, school, me
+    }
+
+    private var workBadgeCount: Int {
+        let cal = Calendar.current
+        let today = Date()
+        return appState.assignments.filter { a in
+            !a.isCompleted && a.dueDate.map { cal.isDate($0, inSameDayAs: today) } ?? false
+        }.count
     }
 
     var body: some View {
@@ -17,6 +27,7 @@ struct AppTabView: View {
                 WorkView()
                     .tabItem { Label("Work", systemImage: "checkmark.circle.fill") }
                     .tag(Tab.work)
+                    .badge(workBadgeCount)
                 GradesView()
                     .tabItem { Label("Grades", systemImage: "chart.bar.fill") }
                     .tag(Tab.grades)
