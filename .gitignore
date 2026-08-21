@@ -27,3 +27,4 @@ DerivedData/
 # macOS
 .DS_Store
 *.swp
+.claude/
