@@ -17,6 +17,7 @@
 		1F0863B2C8873528D38A864E /* AskView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F8A9B15CBD00F0B41BD5FC7 /* AskView.swift */; };
 		29788781D744C8DE61917970 /* FreeBlockEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29644A60BCA02609A4C72931 /* FreeBlockEngine.swift */; };
 		29BEB839C7562FD4A64B46AE /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B5D2B417B179BF4BB4FF2E0 /* AuthenticationServices.framework */; };
+		369BF33A8846EE73954D5868 /* GoogleService.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4D0414EA840FBB8181D2361A /* GoogleService.plist */; };
 		3C13E51D05EFC15516632A5F /* AddWorkSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5794819B906BCBC73CBE0300 /* AddWorkSheet.swift */; };
 		3DFCDEA539FC898467660668 /* GoogleService.plist.template in Resources */ = {isa = PBXBuildFile; fileRef = 05F6EAA3C87DB675BB084CCF /* GoogleService.plist.template */; };
 		42495D44820AAE6A0D4B1452 /* CalendarProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C5629BF47468EC0F3DAC63 /* CalendarProvider.swift */; };
@@ -101,6 +102,7 @@
 		44A06E280EC187019BA20EA0 /* ScheduleSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleSource.swift; sourceTree = "<group>"; };
 		4948D4E04B1C0B4A9BC09876 /* SharedWidgetData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedWidgetData.swift; sourceTree = "<group>"; };
 		4B5D2B417B179BF4BB4FF2E0 /* AuthenticationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AuthenticationServices.framework; path = System/Library/Frameworks/AuthenticationServices.framework; sourceTree = SDKROOT; };
+		4D0414EA840FBB8181D2361A /* GoogleService.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = GoogleService.plist; sourceTree = "<group>"; };
 		5794819B906BCBC73CBE0300 /* AddWorkSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddWorkSheet.swift; sourceTree = "<group>"; };
 		5D2E3223C9E33DD666337A3E /* ClassroomConnectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassroomConnectView.swift; sourceTree = "<group>"; };
 		5E4D71A1AE4D911C6F2DD769 /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
@@ -204,6 +206,7 @@
 			isa = PBXGroup;
 			children = (
 				D9E9B9343D177395F984079A /* GoogleConfig.swift */,
+				4D0414EA840FBB8181D2361A /* GoogleService.plist */,
 				05F6EAA3C87DB675BB084CCF /* GoogleService.plist.template */,
 			);
 			path = Config;
@@ -477,6 +480,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8CB75121FF77A0622CB6D234 /* Assets.xcassets in Resources */,
+				369BF33A8846EE73954D5868 /* GoogleService.plist in Resources */,
 				3DFCDEA539FC898467660668 /* GoogleService.plist.template in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

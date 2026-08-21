@@ -42,7 +42,7 @@
 			<string>Google OAuth Callback</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>REPLACE_WITH_REVERSED_CLIENT_ID</string>
+				<string>com.googleusercontent.apps.832626088655-ip7i0vfsngu7foiml0gdtonl58377f1u</string>
 			</array>
 		</dict>
 	</array>
