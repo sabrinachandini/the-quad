@@ -194,6 +194,10 @@ private struct DoneStep: View {
                 Spacer()
                 Button {
                     model.complete()
+                    Task {
+                        await NotificationScheduler.shared.requestPermission()
+                        NotificationScheduler.shared.scheduleAll()
+                    }
                 } label: {
                     Text("Open The Quad")
                         .font(.headline)

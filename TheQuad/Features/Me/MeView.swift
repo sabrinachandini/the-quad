@@ -110,6 +110,9 @@ struct MeView: View {
                         .foregroundStyle(DesignTokens.Colors.primary)
                 }
                 .tint(DesignTokens.Colors.accent)
+                .onChange(of: appState.classRemindersEnabled) {
+                    NotificationScheduler.shared.scheduleAll()
+                }
             } header: {
                 sectionHeader("Notifications")
             }
