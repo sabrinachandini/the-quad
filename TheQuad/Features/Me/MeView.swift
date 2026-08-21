@@ -142,7 +142,7 @@ struct MeView: View {
                     if let url = icsExportURL {
                         ShareLink(
                             item: url,
-                            preview: SharePreview("LHS Schedule", systemImage: "calendar")
+                            preview: SharePreview("LHS Schedule", image: Image(systemName: "calendar"))
                         ) {
                             HStack {
                                 Image(systemName: "calendar.badge.checkmark")

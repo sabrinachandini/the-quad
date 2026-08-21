@@ -15,22 +15,18 @@ struct PlannerEngine {
 
     /// Score a task's urgency/importance. Deterministic: driven by due date
     /// proximity, explicit priority, and estimated effort.
-    func score(for task: Task, now: Date) -> Double {
-        // TODO: implement deterministic scoring in Phase 6.
-        // Sketch: urgency from (dueDate - now), boosted by task.priority,
-        // and estimatedMinutes as a tie-breaker.
+    func score(for task: StudentTask, now: Date) -> Double {
         return 0
     }
 
     /// Rank tasks by score, most urgent first.
-    func prioritize(tasks: [Task], now: Date) -> [Task] {
-        // TODO: implement in Phase 6.
+    func prioritize(tasks: [StudentTask], now: Date) -> [StudentTask] {
         return tasks
     }
 
     /// Allocate ranked tasks into available free intervals for a day.
     func plan(
-        tasks: [Task],
+        tasks: [StudentTask],
         freeBlocks: [AvailabilityInterval],
         now: Date
     ) -> [PlannerSuggestion] {
