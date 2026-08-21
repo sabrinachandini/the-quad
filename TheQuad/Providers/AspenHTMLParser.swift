@@ -75,42 +75,53 @@ struct AspenHTMLParser {
             throw AspenParseError.loginPageReturned
         }
 
-        // Aspen X2/X3 renders a table with id="dataGrid" or class="listTable"
-        // Rows contain <tr> elements with <td> cells.
-        // We extract table rows from the grade table region.
+        // Try each table in the page, largest first, until one yields parseable courses.
+        // This handles Aspen deployments where the grade table doesn't use standard identifiers.
+        let candidates = allTableRanges(in: html)
 
-        // Find the main data table
-        guard let tableRange = findTableRange(in: html) else {
-            throw AspenParseError.structureChanged("Could not locate grade table in HTML")
+        for tableRange in candidates {
+            let tableHTML = String(html[tableRange])
+            let courses = tryParseCourseTable(tableHTML)
+            if !courses.isEmpty {
+                return courses
+            }
         }
 
-        let tableHTML = String(html[tableRange])
+        // If we have tables but none had courses, report "no courses" (summer / no active term).
+        // If we have no tables at all, the structure is completely unrecognized.
+        if candidates.isEmpty {
+            throw AspenParseError.structureChanged("Could not locate any table in HTML")
+        }
+
+        throw AspenParseError.noCoursesFound
+    }
+
+    /// Try to extract course rows from a single table. Returns [] if this table isn't the grade list.
+    private static func tryParseCourseTable(_ tableHTML: String) -> [AspenCourseSummary] {
         let rows = extractTableRows(from: tableHTML)
 
-        // Skip header row(s)
         let dataRows = rows.filter { row in
             let lower = row.lowercased()
             return !lower.contains("<th") &&
-                   !lower.contains("class=\"listHeader\"") &&
+                   !lower.contains("class=\"listheader\"") &&
                    !lower.contains("class=\"header\"") &&
                    row.contains("<td")
         }
 
-        guard !dataRows.isEmpty else {
-            throw AspenParseError.noCoursesFound
-        }
+        guard dataRows.count >= 1 else { return [] }
 
         var courses: [AspenCourseSummary] = []
-
         for row in dataRows {
             guard let course = parseCourseRow(row) else { continue }
+            // A valid course row must have a non-empty name that isn't a UI element label
+            let name = course.name
+            guard name.count >= 3,
+                  !name.lowercased().contains("navigation"),
+                  !name.lowercased().contains("select"),
+                  !name.lowercased().contains("search"),
+                  !name.lowercased().contains("filter") else { continue }
             courses.append(course)
         }
-
-        if courses.isEmpty {
-            throw AspenParseError.noCoursesFound
-        }
-
         return courses
     }
 
@@ -148,43 +159,29 @@ struct AspenHTMLParser {
 
     // MARK: - Private: Table Parsing
 
-    private static func findTableRange(in html: String) -> Range<String.Index>? {
-        // Step 1: look for grade table by known Aspen identifier patterns
-        let tablePatterns = [
-            "id=\"dataGrid\"",
-            "class=\"listTable\"",
-            "id=\"classListTable\"",
-            "portalClassList",
-            "class=\"dataGrid\"",
-            "class=\"portalGrid\"",
-        ]
-
-        for pattern in tablePatterns {
-            if let patternRange = html.range(of: pattern, options: .caseInsensitive) {
-                let searchBack = html[html.startIndex..<patternRange.lowerBound]
-                if let tableStart = searchBack.range(of: "<table", options: [.caseInsensitive, .backwards]) {
-                    let searchForward = html[patternRange.upperBound...]
-                    if let tableEnd = searchForward.range(of: "</table>", options: .caseInsensitive) {
-                        return tableStart.lowerBound..<tableEnd.upperBound
-                    }
-                }
-            }
-        }
-
-        // Step 2: collect ALL <table>…</table> blocks and pick the one with the most <td> cells
-        // This handles Aspen deployments that don't use the standard identifiers above.
-        var allTables: [(range: Range<String.Index>, tdCount: Int)] = []
+    /// Returns all table ranges in the page, with known Aspen grade-table markers first,
+    /// then remaining tables sorted largest-first (most <td> cells).
+    private static func allTableRanges(in html: String) -> [Range<String.Index>] {
+        // Collect every <table>…</table> block with its <td> count
+        var tables: [(range: Range<String.Index>, tdCount: Int, priority: Int)] = []
         var search = html.startIndex
+
+        let priorityPatterns = [
+            "id=\"dataGrid\"", "class=\"listTable\"", "id=\"classListTable\"",
+            "portalClassList", "class=\"dataGrid\"", "class=\"portalGrid\"",
+        ]
 
         while search < html.endIndex,
               let tableStart = html.range(of: "<table", options: .caseInsensitive, range: search..<html.endIndex) {
-            // Find the matching </table> (non-nested; good enough for Aspen's flat structure)
             if let tableEnd = html.range(of: "</table>", options: .caseInsensitive,
                                           range: tableStart.upperBound..<html.endIndex) {
                 let tableHTML = String(html[tableStart.lowerBound..<tableEnd.upperBound])
                 let tdCount = tableHTML.components(separatedBy: "<td").count - 1
                 if tdCount > 0 {
-                    allTables.append((range: tableStart.lowerBound..<tableEnd.upperBound, tdCount: tdCount))
+                    let hasPriority = priorityPatterns.contains { tableHTML.range(of: $0, options: .caseInsensitive) != nil }
+                    tables.append((range: tableStart.lowerBound..<tableEnd.upperBound,
+                                   tdCount: tdCount,
+                                   priority: hasPriority ? 1 : 0))
                 }
                 search = tableEnd.upperBound
             } else {
@@ -192,8 +189,13 @@ struct AspenHTMLParser {
             }
         }
 
-        // Pick the largest table (most <td> cells) — the grade list table is typically the biggest
-        return allTables.max(by: { $0.tdCount < $1.tdCount })?.range
+        // Priority tables first, then by descending <td> count
+        return tables
+            .sorted { lhs, rhs in
+                if lhs.priority != rhs.priority { return lhs.priority > rhs.priority }
+                return lhs.tdCount > rhs.tdCount
+            }
+            .map { $0.range }
     }
 
     private static func extractTableRows(from html: String) -> [String] {
