@@ -4,6 +4,8 @@ struct MeView: View {
     @State private var appState = AppState.shared
     @State private var showClassroomSheet = false
     @State private var showAspenSheet = false
+    @State private var icsExportURL: URL? = nil
+    @State private var showShareSheet = false
 
     var body: some View {
         List {
@@ -129,6 +131,48 @@ struct MeView: View {
                 sectionHeader("Notifications")
             }
 
+            // MARK: - Calendar Export
+            Section {
+                VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
+                    Text("Subscribe to your rotating schedule in any calendar app.")
+                        .font(DesignTokens.Typography.quadCaption)
+                        .foregroundStyle(DesignTokens.Colors.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    if let url = icsExportURL {
+                        ShareLink(
+                            item: url,
+                            preview: SharePreview("LHS Schedule", systemImage: "calendar")
+                        ) {
+                            HStack {
+                                Image(systemName: "calendar.badge.checkmark")
+                                    .foregroundStyle(DesignTokens.Colors.accent)
+                                Text("Share .ics File")
+                                    .font(DesignTokens.Typography.quadBody)
+                                    .foregroundStyle(DesignTokens.Colors.accent)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    } else {
+                        Button {
+                            generateICSFile()
+                        } label: {
+                            HStack {
+                                Image(systemName: "calendar.badge.plus")
+                                    .foregroundStyle(DesignTokens.Colors.accent)
+                                Text("Export .ics File")
+                                    .font(DesignTokens.Typography.quadBody)
+                                    .foregroundStyle(DesignTokens.Colors.accent)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.vertical, DesignTokens.Spacing.xs)
+            } header: {
+                sectionHeader("Calendar Export")
+            }
+
             // MARK: - About
             Section {
                 HStack {
@@ -156,6 +200,28 @@ struct MeView: View {
         }
         .sheet(isPresented: $showAspenSheet) {
             AspenIntegrationSheet()
+        }
+    }
+
+    private func generateICSFile() {
+        let engine = appState.scheduleEngine
+        let today = Date()
+        guard let sixMonths = Calendar.current.date(byAdding: .month, value: 6, to: today) else { return }
+
+        let icsString = ICSGenerator().generate(
+            courses: appState.courses,
+            enrollments: appState.enrollments,
+            engine: engine,
+            from: today,
+            to: sixMonths
+        )
+
+        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("LHS_Schedule.ics")
+        do {
+            try icsString.write(to: tempURL, atomically: true, encoding: .utf8)
+            icsExportURL = tempURL
+        } catch {
+            // If write fails, silently no-op — button remains visible for retry
         }
     }
 
