@@ -50,8 +50,7 @@ struct AppTabView: View {
             }
             .padding(.bottom, 70)
             .sheet(isPresented: $showAsk) {
-                Text("Ask — coming soon")
-                    .presentationDetents([.medium])
+                AskView()
             }
         }
     }
