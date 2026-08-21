@@ -7,6 +7,9 @@ struct User: Identifiable, Codable {
     var appleUserID: String?        // Sign in with Apple
     var lpsGoogleEmail: String?     // secondary LPS identity
     var displayName: String
+    var graduationYear: Int         // 2026, 2027, 2028
+    var isInDirectory: Bool         // opted into the directory
+    var showClassesInDirectory: Bool // shares block info with directory viewers
     var createdAt: Date
 }
 

@@ -14,6 +14,12 @@ struct TodayView: View {
         return date.formatted(.dateTime.hour().minute())
     }
 
+    private func durationBetween(_ start: DateComponents, _ end: DateComponents) -> Int {
+        let startMins = (start.hour ?? 0) * 60 + (start.minute ?? 0)
+        let endMins = (end.hour ?? 0) * 60 + (end.minute ?? 0)
+        return max(0, endMins - startMins)
+    }
+
     var body: some View {
         ZStack {
             DesignTokens.Colors.background.ignoresSafeArea()
@@ -139,16 +145,35 @@ struct TodayView: View {
             let color = CourseColors.color(atIndex: course.colorIndex)
             row(time: time, title: course.name, subtitle: course.room, color: color, isFree: false)
         } else {
-            // free block — airy, no card background
-            HStack {
-                Text(time)
-                    .font(DesignTokens.Typography.quadCaption)
-                    .foregroundStyle(DesignTokens.Colors.secondary)
-                    .frame(width: 110, alignment: .leading)
-                Text("Free")
-                    .font(DesignTokens.Typography.quadBody.weight(.medium))
-                    .foregroundStyle(DesignTokens.Colors.secondary)
-                Spacer()
+            // free block — airy, no card background; show friend overlap if any
+            let freeSoon = model.friendsFreeSoon
+            VStack(alignment: .leading, spacing: 2) {
+                HStack {
+                    Text(time)
+                        .font(DesignTokens.Typography.quadCaption)
+                        .foregroundStyle(DesignTokens.Colors.secondary)
+                        .frame(width: 110, alignment: .leading)
+                    Text("FREE")
+                        .font(DesignTokens.Typography.quadBody.weight(.semibold))
+                        .foregroundStyle(DesignTokens.Colors.accent)
+                    Spacer()
+                    let mins = durationBetween(slot.startTime, slot.endTime)
+                    if mins > 0 {
+                        Text("· \(mins) min")
+                            .font(DesignTokens.Typography.quadCaption)
+                            .foregroundStyle(DesignTokens.Colors.secondary)
+                    }
+                }
+                if !freeSoon.isEmpty {
+                    let names = freeSoon.map { $0.friend.displayName }.formatted(.list(type: .and))
+                    HStack {
+                        Spacer().frame(width: 110)
+                        Text("\(names) also free")
+                            .font(DesignTokens.Typography.quadCaption)
+                            .foregroundStyle(DesignTokens.Colors.secondary)
+                        Spacer()
+                    }
+                }
             }
             .padding(.vertical, DesignTokens.Spacing.md)
         }

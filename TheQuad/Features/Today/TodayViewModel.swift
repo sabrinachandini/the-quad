@@ -126,4 +126,43 @@ final class TodayViewModel {
     func course(for slot: MeetingSlot) -> Course? {
         allSessions.first { $0.slot.id == slot.id }?.course
     }
+
+    // MARK: - Friend free-block preview
+
+    /// Up to 2 friends who share the next (or current) free block with me today.
+    var friendsFreeSoon: [(friend: User, sharedBlock: AvailabilityInterval)] {
+        let today = now
+        let allSlotsList = engine.meetings(for: today)
+        guard !allSlotsList.isEmpty else { return [] }
+
+        let mySessions = engine.studentMeetings(for: today, enrollments: enrollments, courses: courses)
+        let freeEngine = FreeBlockEngine()
+        let myFree = freeEngine.freeBlocks(for: today, allSlots: allSlotsList, studentSessions: mySessions)
+
+        // Find the next free block at or after now (includes currently-in-progress free blocks)
+        let minutesNow = Calendar.current.component(.hour, from: now) * 60
+            + Calendar.current.component(.minute, from: now)
+        guard let nextFree = myFree.first(where: {
+            let endMin = (Calendar.current.component(.hour, from: $0.end) * 60
+                + Calendar.current.component(.minute, from: $0.end))
+            return endMin > minutesNow
+        }) else {
+            return []
+        }
+
+        var result: [(User, AvailabilityInterval)] = []
+        for friend in AppState.shared.friends.prefix(3) {
+            guard let theirCourses = AppState.shared.friendCourses[friend.id] else { continue }
+            let theirEnrollments = theirCourses.map {
+                Enrollment(id: UUID(), studentId: friend.id, courseId: $0.id, schoolYear: "2025-26")
+            }
+            let theirSessions = engine.studentMeetings(for: today, enrollments: theirEnrollments, courses: theirCourses)
+            let theirFree = freeEngine.freeBlocks(for: today, studentId: friend.id, allSlots: allSlotsList, studentSessions: theirSessions)
+            let shared = freeEngine.sharedFreeBlocks(studentA: [nextFree], studentB: theirFree)
+            if let overlap = shared.first {
+                result.append((friend, overlap))
+            }
+        }
+        return Array(result.prefix(2))
+    }
 }

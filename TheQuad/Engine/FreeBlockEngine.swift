@@ -83,6 +83,18 @@ struct FreeBlockEngine {
         return shared.sorted { $0.start < $1.start }
     }
 
+    /// Convenience overload: infers studentId from the first session's enrollment,
+    /// or uses a zero UUID if the student has no sessions (fully free day).
+    func freeBlocks(
+        for date: Date,
+        allSlots: [MeetingSlot],
+        studentSessions: [CourseSession]
+    ) -> [AvailabilityInterval] {
+        // Try to pull studentId from AppState enrollments; fall back to a placeholder.
+        let sid = AppState.shared.enrollments.first?.studentId ?? UUID()
+        return freeBlocks(for: date, studentId: sid, allSlots: allSlots, studentSessions: studentSessions)
+    }
+
     // MARK: - Helpers
 
     private func makeInterval(
