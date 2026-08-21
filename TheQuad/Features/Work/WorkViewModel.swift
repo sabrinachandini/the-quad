@@ -106,15 +106,61 @@ final class WorkViewModel {
 
     static func mockAssignments() -> [Assignment] {
         let cal = Calendar.current
-        let now = cal.date(from: DateComponents(year: 2025, month: 9, day: 4, hour: 10)) ?? Date()
+        // Anchor to Sept 8, 2026 (first day of 2026-27 school year, Day 1)
+        let anchor = cal.date(from: DateComponents(year: 2026, month: 9, day: 8, hour: 10)) ?? Date()
         func due(_ days: Int, _ hour: Int) -> Date {
-            cal.date(byAdding: .day, value: days, to: cal.date(bySettingHour: hour, minute: 0, second: 0, of: now) ?? now) ?? now
+            cal.date(byAdding: .day, value: days, to:
+                cal.date(bySettingHour: hour, minute: 59, second: 0, of: anchor) ?? anchor) ?? anchor
         }
         return [
-            Assignment(id: UUID(), title: "Ch. 4 Problem Set", description: "Stoichiometry", courseId: MockStudentSchedule.apChemistry.id, dueDate: due(0, 15), classroomURL: nil, submissionState: .notStarted, estimatedMinutes: 45, provenance: .student, isCompleted: false),
-            Assignment(id: UUID(), title: "DBQ Essay Draft", description: "Revolution causes", courseId: MockStudentSchedule.apUSHistory.id, dueDate: due(1, 8), classroomURL: nil, submissionState: .inProgress, estimatedMinutes: 90, provenance: .student, isCompleted: false),
-            Assignment(id: UUID(), title: "Read Ch. 12", description: nil, courseId: MockStudentSchedule.english11.id, dueDate: due(1, 8), classroomURL: nil, submissionState: .notStarted, estimatedMinutes: 30, provenance: .student, isCompleted: false),
-            Assignment(id: UUID(), title: "Problem Set 3", description: "Trig identities", courseId: MockStudentSchedule.preCalculus.id, dueDate: due(3, 8), classroomURL: nil, submissionState: .notStarted, estimatedMinutes: 40, provenance: .student, isCompleted: false)
+            Assignment(
+                id: UUID(), title: "Trig Functions Problem Set",
+                description: "Section 4.1–4.3, odds only",
+                courseId: MockStudentSchedule.math3.id,
+                dueDate: due(0, 23), classroomURL: nil,
+                submissionState: .notStarted, estimatedMinutes: 40,
+                provenance: .classroom, isCompleted: false
+            ),
+            Assignment(
+                id: UUID(), title: "Spanish III Vocab Quiz",
+                description: "Unidad 2 vocabulary list",
+                courseId: MockStudentSchedule.spanishIII.id,
+                dueDate: due(1, 8), classroomURL: nil,
+                submissionState: .notStarted, estimatedMinutes: 20,
+                provenance: .classroom, isCompleted: false
+            ),
+            Assignment(
+                id: UUID(), title: "World History Chapter 3 Reading",
+                description: "Causes of WWI, pp. 58–74 — annotate",
+                courseId: MockStudentSchedule.worldHistory.id,
+                dueDate: due(2, 8), classroomURL: nil,
+                submissionState: .inProgress, estimatedMinutes: 35,
+                provenance: .classroom, isCompleted: false
+            ),
+            Assignment(
+                id: UUID(), title: "Analytical Essay Draft",
+                description: "Thesis + 2 body paragraphs",
+                courseId: MockStudentSchedule.litAndComp.id,
+                dueDate: due(3, 23), classroomURL: nil,
+                submissionState: .notStarted, estimatedMinutes: 75,
+                provenance: .classroom, isCompleted: false
+            ),
+            Assignment(
+                id: UUID(), title: "Biology Lab Report",
+                description: "Cell membrane diffusion lab",
+                courseId: MockStudentSchedule.biology.id,
+                dueDate: due(5, 23), classroomURL: nil,
+                submissionState: .notStarted, estimatedMinutes: 60,
+                provenance: .classroom, isCompleted: false
+            ),
+            Assignment(
+                id: UUID(), title: "Economics Supply & Demand Graph",
+                description: "Draw and label equilibrium scenarios",
+                courseId: MockStudentSchedule.economics.id,
+                dueDate: due(7, 8), classroomURL: nil,
+                submissionState: .notStarted, estimatedMinutes: 30,
+                provenance: .student, isCompleted: false
+            ),
         ]
     }
 }

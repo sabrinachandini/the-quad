@@ -25,12 +25,19 @@ final class TodayViewModel {
         self.enrollments = enrollments
         self.courses = courses
 
-        // DEBUG: set QUAD_DEBUG_DATE=yyyy-MM-dd in scheme env vars to pin the date.
+        // DEBUG: pin to a school day to preview the full schedule UI.
+        // To disable, delete this block or set debugDate = nil.
         #if DEBUG
         let debugDate: Date? = {
-            guard let s = ProcessInfo.processInfo.environment["QUAD_DEBUG_DATE"] else { return nil }
-            let f = DateFormatter(); f.dateFormat = "yyyy-MM-dd HH:mm"
-            return f.date(from: s) ?? { let g = DateFormatter(); g.dateFormat = "yyyy-MM-dd"; return g.date(from: s) }()
+            // First check env var (xcrun simctl launch --setenv QUAD_DEBUG_DATE="yyyy-MM-dd HH:mm")
+            if let s = ProcessInfo.processInfo.environment["QUAD_DEBUG_DATE"] {
+                let f = DateFormatter(); f.dateFormat = "yyyy-MM-dd HH:mm"
+                if let d = f.date(from: s) { return d }
+                let g = DateFormatter(); g.dateFormat = "yyyy-MM-dd"
+                if let d = g.date(from: s) { return d }
+            }
+            // Fallback: hardcoded school-day preview (Sept 8 2026, 10:00 AM = Day 1, B block active)
+            return Calendar.current.date(from: DateComponents(year: 2026, month: 9, day: 8, hour: 10))
         }()
         self.now = previewDate ?? debugDate ?? Date()
         #else

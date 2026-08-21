@@ -90,32 +90,39 @@ struct MeView: View {
                             .font(DesignTokens.Typography.quadBody)
                             .foregroundStyle(DesignTokens.Colors.primary)
                         Spacer()
+                        if appState.classroomConnected {
+                            HStack(spacing: 4) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundStyle(.green)
+                                    .font(.caption)
+                                Text("Connected")
+                                    .font(DesignTokens.Typography.quadCaption.weight(.semibold))
+                                    .foregroundStyle(.green)
+                            }
+                        } else {
+                            Text("Connect")
+                                .font(DesignTokens.Typography.quadCaption.weight(.semibold))
+                                .foregroundStyle(DesignTokens.Colors.accent)
+                        }
+                    }
+                }
+                .buttonStyle(.plain)
+
+                // Aspen Grades row
+                Button {
+                    showAspenSheet = true
+                } label: {
+                    HStack {
+                        Label("Aspen Grades", systemImage: "chart.bar.fill")
+                            .font(DesignTokens.Typography.quadBody)
+                            .foregroundStyle(DesignTokens.Colors.primary)
+                        Spacer()
                         Text("Connect")
                             .font(DesignTokens.Typography.quadCaption.weight(.semibold))
                             .foregroundStyle(DesignTokens.Colors.accent)
                     }
                 }
                 .buttonStyle(.plain)
-
-                // Aspen Grades row
-                HStack {
-                    Label("Aspen Grades", systemImage: "chart.bar.fill")
-                        .font(DesignTokens.Typography.quadBody)
-                        .foregroundStyle(DesignTokens.Colors.primary)
-                    Spacer()
-                    Button {
-                        showAspenSheet = true
-                    } label: {
-                        Text("Coming soon")
-                            .font(DesignTokens.Typography.quadCaption.weight(.semibold))
-                            .foregroundStyle(DesignTokens.Colors.secondary)
-                            .padding(.horizontal, DesignTokens.Spacing.sm)
-                            .padding(.vertical, 3)
-                            .background(DesignTokens.Colors.secondary.opacity(0.12))
-                            .clipShape(Capsule())
-                    }
-                    .buttonStyle(.plain)
-                }
             } header: {
                 sectionHeader("Integrations")
             }

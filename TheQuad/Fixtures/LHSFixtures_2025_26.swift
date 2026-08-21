@@ -18,27 +18,29 @@ enum LHSFixtures_2025_26 {
         let start: DateComponents
         let end: DateComponents
     }
-    private static let p1 = Period(start: hm(7, 55), end: hm(8, 50))
-    private static let p2 = Period(start: hm(8, 55), end: hm(9, 50))
-    private static let p3 = Period(start: hm(9, 55), end: hm(10, 50))
-    private static let lunch = Period(start: hm(10, 55), end: hm(11, 25))
-    private static let p4 = Period(start: hm(11, 30), end: hm(12, 25))
-    private static let p5 = Period(start: hm(12, 30), end: hm(13, 25))
-    private static let p6 = Period(start: hm(13, 30), end: hm(14, 20))
+    // Actual LHS bell times (reference_2025_26 confirmed from printed schedule).
+    private static let p1 = Period(start: hm(8, 30), end: hm(9, 30))
+    private static let p2 = Period(start: hm(9, 35), end: hm(10, 35))
+    private static let p3 = Period(start: hm(10, 40), end: hm(11, 40))
+    private static let lunch = Period(start: hm(11, 40), end: hm(12, 15))
+    private static let p4 = Period(start: hm(12, 15), end: hm(13, 10))
+    private static let p5 = Period(start: hm(13, 15), end: hm(14, 10))
+    private static let p6 = Period(start: hm(14, 15), end: hm(15, 10))
 
     private static let standardPeriods: [Period] = [p1, p2, p3, p4, p5, p6]
 
     // MARK: - Rotating block order by day (reference_2025_26)
-    // LHS has 8 academic blocks (A–H). Only 6 meet per day, advancing by one
-    // block each rotation day. G and H do not appear on Day 1; A and B do not
-    // appear on Days 2–3, etc. A course in block G meets 4 out of every 6 days.
+    // Actual LHS 6-day rotation from printed schedule (Bhattacharjya 2025-26).
+    // The pattern is a 3-type cycle repeated (D1=D4, D3=D6, D2≈D5).
+    // Every block meets exactly 4 out of 6 days.
+    // Homeroom appears in Day 2 slot 5; flex block appears in Days 3/5/6 slot 5.
     static let blockOrder: [DayType: [AcademicBlock]] = [
         .day1: [.a, .b, .c, .d, .e, .f],
-        .day2: [.b, .c, .d, .e, .f, .g],
-        .day3: [.c, .d, .e, .f, .g, .h],
-        .day4: [.d, .e, .f, .g, .h, .a],
-        .day5: [.e, .f, .g, .h, .a, .b],
-        .day6: [.f, .g, .h, .a, .b, .c],
+        .day2: [.e, .f, .g, .h, .homeroom, .d],
+        .day3: [.b, .a, .g, .h, .flex, .c],
+        .day4: [.a, .b, .c, .d, .e, .f],
+        .day5: [.e, .f, .g, .h, .flex, .d],
+        .day6: [.b, .a, .g, .h, .flex, .c],
     ]
 
     // MARK: - Bell schedules
@@ -83,12 +85,12 @@ enum LHSFixtures_2025_26 {
     static let halfDaySchedule: BellSchedule = {
         let blocks = blockOrder[.day1] ?? []
         let shortPeriods: [Period] = [
-            Period(start: hm(7, 55), end: hm(8, 30)),
-            Period(start: hm(8, 35), end: hm(9, 10)),
-            Period(start: hm(9, 15), end: hm(9, 50)),
-            Period(start: hm(9, 55), end: hm(10, 30)),
-            Period(start: hm(10, 35), end: hm(11, 5)),
-            Period(start: hm(11, 10), end: hm(11, 30))
+            Period(start: hm(8, 30), end: hm(9, 10)),
+            Period(start: hm(9, 15), end: hm(9, 55)),
+            Period(start: hm(10, 0), end: hm(10, 40)),
+            Period(start: hm(10, 45), end: hm(11, 25)),
+            Period(start: hm(11, 30), end: hm(12, 0)),
+            Period(start: hm(12, 5), end: hm(12, 30))
         ]
         var slots: [MeetingSlot] = []
         for (index, block) in blocks.enumerated() {

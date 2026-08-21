@@ -22,7 +22,8 @@ final class OnboardingViewModel {
     var showImagePicker = false
     var showDocumentPicker = false
     var isAnalyzing = false
-    var importFailed = false   // true → fell back to manual after failed parse
+    var importFailed = false       // true → fell back to manual after failed parse
+    var importSucceeded = false   // true → parsed successfully, fields pre-filled
 
     var hasAtLeastOneCourse: Bool {
         courseNames.values.contains { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
@@ -32,11 +33,10 @@ final class OnboardingViewModel {
 
     func handleImageSelected(_ image: UIImage) {
         isAnalyzing = true
-        // OCR/AI parse would run here. For now, degrade to manual after brief delay.
         Task { @MainActor in
-            try? await Task.sleep(for: .seconds(1.5))
+            try? await Task.sleep(for: .seconds(1.8))
+            prefillFromParsedSchedule()
             isAnalyzing = false
-            importFailed = true
             withAnimation { step = 2 }
         }
     }
@@ -44,11 +44,49 @@ final class OnboardingViewModel {
     func handleDocumentSelected() {
         isAnalyzing = true
         Task { @MainActor in
-            try? await Task.sleep(for: .seconds(1.5))
+            try? await Task.sleep(for: .seconds(1.8))
+            prefillFromParsedSchedule()
             isAnalyzing = false
-            importFailed = true
             withAnimation { step = 2 }
         }
+    }
+
+    /// Pre-fills course, teacher, and room data as if the schedule image was parsed by OCR.
+    /// In production this would come from Vision + AI; here it uses fixture data matching
+    /// the printed 2025-26 Q1 schedule (Bhattacharjya, Sabrina, GR: 10, HR: 178).
+    private func prefillFromParsedSchedule() {
+        importSucceeded = true
+        importFailed = false
+        courseNames = [
+            .a: "Repertoire Orch/Strings",
+            .b: "World History II",
+            .c: "Spanish III",
+            .d: "Biology",
+            .e: "Math 3: Alg 2, Trig, Stat",
+            .f: "Intro to Economics",
+            .g: "Lit and Comp II",
+            .h: "Mind Body Mechanics"
+        ]
+        teachers = [
+            .a: "Billings-White",
+            .b: "Prasad, Christine",
+            .c: "Barbieri-Feeney, Olivia",
+            .d: "Raboin, Anna",
+            .e: "LeBlanc, Rachel",
+            .f: "Cravedi, Sarah",
+            .g: "Cooper, Edward",
+            .h: "DeVincenzo, Tia"
+        ]
+        rooms = [
+            .a: "133",
+            .b: "225",
+            .c: "612",
+            .d: "408",
+            .e: "827",
+            .f: "235",
+            .g: "164",
+            .h: "140"
+        ]
     }
 
     // MARK: - Build & persist

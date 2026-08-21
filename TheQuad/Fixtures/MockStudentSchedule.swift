@@ -1,63 +1,62 @@
 import Foundation
 
-/// A realistic fictional LHS student schedule for development and previews.
-/// Eight courses across blocks A–H. Only 6 meet per day on the rotating schedule —
-/// which 6 depends on the day type (Day 1 = A–F, Day 2 = B–G, Day 3 = C–H, etc.).
+/// Sabrina Bhattacharjya's 2025-26 LHS schedule used as prototype fixture data.
+/// Eight courses across blocks A–H. Only 6 meet per day on the rotating schedule.
+/// Block mapping matches the printed Q1 schedule from Aspen.
 enum MockStudentSchedule {
 
     static let studentId = UUID(uuidString: "11111111-1111-1111-1111-111111111111")!
 
-    static let apChemistry = Course(
+    static let orchestraStrings = Course(
         id: UUID(uuidString: "AA000000-0000-0000-0000-000000000001")!,
-        name: "AP Chemistry", teacher: "Ms. Chen", room: "234",
-        block: .a, classCode: nil, colorIndex: 0, provenance: .parsedSchedule
+        name: "Repertoire Orch/Strings", teacher: "Billings-White", room: "133",
+        block: .a, classCode: "6910-001", colorIndex: 0, provenance: .parsedSchedule
     )
-    static let apUSHistory = Course(
+    static let worldHistory = Course(
         id: UUID(uuidString: "AA000000-0000-0000-0000-000000000002")!,
-        name: "AP US History", teacher: "Mr. Rodriguez", room: "115",
-        block: .b, classCode: nil, colorIndex: 1, provenance: .parsedSchedule
+        name: "World History II", teacher: "Prasad, Christine", room: "225",
+        block: .b, classCode: "2206-011", colorIndex: 1, provenance: .parsedSchedule
     )
-    static let orchestra = Course(
+    static let spanishIII = Course(
         id: UUID(uuidString: "AA000000-0000-0000-0000-000000000003")!,
-        name: "Orchestra", teacher: "Mr. Kim", room: "Auditorium",
-        block: .c, classCode: nil, colorIndex: 2, provenance: .parsedSchedule
+        name: "Spanish III", teacher: "Barbieri-Feeney, Olivia", room: "612",
+        block: .c, classCode: "5638-004", colorIndex: 2, provenance: .parsedSchedule
     )
-    static let english11 = Course(
+    static let biology = Course(
         id: UUID(uuidString: "AA000000-0000-0000-0000-000000000004")!,
-        name: "English 11", teacher: "Ms. Thompson", room: "203",
-        block: .d, classCode: nil, colorIndex: 3, provenance: .parsedSchedule
+        name: "Biology", teacher: "Raboin, Anna", room: "408",
+        block: .d, classCode: "4206-011", colorIndex: 3, provenance: .parsedSchedule
     )
-    static let preCalculus = Course(
+    static let math3 = Course(
         id: UUID(uuidString: "AA000000-0000-0000-0000-000000000005")!,
-        name: "Pre-Calculus", teacher: "Ms. Patel", room: "318",
-        block: .e, classCode: nil, colorIndex: 4, provenance: .parsedSchedule
+        name: "Math 3: Alg 2, Trig, Stat", teacher: "LeBlanc, Rachel", room: "827",
+        block: .e, classCode: "3338-005", colorIndex: 4, provenance: .parsedSchedule
     )
-    static let spanishIV = Course(
+    static let economics = Course(
         id: UUID(uuidString: "AA000000-0000-0000-0000-000000000006")!,
-        name: "Spanish IV", teacher: "Mr. Garcia", room: "127",
-        block: .f, classCode: nil, colorIndex: 5, provenance: .parsedSchedule
+        name: "Intro to Economics", teacher: "Cravedi, Sarah", room: "235",
+        block: .f, classCode: "2660-001", colorIndex: 5, provenance: .parsedSchedule
     )
-    static let physics = Course(
+    static let litAndComp = Course(
         id: UUID(uuidString: "AA000000-0000-0000-0000-000000000007")!,
-        name: "Physics", teacher: "Ms. Larson", room: "241",
-        block: .g, classCode: nil, colorIndex: 6, provenance: .parsedSchedule
+        name: "Lit and Comp II", teacher: "Cooper, Edward", room: "164",
+        block: .g, classCode: "1208-026", colorIndex: 6, provenance: .parsedSchedule
     )
-    static let pe = Course(
+    static let mindBodyMechanics = Course(
         id: UUID(uuidString: "AA000000-0000-0000-0000-000000000008")!,
-        name: "PE", teacher: "Mr. Wallace", room: "Gym",
-        block: .h, classCode: nil, colorIndex: 7, provenance: .parsedSchedule
+        name: "Mind Body Mechanics", teacher: "DeVincenzo, Tia", room: "140",
+        block: .h, classCode: "7570-001", colorIndex: 7, provenance: .parsedSchedule
     )
 
     static let courses: [Course] = [
-        apChemistry, apUSHistory, orchestra, english11,
-        preCalculus, spanishIV, physics, pe
+        orchestraStrings, worldHistory, spanishIII, biology,
+        math3, economics, litAndComp, mindBodyMechanics
     ]
 
     static let enrollments: [Enrollment] = courses.map { course in
         Enrollment(id: UUID(), studentId: studentId, courseId: course.id, schoolYear: "2026-27")
     }
 
-    /// A ScheduleEngine seeded with reference fixtures + the mock student's data.
     static func engine() -> ScheduleEngine {
         ScheduleEngine(
             calendarDates: LHSFixtures_2025_26.calendarDates_2025_26

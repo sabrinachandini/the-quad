@@ -211,7 +211,18 @@ private struct ManualEntryStep: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                if model.importFailed {
+                if model.importSucceeded {
+                    HStack(spacing: DesignTokens.Spacing.sm) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundStyle(.green)
+                        Text("Parsed from your schedule — tap any field to edit.")
+                            .font(.caption)
+                            .foregroundStyle(DesignTokens.Colors.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .padding(DesignTokens.Spacing.md)
+                    .background(Color.green.opacity(0.1))
+                } else if model.importFailed {
                     HStack(spacing: DesignTokens.Spacing.sm) {
                         Image(systemName: "info.circle.fill")
                             .foregroundStyle(.orange)
@@ -266,6 +277,7 @@ private struct ManualEntryStep: View {
                     Button {
                         withAnimation {
                             model.importFailed = false
+                            model.importSucceeded = false
                             model.step = 1
                         }
                     } label: {

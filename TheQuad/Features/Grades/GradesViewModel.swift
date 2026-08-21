@@ -110,133 +110,150 @@ final class GradesViewModel {
         }
 
         return [
-            // AP Chemistry — Tests 50%, Homework 30%, Labs 20%
+            // Repertoire Orch/Strings — Performance 100%
             CourseGrade(
-                id: UUID(),
-                courseId: MockStudentSchedule.apChemistry.id,
-                currentGrade: nil,
-                letterGrade: nil,
-                categories: [
-                    GradeCategory(id: UUID(), name: "Tests", weight: 0.50, entries: [
-                        entry("Unit 1 Test", 88),
-                        entry("Unit 2 Test", 92),
-                        entry("Unit 3 Test", 79)
-                    ]),
-                    GradeCategory(id: UUID(), name: "Homework", weight: 0.30, entries: [
-                        entry("HW Set 1", 95),
-                        entry("HW Set 2", 88),
-                        entry("HW Set 3", 100),
-                        entry("HW Set 4", 78)
-                    ]),
-                    GradeCategory(id: UUID(), name: "Labs", weight: 0.20, entries: [
-                        entry("Lab 1", 90),
-                        entry("Lab 2", 85)
-                    ])
-                ],
-                provenance: .aspen
-            ),
-
-            // AP US History — Essays 60%, Participation 40%
-            CourseGrade(
-                id: UUID(),
-                courseId: MockStudentSchedule.apUSHistory.id,
-                currentGrade: nil,
-                letterGrade: nil,
-                categories: [
-                    GradeCategory(id: UUID(), name: "Essays", weight: 0.60, entries: [
-                        entry("DBQ Essay", 91),
-                        entry("LEQ Essay", 87)
-                    ]),
-                    GradeCategory(id: UUID(), name: "Participation", weight: 0.40, entries: [
-                        entry("Q1 Participation", 95)
-                    ])
-                ],
-                provenance: .aspen
-            ),
-
-            // Orchestra — Performance 100%
-            CourseGrade(
-                id: UUID(),
-                courseId: MockStudentSchedule.orchestra.id,
-                currentGrade: nil,
-                letterGrade: nil,
+                id: UUID(), courseId: MockStudentSchedule.orchestraStrings.id,
+                currentGrade: nil, letterGrade: nil,
                 categories: [
                     GradeCategory(id: UUID(), name: "Performance", weight: 1.00, entries: [
-                        entry("Fall Concert", 98),
-                        entry("Chair Audition", 94)
+                        entry("Fall Audition", 96),
+                        entry("Section Recording", 92),
                     ])
                 ],
                 provenance: .aspen
             ),
 
-            // English 11 — Essays 50%, Reading 30%, Discussion 20%
+            // World History II — Essays 50%, Quizzes 30%, Participation 20%
             CourseGrade(
-                id: UUID(),
-                courseId: MockStudentSchedule.english11.id,
-                currentGrade: nil,
-                letterGrade: nil,
+                id: UUID(), courseId: MockStudentSchedule.worldHistory.id,
+                currentGrade: nil, letterGrade: nil,
                 categories: [
                     GradeCategory(id: UUID(), name: "Essays", weight: 0.50, entries: [
-                        entry("Analytical Essay 1", 85),
-                        entry("Analytical Essay 2", 89)
+                        entry("Document Analysis 1", 88),
+                        entry("Thesis Paragraph", 91),
                     ]),
-                    GradeCategory(id: UUID(), name: "Reading", weight: 0.30, entries: [
-                        entry("Reading Quiz 1", 92),
-                        entry("Reading Quiz 2", 88),
-                        entry("Reading Quiz 3", 95)
+                    GradeCategory(id: UUID(), name: "Quizzes", weight: 0.30, entries: [
+                        entry("Ch. 1 Quiz", 84),
+                        entry("Ch. 2 Quiz", 90),
                     ]),
-                    GradeCategory(id: UUID(), name: "Discussion", weight: 0.20, entries: [
-                        entry("Socratic Seminar", 90)
+                    GradeCategory(id: UUID(), name: "Participation", weight: 0.20, entries: [
+                        entry("Q1 Discussion", 95),
                     ])
                 ],
                 provenance: .aspen
             ),
 
-            // Pre-Calculus — Tests 60%, Homework 30%, Quizzes 10%
+            // Spanish III — Speaking 40%, Tests 40%, Homework 20%
             CourseGrade(
-                id: UUID(),
-                courseId: MockStudentSchedule.preCalculus.id,
-                currentGrade: nil,
-                letterGrade: nil,
+                id: UUID(), courseId: MockStudentSchedule.spanishIII.id,
+                currentGrade: nil, letterGrade: nil,
+                categories: [
+                    GradeCategory(id: UUID(), name: "Speaking", weight: 0.40, entries: [
+                        entry("Oral Presentation 1", 94),
+                    ]),
+                    GradeCategory(id: UUID(), name: "Tests", weight: 0.40, entries: [
+                        entry("Unidad 1 Test", 87),
+                        entry("Unidad 2 Test", 91),
+                    ]),
+                    GradeCategory(id: UUID(), name: "Homework", weight: 0.20, entries: [
+                        entry("HW 1–4", 98),
+                        entry("HW 5–8", 94),
+                    ])
+                ],
+                provenance: .aspen
+            ),
+
+            // Biology — Tests 50%, Labs 30%, Homework 20%
+            CourseGrade(
+                id: UUID(), courseId: MockStudentSchedule.biology.id,
+                currentGrade: nil, letterGrade: nil,
+                categories: [
+                    GradeCategory(id: UUID(), name: "Tests", weight: 0.50, entries: [
+                        entry("Cell Biology Test", 82),
+                        entry("Genetics Quiz", 89),
+                    ]),
+                    GradeCategory(id: UUID(), name: "Labs", weight: 0.30, entries: [
+                        entry("Microscopy Lab", 93),
+                        entry("Diffusion Lab", 88),
+                    ]),
+                    GradeCategory(id: UUID(), name: "Homework", weight: 0.20, entries: [
+                        entry("HW Set 1", 96),
+                        entry("HW Set 2", 90),
+                    ])
+                ],
+                provenance: .aspen
+            ),
+
+            // Math 3: Alg 2, Trig, Stat — Tests 60%, Homework 30%, Quizzes 10%
+            CourseGrade(
+                id: UUID(), courseId: MockStudentSchedule.math3.id,
+                currentGrade: nil, letterGrade: nil,
                 categories: [
                     GradeCategory(id: UUID(), name: "Tests", weight: 0.60, entries: [
-                        entry("Test 1: Functions", 94),
-                        entry("Test 2: Trig", 88)
+                        entry("Functions Test", 90),
+                        entry("Trig Ratios Test", 85),
                     ]),
                     GradeCategory(id: UUID(), name: "Homework", weight: 0.30, entries: [
                         entry("HW 1", 100),
                         entry("HW 2", 95),
                         entry("HW 3", 88),
-                        entry("HW 4", 92)
                     ]),
                     GradeCategory(id: UUID(), name: "Quizzes", weight: 0.10, entries: [
-                        entry("Quiz 1", 85),
-                        entry("Quiz 2", 90),
-                        entry("Quiz 3", 78)
+                        entry("Quiz 1", 88),
+                        entry("Quiz 2", 92),
                     ])
                 ],
                 provenance: .aspen
             ),
 
-            // Spanish IV — Speaking 40%, Written 60%
+            // Intro to Economics — Tests 60%, Projects 40%
             CourseGrade(
-                id: UUID(),
-                courseId: MockStudentSchedule.spanishIV.id,
-                currentGrade: nil,
-                letterGrade: nil,
+                id: UUID(), courseId: MockStudentSchedule.economics.id,
+                currentGrade: nil, letterGrade: nil,
                 categories: [
-                    GradeCategory(id: UUID(), name: "Speaking", weight: 0.40, entries: [
-                        entry("Oral Presentation 1", 92),
-                        entry("Oral Presentation 2", 88)
+                    GradeCategory(id: UUID(), name: "Tests", weight: 0.60, entries: [
+                        entry("Supply & Demand Test", 93),
                     ]),
-                    GradeCategory(id: UUID(), name: "Written", weight: 0.60, entries: [
-                        entry("Written Exam 1", 85),
-                        entry("Written Exam 2", 90),
-                        entry("Written Exam 3", 78)
+                    GradeCategory(id: UUID(), name: "Projects", weight: 0.40, entries: [
+                        entry("Market Analysis", 89),
                     ])
                 ],
                 provenance: .aspen
-            )
+            ),
+
+            // Lit and Comp II — Essays 60%, Discussion 30%, Reading 10%
+            CourseGrade(
+                id: UUID(), courseId: MockStudentSchedule.litAndComp.id,
+                currentGrade: nil, letterGrade: nil,
+                categories: [
+                    GradeCategory(id: UUID(), name: "Essays", weight: 0.60, entries: [
+                        entry("Analytical Essay 1", 86),
+                        entry("Close Reading", 91),
+                    ]),
+                    GradeCategory(id: UUID(), name: "Discussion", weight: 0.30, entries: [
+                        entry("Socratic Seminar", 93),
+                    ]),
+                    GradeCategory(id: UUID(), name: "Reading", weight: 0.10, entries: [
+                        entry("Reading Checks", 97),
+                    ])
+                ],
+                provenance: .aspen
+            ),
+
+            // Mind Body Mechanics — Participation 70%, Assessments 30%
+            CourseGrade(
+                id: UUID(), courseId: MockStudentSchedule.mindBodyMechanics.id,
+                currentGrade: nil, letterGrade: nil,
+                categories: [
+                    GradeCategory(id: UUID(), name: "Participation", weight: 0.70, entries: [
+                        entry("Q1 Effort", 98),
+                    ]),
+                    GradeCategory(id: UUID(), name: "Assessments", weight: 0.30, entries: [
+                        entry("Fitness Assessment", 95),
+                    ])
+                ],
+                provenance: .aspen
+            ),
         ]
     }
 }
