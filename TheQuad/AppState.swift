@@ -13,7 +13,9 @@ final class AppState {
     var displayName: String
     var graduationYear: Int
     var classRemindersEnabled: Bool
-    var classroomConnected: Bool
+
+    // MARK: - Aspen
+    var aspenProvider: AspenGradeProvider = .shared
 
     // MARK: - Social
 
@@ -34,8 +36,7 @@ final class AppState {
 
     var scheduleEngine: ScheduleEngine {
         ScheduleEngine(
-            calendarDates: LHSFixtures_2025_26.calendarDates_2025_26
-                        + LHSFixtures_2025_26.calendarDates_2026_27,
+            calendarDates: LHSFixtures_2025_26.calendarDates_2025_26,
             overrides: [],
             bellSchedules: LHSFixtures_2025_26.allBellSchedules
         )
@@ -46,20 +47,24 @@ final class AppState {
         self.enrollments = MockStudentSchedule.enrollments
         self.hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "quad_onboarding_complete")
         self.assignments = WorkViewModel.mockAssignments()
-        self.grades = GradesViewModel.mockGrades()
-        self.displayName = "Sabrina"
-        self.graduationYear = 2028
+        // Load cached Aspen grades if available; fall back to mock for dev
+        if let cached = AspenGradeProvider.shared.loadCachedGrades() {
+            self.grades = cached
+        } else {
+            self.grades = GradesViewModel.mockGrades()  // dev fallback
+        }
+        self.displayName = "Student"
+        self.graduationYear = 2026
         self.classRemindersEnabled = true
-        self.classroomConnected = true
 
         let dir = AppState.mockDirectory()
         self.directory = dir
         self.currentUser = User(
             id: MockStudentSchedule.studentId,
             appleUserID: nil,
-            lpsGoogleEmail: "sbhattacharjya@lps.lexingtonma.org",
-            displayName: "Sabrina",
-            graduationYear: 2028,
+            lpsGoogleEmail: "student@lps.lexingtonma.org",
+            displayName: "Student",
+            graduationYear: 2026,
             isInDirectory: true,
             showClassesInDirectory: true,
             createdAt: Date()
@@ -74,39 +79,38 @@ final class AppState {
 
         // Mock courses for each friend — spread across different blocks for realistic overlap
         var fc: [UUID: [Course]] = [:]
-        // Friends' courses overlap Sabrina's schedule realistically.
-        // dir[0] = Maya: shares A block (Orchestra) and E block (Math)
         fc[dir[0].id] = [
-            Course(id: UUID(), name: "Repertoire Orch/Strings", teacher: "Billings-White", room: "133",
+            Course(id: UUID(), name: "AP Biology", teacher: "Ms. Lee", room: "210",
                    block: .a, classCode: nil, colorIndex: 0, provenance: .parsedSchedule),
-            Course(id: UUID(), name: "Precalculus", teacher: "Ms. Nguyen", room: "821",
+            Course(id: UUID(), name: "AP English Lit", teacher: "Mr. Walsh", room: "104",
                    block: .c, classCode: nil, colorIndex: 3, provenance: .parsedSchedule),
-            Course(id: UUID(), name: "Math 3: Alg 2, Trig, Stat", teacher: "LeBlanc, Rachel", room: "827",
+            Course(id: UUID(), name: "Statistics", teacher: "Ms. Nguyen", room: "321",
                    block: .e, classCode: nil, colorIndex: 4, provenance: .parsedSchedule),
-            Course(id: UUID(), name: "Lit and Comp II", teacher: "Cooper, Edward", room: "164",
+            Course(id: UUID(), name: "French IV", teacher: "Mme. Bernard", room: "132",
                    block: .g, classCode: nil, colorIndex: 5, provenance: .parsedSchedule),
         ]
-        // dir[2] = Alex: shares B block (World History) and G block (Lit)
         fc[dir[2].id] = [
-            Course(id: UUID(), name: "World History II", teacher: "Prasad, Christine", room: "225",
+            Course(id: UUID(), name: "AP Calculus BC", teacher: "Mr. Park", room: "316",
                    block: .b, classCode: nil, colorIndex: 1, provenance: .parsedSchedule),
-            Course(id: UUID(), name: "Spanish III", teacher: "Barbieri-Feeney, Olivia", room: "612",
+            Course(id: UUID(), name: "AP US History", teacher: "Mr. Rodriguez", room: "115",
+                   block: .b, classCode: nil, colorIndex: 1, provenance: .parsedSchedule),
+            Course(id: UUID(), name: "Orchestra", teacher: "Mr. Kim", room: "Auditorium",
                    block: .c, classCode: nil, colorIndex: 2, provenance: .parsedSchedule),
-            Course(id: UUID(), name: "Lit and Comp II", teacher: "Cooper, Edward", room: "164",
-                   block: .g, classCode: nil, colorIndex: 6, provenance: .parsedSchedule),
-            Course(id: UUID(), name: "Computer Science", teacher: "Ms. Torres", room: "Lab 2",
-                   block: .h, classCode: nil, colorIndex: 7, provenance: .parsedSchedule),
+            Course(id: UUID(), name: "Computer Science A", teacher: "Ms. Torres", room: "Lab 2",
+                   block: .h, classCode: nil, colorIndex: 6, provenance: .parsedSchedule),
         ]
-        // dir[5] = Chris: free during E and F (Sabrina has Math 3 and Econ)
         fc[dir[5].id] = [
-            Course(id: UUID(), name: "Biology", teacher: "Raboin, Anna", room: "408",
+            Course(id: UUID(), name: "AP Chemistry", teacher: "Ms. Chen", room: "234",
+                   block: .a, classCode: nil, colorIndex: 0, provenance: .parsedSchedule),
+            Course(id: UUID(), name: "English 11", teacher: "Ms. Thompson", room: "203",
                    block: .d, classCode: nil, colorIndex: 3, provenance: .parsedSchedule),
-            Course(id: UUID(), name: "Intro to Economics", teacher: "Cravedi, Sarah", room: "235",
-                   block: .f, classCode: nil, colorIndex: 5, provenance: .parsedSchedule),
             Course(id: UUID(), name: "Studio Art", teacher: "Mr. Osei", room: "Art Wing",
-                   block: .h, classCode: nil, colorIndex: 7, provenance: .parsedSchedule),
+                   block: .f, classCode: nil, colorIndex: 7, provenance: .parsedSchedule),
         ]
         self.friendCourses = fc
+
+        // Try to resume Aspen session in background
+        Task { await AspenGradeProvider.shared.tryResumeSession() }
     }
 
     // MARK: - Mock Directory

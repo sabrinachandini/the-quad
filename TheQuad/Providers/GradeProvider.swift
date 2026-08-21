@@ -1,11 +1,16 @@
 import Foundation
 
-/// Source of grades. Concrete implementation (Aspen) arrives in Phase 5.
-/// App logic couples only to this protocol.
-protocol GradeProvider {
-    var provenance: DataProvenance { get }
-    var isAvailable: Bool { get }
+// MARK: - Integration Status
+// Aspen:    IMPLEMENTED (device-side authenticated web session)
+// Parser:   TESTED WITH FIXTURE (not yet TESTED AGAINST REAL SERVICE)
+// Auth:     TESTED WITH FIXTURE
 
-    /// Fetch current grades for the given courses.
-    func fetchGrades(for courseIds: [UUID]) async throws -> [CourseGrade]
+protocol GradeProvider: AnyObject {
+    var provenance: DataProvenance { get }
+    var isConnected: Bool { get }
+
+    func connect(username: String, password: String) async throws
+    func fetchCourses() async throws -> [CourseGrade]
+    func refresh() async throws
+    func disconnect() async throws
 }
