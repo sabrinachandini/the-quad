@@ -1,96 +1,164 @@
 import SwiftUI
 
 struct MeView: View {
-    @State private var model = MeViewModel()
+    @State private var appState = AppState.shared
+    @State private var showClassroomAlert = false
+    @State private var showAspenAlert = false
 
     var body: some View {
-        ZStack {
-            DesignTokens.Colors.background.ignoresSafeArea()
-            ScrollView {
-                VStack(alignment: .leading, spacing: DesignTokens.Spacing.xl) {
-                    profile
-
-                    group(title: "Integrations") {
-                        ForEach(model.integrations) { conn in
-                            integrationRow(conn)
-                        }
+        List {
+            // MARK: - Profile
+            Section {
+                HStack(spacing: DesignTokens.Spacing.md) {
+                    ZStack {
+                        Circle()
+                            .fill(DesignTokens.Colors.accent)
+                            .frame(width: 56, height: 56)
+                        Text(String(appState.displayName.prefix(1)).uppercased())
+                            .font(.system(size: 22, weight: .bold))
+                            .foregroundStyle(.white)
                     }
-
-                    group(title: "Notifications") {
-                        Toggle(isOn: $model.notifications.classChangeRemindersEnabled) {
-                            Text("Class change reminders")
-                                .font(DesignTokens.Typography.quadBody)
-                                .foregroundStyle(DesignTokens.Colors.primary)
-                        }
-                        Toggle(isOn: $model.notifications.assignmentDueRemindersEnabled) {
-                            Text("Assignment due reminders")
-                                .font(DesignTokens.Typography.quadBody)
-                                .foregroundStyle(DesignTokens.Colors.primary)
-                        }
-                    }
-                    .tint(DesignTokens.Colors.accent)
-
-                    group(title: "School Year") {
-                        HStack {
-                            Text("Current year")
-                                .font(DesignTokens.Typography.quadBody)
-                                .foregroundStyle(DesignTokens.Colors.primary)
-                            Spacer()
-                            Text(model.schoolYear)
-                                .font(DesignTokens.Typography.quadBody.weight(.semibold))
-                                .foregroundStyle(DesignTokens.Colors.accent)
-                        }
+                    VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
+                        Text(appState.displayName)
+                            .font(DesignTokens.Typography.quadHeadline)
+                            .foregroundStyle(DesignTokens.Colors.primary)
+                        Text("Class of \(appState.graduationYear) · LHS")
+                            .font(DesignTokens.Typography.quadCaption)
+                            .foregroundStyle(DesignTokens.Colors.secondary)
                     }
                 }
-                .padding(DesignTokens.Spacing.lg)
-                .padding(.bottom, DesignTokens.Spacing.xxxl)
+                .padding(.vertical, DesignTokens.Spacing.xs)
+            } header: {
+                sectionHeader("Profile")
+            }
+
+            // MARK: - My Schedule
+            Section {
+                ForEach(appState.courses) { course in
+                    HStack(spacing: DesignTokens.Spacing.md) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.small)
+                                .fill(CourseColors.color(atIndex: course.colorIndex))
+                                .frame(width: 32, height: 32)
+                            Text(course.block.rawValue.uppercased())
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundStyle(.white)
+                        }
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(course.name)
+                                .font(DesignTokens.Typography.quadBody)
+                                .foregroundStyle(DesignTokens.Colors.primary)
+                            if let teacher = course.teacher {
+                                Text(teacher)
+                                    .font(DesignTokens.Typography.quadCaption)
+                                    .foregroundStyle(DesignTokens.Colors.secondary)
+                            }
+                        }
+                    }
+                    .padding(.vertical, 2)
+                }
+
+                Button {
+                    appState.hasCompletedOnboarding = false
+                } label: {
+                    HStack {
+                        Image(systemName: "pencil")
+                            .foregroundStyle(DesignTokens.Colors.accent)
+                        Text("Edit Schedule")
+                            .font(DesignTokens.Typography.quadBody)
+                            .foregroundStyle(DesignTokens.Colors.accent)
+                    }
+                }
+            } header: {
+                sectionHeader("My Schedule")
+            }
+
+            // MARK: - Integrations
+            Section {
+                HStack {
+                    Label("Google Classroom", systemImage: "graduationcap.fill")
+                        .font(DesignTokens.Typography.quadBody)
+                        .foregroundStyle(DesignTokens.Colors.primary)
+                    Spacer()
+                    Button("Connect") {
+                        showClassroomAlert = true
+                    }
+                    .font(DesignTokens.Typography.quadCaption.weight(.semibold))
+                    .foregroundStyle(DesignTokens.Colors.accent)
+                }
+
+                HStack {
+                    Label("Aspen Grades", systemImage: "chart.bar.fill")
+                        .font(DesignTokens.Typography.quadBody)
+                        .foregroundStyle(DesignTokens.Colors.primary)
+                    Spacer()
+                    Button("Connect") {
+                        showAspenAlert = true
+                    }
+                    .font(DesignTokens.Typography.quadCaption.weight(.semibold))
+                    .foregroundStyle(DesignTokens.Colors.accent)
+                }
+            } header: {
+                sectionHeader("Integrations")
+            }
+
+            // MARK: - Notifications
+            Section {
+                Toggle(isOn: $appState.classRemindersEnabled) {
+                    Label("Class reminders", systemImage: "bell.fill")
+                        .font(DesignTokens.Typography.quadBody)
+                        .foregroundStyle(DesignTokens.Colors.primary)
+                }
+                .tint(DesignTokens.Colors.accent)
+            } header: {
+                sectionHeader("Notifications")
+            }
+
+            // MARK: - About
+            Section {
+                HStack {
+                    Spacer()
+                    VStack(spacing: DesignTokens.Spacing.xs) {
+                        Text("The Quad · Everything LHS.")
+                            .font(DesignTokens.Typography.quadCaption)
+                            .foregroundStyle(DesignTokens.Colors.secondary)
+                        Text("Version 0.1.0")
+                            .font(DesignTokens.Typography.quadCaption)
+                            .foregroundStyle(DesignTokens.Colors.secondary.opacity(0.6))
+                    }
+                    Spacer()
+                }
+                .listRowBackground(Color.clear)
             }
         }
-    }
-
-    private var profile: some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
-            Text("Me")
-                .font(DesignTokens.Typography.quadTitle)
-                .foregroundStyle(DesignTokens.Colors.primary)
-            Text(model.displayName)
-                .font(DesignTokens.Typography.quadHeadline)
-                .foregroundStyle(DesignTokens.Colors.primary)
-            Text("Grade \(model.gradeLevel) · LHS")
-                .font(DesignTokens.Typography.quadBody)
-                .foregroundStyle(DesignTokens.Colors.secondary)
+        .listStyle(.insetGrouped)
+        .scrollContentBackground(.hidden)
+        .background(DesignTokens.Colors.background.ignoresSafeArea())
+        .navigationTitle("Me")
+        .navigationBarTitleDisplayMode(.large)
+        .alert("Coming Soon", isPresented: $showClassroomAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Google Classroom integration is coming in a future update.")
+        }
+        .alert("Coming Soon", isPresented: $showAspenAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Aspen Grades integration is coming in a future update.")
         }
     }
 
-    private func integrationRow(_ conn: IntegrationConnection) -> some View {
-        HStack {
-            Text(model.label(for: conn.provider))
-                .font(DesignTokens.Typography.quadBody)
-                .foregroundStyle(DesignTokens.Colors.primary)
-            Spacer()
-            Text(conn.isConnected ? "Connected" : "Not Connected")
-                .font(DesignTokens.Typography.quadCaption.weight(.semibold))
-                .foregroundStyle(conn.isConnected ? DesignTokens.Colors.accent : DesignTokens.Colors.secondary)
-        }
-    }
-
-    @ViewBuilder
-    private func group<Content: View>(title: String, @ViewBuilder content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
-            Text(title)
-                .font(DesignTokens.Typography.quadHeadline)
-                .foregroundStyle(DesignTokens.Colors.primary)
-            VStack(spacing: DesignTokens.Spacing.md) {
-                content()
-            }
-            .padding(DesignTokens.Spacing.lg)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(DesignTokens.Colors.surface)
-            .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large))
-        }
+    private func sectionHeader(_ title: String) -> some View {
+        Text(title)
+            .font(DesignTokens.Typography.quadCaption.weight(.semibold))
+            .foregroundStyle(DesignTokens.Colors.secondary)
+            .textCase(nil)
     }
 }
 
 #Preview {
-    MeView().preferredColorScheme(.dark)
+    NavigationStack {
+        MeView()
+    }
+    .preferredColorScheme(.dark)
 }

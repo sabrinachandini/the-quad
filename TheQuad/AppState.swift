@@ -9,6 +9,10 @@ final class AppState {
     var enrollments: [Enrollment]
     var hasCompletedOnboarding: Bool
     var assignments: [Assignment]
+    var grades: [CourseGrade]
+    var displayName: String
+    var graduationYear: Int
+    var classRemindersEnabled: Bool
 
     var scheduleEngine: ScheduleEngine {
         ScheduleEngine(
@@ -23,5 +27,9 @@ final class AppState {
         self.enrollments = MockStudentSchedule.enrollments
         self.hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "quad_onboarding_complete")
         self.assignments = WorkViewModel.mockAssignments()
+        self.grades = GradesViewModel.mockGrades()
+        self.displayName = "Student"
+        self.graduationYear = 2026
+        self.classRemindersEnabled = true
     }
 }
