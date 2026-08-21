@@ -17,7 +17,7 @@ enum SubmissionState: String, Codable {
     case notStarted, inProgress, turnedIn, returned, missing, graded
 }
 
-struct Task: Identifiable, Codable {
+struct StudentTask: Identifiable, Codable {
     let id: UUID
     var title: String
     var taskType: TaskType
