@@ -22,3 +22,29 @@ Host the per-user ICS feed on a **Supabase edge function** or **CloudKit**? Trad
 
 ## Q-7 — Grade weighting rules
 Does LHS use a standard weighted GPA, or custom weighting/rounding rules per course? The what-if engine must match reality exactly. **Owner:** admin input / Phase 5.
+
+---
+
+## Classroom OAuth Spike (Spike 1) — Status: In Progress
+
+### What we know
+- Required scopes: `classroom.courses.readonly`, `classroom.coursework.me.readonly`, `classroom.student-submissions.me.readonly`
+- GoogleSignIn iOS SDK available via SPM: `github.com/google/GoogleSignIn-iOS`
+- Classroom REST API is well-documented and stable
+
+### Key risk
+LPS uses Google Workspace for Education. School admins can restrict which OAuth apps students authorize. If LPS has set "Trusted apps only" policy, third-party apps cannot acquire Classroom scopes even with student consent.
+
+### Investigation needed
+- [ ] Test sign-in flow with an actual LHS student Google account
+- [ ] Check if `classroom.coursework.me.readonly` scope is grantable
+- [ ] If blocked: document the exact OAuth error returned
+- [ ] Fallback path: manual assignment entry (already implemented)
+
+---
+
+## Aspen Spike (Spike 2) — Status: Not Started
+- GradeKit approach: likely uses a WKWebView session to the Aspen web portal
+- Credentials must stay on-device (Keychain only — never server-side)
+- Need to reverse-engineer Aspen's web API endpoints for Lexington's instance
+- Risk: Aspen web structure may change; brittle scraping approach
