@@ -2,7 +2,7 @@ import Foundation
 
 /// reference_2025_26
 ///
-/// Reference LHS bell schedules and sample calendar dates for the 2025-26 year.
+/// Reference LHS bell schedules and calendar dates for the 2025-26 year.
 /// These values are REFERENCE ONLY — not authoritative. Confirm with admin
 /// before treating any time as ground truth. See docs/LHS_SCHEDULE_MODEL.md.
 enum LHSFixtures_2025_26 {
@@ -99,30 +99,165 @@ enum LHSFixtures_2025_26 {
         return BellSchedule(id: UUID(), name: "Half Day", dayType: .halfDay, slots: slots)
     }()
 
+    /// Delayed opening schedule (reference_2025_26).
+    /// School starts 9:55 AM. Six ~45-min academic blocks with a short lunch.
+    static let delayedOpeningSchedule: BellSchedule = {
+        let blocks = blockOrder[.day1] ?? []
+        let delayedPeriods: [Period] = [
+            Period(start: hm(9, 55), end: hm(10, 35)),
+            Period(start: hm(10, 40), end: hm(11, 20)),
+            Period(start: hm(11, 25), end: hm(12, 5)),
+            Period(start: hm(12, 35), end: hm(13, 15)),
+            Period(start: hm(13, 20), end: hm(14, 0)),
+            Period(start: hm(14, 5), end: hm(14, 20))
+        ]
+        let delayedLunch = Period(start: hm(12, 5), end: hm(12, 30))
+        var slots: [MeetingSlot] = []
+        var order = 0
+        for (index, block) in blocks.enumerated() {
+            let p = delayedPeriods[index]
+            slots.append(MeetingSlot(
+                id: UUID(), order: order, block: block,
+                startTime: p.start, endTime: p.end, isLunch: false
+            ))
+            order += 1
+            // Embed lunch after the third block (same pattern as standard).
+            if index == 2 {
+                slots.append(MeetingSlot(
+                    id: UUID(), order: order, block: .flex,
+                    startTime: delayedLunch.start, endTime: delayedLunch.end, isLunch: true
+                ))
+                order += 1
+            }
+        }
+        return BellSchedule(id: UUID(), name: "Delayed Opening", dayType: .delayedOpening, slots: slots)
+    }()
+
+    /// Assembly schedule (reference_2025_26).
+    /// Periods are shortened to ~45 min to fit a 30-min assembly block.
+    /// Only 5 academic blocks on assembly days; assembly slot after period 2.
+    static let assemblySchedule: BellSchedule = {
+        let blocks = blockOrder[.day1] ?? []
+        // Five academic periods around the assembly slot.
+        let assemblyPeriods: [Period] = [
+            Period(start: hm(7, 55), end: hm(8, 40)),
+            Period(start: hm(8, 45), end: hm(9, 30)),
+            // Assembly: 9:35–10:05
+            Period(start: hm(10, 10), end: hm(10, 55)),
+            Period(start: hm(11, 35), end: hm(12, 20)),
+            Period(start: hm(12, 25), end: hm(13, 10))
+        ]
+        let assemblyLunch = Period(start: hm(11, 0), end: hm(11, 30))
+        // Use first 5 blocks from Day 1 order.
+        let usedBlocks = Array(blocks.prefix(5))
+        var slots: [MeetingSlot] = []
+        var order = 0
+        for (index, block) in usedBlocks.enumerated() {
+            let p = assemblyPeriods[index]
+            slots.append(MeetingSlot(
+                id: UUID(), order: order, block: block,
+                startTime: p.start, endTime: p.end, isLunch: false
+            ))
+            order += 1
+            // Embed lunch after the third academic block (index 2).
+            if index == 2 {
+                slots.append(MeetingSlot(
+                    id: UUID(), order: order, block: .flex,
+                    startTime: assemblyLunch.start, endTime: assemblyLunch.end, isLunch: true
+                ))
+                order += 1
+            }
+        }
+        return BellSchedule(id: UUID(), name: "Assembly", dayType: .assembly, slots: slots)
+    }()
+
     /// All bell schedules the engine should be seeded with.
     static let allBellSchedules: [BellSchedule] = [
         day1Schedule, day2Schedule, day3Schedule,
         day4Schedule, day5Schedule, day6Schedule,
-        halfDaySchedule
+        halfDaySchedule, delayedOpeningSchedule, assemblySchedule
     ]
 
-    // MARK: - Sample calendar dates (reference_2025_26, September 2025)
+    // MARK: - Full 2025-26 calendar (reference_2025_26)
 
-    private static func date(_ year: Int, _ month: Int, _ day: Int) -> Date {
-        Calendar.current.date(from: DateComponents(year: year, month: month, day: day)) ?? Date()
+    /// Generates school calendar dates from Sept 2, 2025 through June 12, 2026.
+    /// Weekends are skipped. Holidays are marked .noSchool. All other days
+    /// advance through the Day 1–6 rotation in sequence.
+    private static func generateCalendarDates() -> [SchoolCalendarDate] {
+        let cal = Calendar.current
+
+        // Holidays and no-school dates (year, month, day).
+        let holidays: Set<String> = [
+            "2025-09-01", // Labor Day
+            "2025-10-13", // Columbus/Indigenous Peoples Day
+            "2025-11-11", // Veterans Day
+            "2025-11-26", // Day before Thanksgiving (LHS off)
+            "2025-11-27", // Thanksgiving Day
+            "2025-11-28", // Day after Thanksgiving
+            // Winter break: Dec 24 – Jan 2
+            "2025-12-24", "2025-12-25", "2025-12-26", "2025-12-27", "2025-12-28",
+            "2025-12-29", "2025-12-30", "2025-12-31",
+            "2026-01-01", "2026-01-02",
+            "2026-01-19", // MLK Day
+            // February break: Feb 16–20
+            "2026-02-16", "2026-02-17", "2026-02-18", "2026-02-19", "2026-02-20",
+            // April break: Apr 20–24
+            "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23", "2026-04-24",
+            "2026-05-25"  // Memorial Day
+        ]
+
+        let rotationDays: [DayType] = [.day1, .day2, .day3, .day4, .day5, .day6]
+
+        var results: [SchoolCalendarDate] = []
+        var rotationIndex = 0
+
+        // Start: September 2, 2025 (Day 1). End: June 12, 2026.
+        guard
+            let startDate = cal.date(from: DateComponents(year: 2025, month: 9, day: 2)),
+            let endDate   = cal.date(from: DateComponents(year: 2026, month: 6, day: 12))
+        else { return [] }
+
+        var current = startDate
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+
+        while current <= endDate {
+            let weekday = cal.component(.weekday, from: current) // 1=Sun, 7=Sat
+            let key = formatter.string(from: current)
+
+            // Skip weekends entirely (no entry generated).
+            if weekday == 1 || weekday == 7 {
+                current = cal.date(byAdding: .day, value: 1, to: current) ?? current
+                continue
+            }
+
+            let dayType: DayType
+            let note: String?
+
+            if holidays.contains(key) {
+                dayType = .noSchool
+                note = nil
+            } else {
+                dayType = rotationDays[rotationIndex % 6]
+                rotationIndex += 1
+                note = nil
+            }
+
+            results.append(SchoolCalendarDate(
+                id: UUID(),
+                date: current,
+                dayType: dayType,
+                bellScheduleOverride: nil,
+                note: note,
+                isVerified: true
+            ))
+
+            current = cal.date(byAdding: .day, value: 1, to: current) ?? current
+        }
+
+        return results
     }
 
-    /// A small sample of September 2025 calendar entries mapping dates to day types.
-    /// reference_2025_26 — verified against the reference calendar for dev use.
-    static let sampleCalendarDates: [SchoolCalendarDate] = [
-        SchoolCalendarDate(id: UUID(), date: date(2025, 9, 2), dayType: .day1, bellScheduleOverride: nil, note: "First day", isVerified: true),
-        SchoolCalendarDate(id: UUID(), date: date(2025, 9, 3), dayType: .day2, bellScheduleOverride: nil, note: nil, isVerified: true),
-        SchoolCalendarDate(id: UUID(), date: date(2025, 9, 4), dayType: .day3, bellScheduleOverride: nil, note: nil, isVerified: true),
-        SchoolCalendarDate(id: UUID(), date: date(2025, 9, 5), dayType: .day4, bellScheduleOverride: nil, note: nil, isVerified: true),
-        SchoolCalendarDate(id: UUID(), date: date(2025, 9, 8), dayType: .day5, bellScheduleOverride: nil, note: nil, isVerified: true),
-        SchoolCalendarDate(id: UUID(), date: date(2025, 9, 9), dayType: .day6, bellScheduleOverride: nil, note: nil, isVerified: true),
-        SchoolCalendarDate(id: UUID(), date: date(2025, 9, 10), dayType: .day1, bellScheduleOverride: nil, note: "Rotation wraps", isVerified: true),
-        SchoolCalendarDate(id: UUID(), date: date(2025, 9, 11), dayType: .day2, bellScheduleOverride: nil, note: nil, isVerified: true),
-        SchoolCalendarDate(id: UUID(), date: date(2025, 9, 12), dayType: .halfDay, bellScheduleOverride: nil, note: "Half day", isVerified: true)
-    ]
+    /// Full 2025-26 school year calendar: Sept 2, 2025 – June 12, 2026.
+    static let calendarDates_2025_26: [SchoolCalendarDate] = generateCalendarDates()
 }

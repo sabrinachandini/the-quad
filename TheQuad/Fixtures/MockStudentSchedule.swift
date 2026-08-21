@@ -48,7 +48,7 @@ enum MockStudentSchedule {
     /// A ScheduleEngine seeded with reference fixtures + the mock student's data.
     static func engine() -> ScheduleEngine {
         ScheduleEngine(
-            calendarDates: LHSFixtures_2025_26.sampleCalendarDates,
+            calendarDates: LHSFixtures_2025_26.calendarDates_2025_26,
             overrides: [],
             bellSchedules: LHSFixtures_2025_26.allBellSchedules
         )
