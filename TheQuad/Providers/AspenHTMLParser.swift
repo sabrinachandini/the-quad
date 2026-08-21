@@ -42,10 +42,17 @@ struct AspenHTMLParser {
             "name=\"username\"",
             "name=\"password\"",
             "Aspen Student Portal",
+            // New Angular SPA login page markers
+            "aspen-login",
+            "app/rest/auth",
+            "app-root",
         ]
         let lower = html.lowercased()
-        return loginSignals.contains { lower.contains($0.lowercased()) } &&
-               lower.contains("password")
+        // Classic portal: has a password field
+        // Angular SPA: has aspen-login route or app-root (Angular bootstrap tag)
+        let hasClassicLogin = loginSignals.prefix(5).contains { lower.contains($0.lowercased()) } && lower.contains("password")
+        let hasAngularLogin = loginSignals.suffix(3).contains { lower.contains($0.lowercased()) }
+        return hasClassicLogin || hasAngularLogin
     }
 
     static func isErrorPage(_ html: String) -> Bool {
@@ -142,20 +149,20 @@ struct AspenHTMLParser {
     // MARK: - Private: Table Parsing
 
     private static func findTableRange(in html: String) -> Range<String.Index>? {
-        // Look for the grade table by common Aspen identifiers
+        // Step 1: look for grade table by known Aspen identifier patterns
         let tablePatterns = [
             "id=\"dataGrid\"",
             "class=\"listTable\"",
             "id=\"classListTable\"",
             "portalClassList",
+            "class=\"dataGrid\"",
+            "class=\"portalGrid\"",
         ]
 
         for pattern in tablePatterns {
             if let patternRange = html.range(of: pattern, options: .caseInsensitive) {
-                // Walk back to find the opening <table tag
                 let searchBack = html[html.startIndex..<patternRange.lowerBound]
                 if let tableStart = searchBack.range(of: "<table", options: [.caseInsensitive, .backwards]) {
-                    // Walk forward from pattern to find </table>
                     let searchForward = html[patternRange.upperBound...]
                     if let tableEnd = searchForward.range(of: "</table>", options: .caseInsensitive) {
                         return tableStart.lowerBound..<tableEnd.upperBound
@@ -164,17 +171,29 @@ struct AspenHTMLParser {
             }
         }
 
-        // Fallback: look for any table containing grade-like content
-        if let tableStart = html.range(of: "<table", options: .caseInsensitive),
-           let tableEnd = html.range(of: "</table>", options: .caseInsensitive,
-                                     range: tableStart.upperBound..<html.endIndex) {
-            let candidate = String(html[tableStart.lowerBound..<tableEnd.upperBound])
-            if candidate.lowercased().contains("grade") || candidate.lowercased().contains("course") {
-                return tableStart.lowerBound..<tableEnd.upperBound
+        // Step 2: collect ALL <table>…</table> blocks and pick the one with the most <td> cells
+        // This handles Aspen deployments that don't use the standard identifiers above.
+        var allTables: [(range: Range<String.Index>, tdCount: Int)] = []
+        var search = html.startIndex
+
+        while search < html.endIndex,
+              let tableStart = html.range(of: "<table", options: .caseInsensitive, range: search..<html.endIndex) {
+            // Find the matching </table> (non-nested; good enough for Aspen's flat structure)
+            if let tableEnd = html.range(of: "</table>", options: .caseInsensitive,
+                                          range: tableStart.upperBound..<html.endIndex) {
+                let tableHTML = String(html[tableStart.lowerBound..<tableEnd.upperBound])
+                let tdCount = tableHTML.components(separatedBy: "<td").count - 1
+                if tdCount > 0 {
+                    allTables.append((range: tableStart.lowerBound..<tableEnd.upperBound, tdCount: tdCount))
+                }
+                search = tableEnd.upperBound
+            } else {
+                break
             }
         }
 
-        return nil
+        // Pick the largest table (most <td> cells) — the grade list table is typically the biggest
+        return allTables.max(by: { $0.tdCount < $1.tdCount })?.range
     }
 
     private static func extractTableRows(from html: String) -> [String] {
