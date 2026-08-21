@@ -26,6 +26,7 @@ struct TodayView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: DesignTokens.Spacing.xl) {
                     header
+                    monthCalendarStrip
                     if let current = model.currentSession {
                         currentCard(current)
                     }
@@ -39,6 +40,71 @@ struct TodayView: View {
                 .padding(.bottom, DesignTokens.Spacing.xxxl)
             }
         }
+    }
+
+    // MARK: - Month Calendar Strip
+
+    private var monthCalendarStrip: some View {
+        let cal = Calendar.current
+        let today = model.now
+        // Compute all days in the current month
+        let comps = cal.dateComponents([.year, .month], from: today)
+        let firstOfMonth = cal.date(from: comps)!
+        let range = cal.range(of: .day, in: .month, for: firstOfMonth)!
+        let days: [Date] = range.map { day in
+            cal.date(bySetting: .day, value: day, of: firstOfMonth)!
+        }
+
+        let monthTitle = today.formatted(.dateTime.month(.wide).year())
+
+        return VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
+            Text(monthTitle)
+                .font(DesignTokens.Typography.quadCaption.weight(.semibold))
+                .foregroundStyle(DesignTokens.Colors.secondary)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 6) {
+                    ForEach(days, id: \.self) { day in
+                        calendarDayCell(day: day, today: today)
+                    }
+                }
+                .padding(.vertical, 4)
+            }
+        }
+        .padding(DesignTokens.Spacing.md)
+        .background(DesignTokens.Colors.surface)
+        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large))
+    }
+
+    @ViewBuilder
+    private func calendarDayCell(day: Date, today: Date) -> some View {
+        let cal = Calendar.current
+        let isToday = cal.isDate(day, inSameDayAs: today)
+        let isSchool = model.isSchoolDayOn(day)
+        let dayNum = cal.component(.day, from: day)
+        let weekdayLetter = day.formatted(.dateTime.weekday(.narrow))
+
+        VStack(spacing: 3) {
+            Text(weekdayLetter)
+                .font(.system(size: 10, weight: .medium))
+                .foregroundStyle(isToday ? DesignTokens.Colors.accent : DesignTokens.Colors.secondary)
+
+            ZStack {
+                Circle()
+                    .fill(isToday ? DesignTokens.Colors.accent : Color.clear)
+                    .frame(width: 30, height: 30)
+
+                Text("\(dayNum)")
+                    .font(.system(size: 13, weight: isToday ? .bold : .regular))
+                    .foregroundStyle(isToday ? .white : DesignTokens.Colors.primary)
+            }
+
+            // School day indicator dot
+            Circle()
+                .fill(isSchool ? (isToday ? .white.opacity(0.7) : DesignTokens.Colors.accent) : Color.clear)
+                .frame(width: 4, height: 4)
+        }
+        .frame(width: 34)
     }
 
     // MARK: - Header

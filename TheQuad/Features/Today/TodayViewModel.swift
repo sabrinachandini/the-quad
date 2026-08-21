@@ -84,6 +84,11 @@ final class TodayViewModel {
         engine.dayType(for: now) != nil
     }
 
+    /// Returns true if a given date is a school day (has a non-nil day type).
+    func isSchoolDayOn(_ date: Date) -> Bool {
+        engine.dayType(for: date) != nil
+    }
+
     /// The first upcoming school day visible in the calendar, for long-break empty states.
     var nextCalendarSchoolDay: SchoolCalendarDate? {
         guard !isSchoolDay else { return nil }

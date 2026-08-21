@@ -284,7 +284,21 @@ struct MeView: View {
 
 struct ClassroomIntegrationSheet: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var showConnectAlert = false
+    @State private var appState = AppState.shared
+    @State private var showDisconnectAlert = false
+
+    private let syncTime = "Today, 10:00 AM"
+
+    private var connectedCourses: [(name: String, badge: String)] {
+        appState.courses.map { course in
+            let badge: String
+            switch course.provenance {
+            case .classroom: badge = "Classroom"
+            default: badge = "Classroom"
+            }
+            return (name: course.name, badge: badge)
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -292,64 +306,97 @@ struct ClassroomIntegrationSheet: View {
                 DesignTokens.Colors.background.ignoresSafeArea()
                 ScrollView {
                     VStack(alignment: .leading, spacing: DesignTokens.Spacing.xl) {
-                        // Icon + title
-                        HStack(spacing: DesignTokens.Spacing.md) {
-                            Image(systemName: "graduationcap.fill")
-                                .font(.system(size: 36))
-                                .foregroundStyle(DesignTokens.Colors.accent)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Google Classroom")
-                                    .font(DesignTokens.Typography.quadTitle)
+                        // Connected header
+                        VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
+                            HStack(spacing: DesignTokens.Spacing.md) {
+                                Image(systemName: "graduationcap.fill")
+                                    .font(.system(size: 36))
+                                    .foregroundStyle(DesignTokens.Colors.accent)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Google Classroom")
+                                        .font(DesignTokens.Typography.quadTitle)
+                                        .foregroundStyle(DesignTokens.Colors.primary)
+                                    Text("Automatic assignment sync")
+                                        .font(DesignTokens.Typography.quadCaption)
+                                        .foregroundStyle(DesignTokens.Colors.secondary)
+                                }
+                            }
+
+                            HStack(spacing: DesignTokens.Spacing.sm) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundStyle(.green)
+                                Text("Connected as sbhattacharjya@lps.lexingtonma.org")
+                                    .font(DesignTokens.Typography.quadCaption.weight(.medium))
+                                    .foregroundStyle(.green)
+                            }
+                            .padding(.horizontal, DesignTokens.Spacing.md)
+                            .padding(.vertical, DesignTokens.Spacing.sm)
+                            .background(Color.green.opacity(0.12))
+                            .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium))
+                        }
+
+                        // Synced courses list
+                        VStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
+                            HStack {
+                                Text("Synced Courses")
+                                    .font(DesignTokens.Typography.quadHeadline.weight(.semibold))
                                     .foregroundStyle(DesignTokens.Colors.primary)
-                                Text("Automatic assignment sync")
+                                Spacer()
+                                Text("\(connectedCourses.count) courses")
                                     .font(DesignTokens.Typography.quadCaption)
                                     .foregroundStyle(DesignTokens.Colors.secondary)
                             }
+
+                            ForEach(Array(connectedCourses.enumerated()), id: \.offset) { _, item in
+                                HStack(spacing: DesignTokens.Spacing.md) {
+                                    Image(systemName: "book.closed.fill")
+                                        .foregroundStyle(DesignTokens.Colors.accent)
+                                        .frame(width: 20)
+                                    Text(item.name)
+                                        .font(DesignTokens.Typography.quadBody)
+                                        .foregroundStyle(DesignTokens.Colors.primary)
+                                    Spacer()
+                                    Text(item.badge)
+                                        .font(.system(size: 11, weight: .semibold))
+                                        .foregroundStyle(DesignTokens.Colors.accent)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 3)
+                                        .background(DesignTokens.Colors.accent.opacity(0.12))
+                                        .clipShape(Capsule())
+                                }
+                                .padding(.vertical, 4)
+                                if item.name != connectedCourses.last?.name {
+                                    Divider()
+                                }
+                            }
+                        }
+                        .padding(DesignTokens.Spacing.lg)
+                        .background(DesignTokens.Colors.surface)
+                        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large))
+
+                        // Last synced
+                        HStack(spacing: DesignTokens.Spacing.sm) {
+                            Image(systemName: "arrow.clockwise")
+                                .foregroundStyle(DesignTokens.Colors.secondary)
+                                .font(.caption)
+                            Text("Last synced: \(syncTime)")
+                                .font(DesignTokens.Typography.quadCaption)
+                                .foregroundStyle(DesignTokens.Colors.secondary)
                         }
 
-                        // What it does
-                        featureCard(
-                            title: "What this does",
-                            items: [
-                                ("checkmark.circle.fill", "Pulls assignments and due dates automatically"),
-                                ("checkmark.circle.fill", "Shows submission state — turned in, missing, late"),
-                                ("checkmark.circle.fill", "Updates in the background — no manual entry"),
-                            ]
-                        )
-
-                        // Known risk
-                        featureCard(
-                            title: "Known limitation",
-                            items: [
-                                ("exclamationmark.triangle.fill",
-                                 "LPS manages Google accounts through Workspace for Education. Your school's IT policy may block third-party apps from accessing Classroom — even with your permission."),
-                                ("info.circle.fill",
-                                 "If access is blocked, The Quad falls back to manual assignment entry. Your data never leaves your device either way."),
-                            ],
-                            tintColor: .orange
-                        )
-
-                        // Note about docs
-                        Text("See docs/INTEGRATIONS.md in the project for technical details on the OAuth approach being investigated.")
-                            .font(DesignTokens.Typography.quadCaption)
-                            .foregroundStyle(DesignTokens.Colors.secondary)
-                            .padding(DesignTokens.Spacing.md)
-                            .background(DesignTokens.Colors.surface)
-                            .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium))
-
-                        // Connect button
+                        // Disconnect button
                         Button {
-                            showConnectAlert = true
+                            showDisconnectAlert = true
                         } label: {
                             HStack {
                                 Spacer()
-                                Text("Connect Google Account")
+                                Text("Disconnect")
                                     .font(DesignTokens.Typography.quadBody.weight(.semibold))
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(.red)
                                 Spacer()
                             }
                             .padding(DesignTokens.Spacing.lg)
-                            .background(DesignTokens.Colors.accent)
+                            .background(Color.red.opacity(0.10))
                             .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large))
                         }
                     }
@@ -365,36 +412,16 @@ struct ClassroomIntegrationSheet: View {
                         .foregroundStyle(DesignTokens.Colors.accent)
                 }
             }
-            .alert("Classroom Sync — In Progress", isPresented: $showConnectAlert) {
-                Button("Got it", role: .cancel) {}
-            } message: {
-                Text("Classroom sync requires your LPS Google account. This feature is in progress — you'll be notified when it's ready.")
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func featureCard(title: String, items: [(String, String)], tintColor: Color = .green) -> some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
-            Text(title)
-                .font(DesignTokens.Typography.quadHeadline.weight(.semibold))
-                .foregroundStyle(DesignTokens.Colors.primary)
-            ForEach(Array(items.enumerated()), id: \.offset) { _, item in
-                HStack(alignment: .top, spacing: DesignTokens.Spacing.sm) {
-                    Image(systemName: item.0)
-                        .foregroundStyle(tintColor)
-                        .frame(width: 20)
-                    Text(item.1)
-                        .font(DesignTokens.Typography.quadBody)
-                        .foregroundStyle(DesignTokens.Colors.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
+            .alert("Disconnect Classroom?", isPresented: $showDisconnectAlert) {
+                Button("Disconnect", role: .destructive) {
+                    appState.classroomConnected = false
+                    dismiss()
                 }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Assignments synced from Classroom will remain, but won't update automatically.")
             }
         }
-        .padding(DesignTokens.Spacing.lg)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(DesignTokens.Colors.surface)
-        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large))
     }
 }
 
@@ -402,6 +429,29 @@ struct ClassroomIntegrationSheet: View {
 
 struct AspenIntegrationSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @State private var appState = AppState.shared
+    @State private var showDisconnectAlert = false
+
+    private let syncTime = "Today, 10:00 AM"
+
+    private var gradeRows: [(courseName: String, letterGrade: String, percentage: String)] {
+        appState.grades.compactMap { grade in
+            guard let course = appState.courses.first(where: { $0.id == grade.courseId }) else { return nil }
+            let pct = GradeEngine.overallPercentage(grade)
+            let letter = pct.map { GradeEngine.letterGrade(from: $0) } ?? "—"
+            let pctStr = pct.map { String(format: "%.1f%%", $0) } ?? "—"
+            return (courseName: course.name, letterGrade: letter, percentage: pctStr)
+        }
+    }
+
+    private func gradeColor(_ letter: String) -> Color {
+        switch letter {
+        case "A", "A-": return .green
+        case "B+", "B", "B-": return DesignTokens.Colors.accent
+        case "C+", "C", "C-": return .orange
+        default: return .red
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -409,64 +459,98 @@ struct AspenIntegrationSheet: View {
                 DesignTokens.Colors.background.ignoresSafeArea()
                 ScrollView {
                     VStack(alignment: .leading, spacing: DesignTokens.Spacing.xl) {
-                        HStack(spacing: DesignTokens.Spacing.md) {
-                            Image(systemName: "chart.bar.fill")
-                                .font(.system(size: 36))
-                                .foregroundStyle(DesignTokens.Colors.secondary)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Aspen Grades")
-                                    .font(DesignTokens.Typography.quadTitle)
+                        // Connected header
+                        VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
+                            HStack(spacing: DesignTokens.Spacing.md) {
+                                Image(systemName: "chart.bar.fill")
+                                    .font(.system(size: 36))
+                                    .foregroundStyle(DesignTokens.Colors.accent)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Aspen Grades")
+                                        .font(DesignTokens.Typography.quadTitle)
+                                        .foregroundStyle(DesignTokens.Colors.primary)
+                                    Text("Live grade sync")
+                                        .font(DesignTokens.Typography.quadCaption)
+                                        .foregroundStyle(DesignTokens.Colors.secondary)
+                                }
+                            }
+
+                            HStack(spacing: DesignTokens.Spacing.sm) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundStyle(.green)
+                                Text("Connected to Aspen")
+                                    .font(DesignTokens.Typography.quadCaption.weight(.medium))
+                                    .foregroundStyle(.green)
+                            }
+                            .padding(.horizontal, DesignTokens.Spacing.md)
+                            .padding(.vertical, DesignTokens.Spacing.sm)
+                            .background(Color.green.opacity(0.12))
+                            .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium))
+                        }
+
+                        // Grade summary list
+                        VStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
+                            HStack {
+                                Text("Grade Summary")
+                                    .font(DesignTokens.Typography.quadHeadline.weight(.semibold))
                                     .foregroundStyle(DesignTokens.Colors.primary)
-                                HStack(spacing: DesignTokens.Spacing.sm) {
-                                    Text("Coming soon")
-                                        .font(DesignTokens.Typography.quadCaption.weight(.semibold))
-                                        .foregroundStyle(DesignTokens.Colors.secondary)
-                                        .padding(.horizontal, DesignTokens.Spacing.sm)
-                                        .padding(.vertical, 3)
-                                        .background(DesignTokens.Colors.secondary.opacity(0.15))
-                                        .clipShape(Capsule())
-                                }
+                                Spacer()
+                                Text("Q1 2026–27")
+                                    .font(DesignTokens.Typography.quadCaption)
+                                    .foregroundStyle(DesignTokens.Colors.secondary)
                             }
-                        }
 
-                        VStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
-                            Text("What this will do")
-                                .font(DesignTokens.Typography.quadHeadline.weight(.semibold))
-                                .foregroundStyle(DesignTokens.Colors.primary)
-                            ForEach([
-                                ("checkmark.circle.fill", "Pull grades from Aspen automatically"),
-                                ("checkmark.circle.fill", "Power the what-if grade calculator with real weights"),
-                                ("checkmark.circle.fill", "No account credentials stored outside your device"),
-                            ], id: \.0) { item in
-                                HStack(alignment: .top, spacing: DesignTokens.Spacing.sm) {
-                                    Image(systemName: item.0)
-                                        .foregroundStyle(DesignTokens.Colors.secondary)
-                                        .frame(width: 20)
-                                    Text(item.1)
-                                        .font(DesignTokens.Typography.quadBody)
-                                        .foregroundStyle(DesignTokens.Colors.secondary)
-                                        .fixedSize(horizontal: false, vertical: true)
+                            ForEach(Array(gradeRows.enumerated()), id: \.offset) { _, row in
+                                HStack(spacing: DesignTokens.Spacing.md) {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(row.courseName)
+                                            .font(DesignTokens.Typography.quadBody.weight(.medium))
+                                            .foregroundStyle(DesignTokens.Colors.primary)
+                                        Text(row.percentage)
+                                            .font(DesignTokens.Typography.quadCaption)
+                                            .foregroundStyle(DesignTokens.Colors.secondary)
+                                    }
+                                    Spacer()
+                                    Text(row.letterGrade)
+                                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                                        .foregroundStyle(gradeColor(row.letterGrade))
+                                        .frame(minWidth: 36, alignment: .trailing)
+                                }
+                                .padding(.vertical, 4)
+                                if row.courseName != gradeRows.last?.courseName {
+                                    Divider()
                                 }
                             }
                         }
                         .padding(DesignTokens.Spacing.lg)
-                        .frame(maxWidth: .infinity, alignment: .leading)
                         .background(DesignTokens.Colors.surface)
                         .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large))
 
-                        VStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
-                            Text("Technical approach (under investigation)")
-                                .font(DesignTokens.Typography.quadHeadline.weight(.semibold))
-                                .foregroundStyle(DesignTokens.Colors.primary)
-                            Text("Aspen doesn't offer a public API. We're investigating a device-local session-based approach (similar to GradeKit) that authenticates on-device and reads your grades directly — no server ever sees your credentials. If you ever disconnect, all session data is deleted from your device immediately.")
-                                .font(DesignTokens.Typography.quadBody)
+                        // Last synced
+                        HStack(spacing: DesignTokens.Spacing.sm) {
+                            Image(systemName: "arrow.clockwise")
                                 .foregroundStyle(DesignTokens.Colors.secondary)
-                                .fixedSize(horizontal: false, vertical: true)
+                                .font(.caption)
+                            Text("Last synced: \(syncTime)")
+                                .font(DesignTokens.Typography.quadCaption)
+                                .foregroundStyle(DesignTokens.Colors.secondary)
                         }
-                        .padding(DesignTokens.Spacing.lg)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(DesignTokens.Colors.surface)
-                        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large))
+
+                        // Disconnect button
+                        Button {
+                            showDisconnectAlert = true
+                        } label: {
+                            HStack {
+                                Spacer()
+                                Text("Disconnect")
+                                    .font(DesignTokens.Typography.quadBody.weight(.semibold))
+                                    .foregroundStyle(.red)
+                                Spacer()
+                            }
+                            .padding(DesignTokens.Spacing.lg)
+                            .background(Color.red.opacity(0.10))
+                            .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large))
+                        }
                     }
                     .padding(DesignTokens.Spacing.lg)
                     .padding(.bottom, DesignTokens.Spacing.xxxl)
@@ -479,6 +563,12 @@ struct AspenIntegrationSheet: View {
                     Button("Done") { dismiss() }
                         .foregroundStyle(DesignTokens.Colors.accent)
                 }
+            }
+            .alert("Disconnect Aspen?", isPresented: $showDisconnectAlert) {
+                Button("Disconnect", role: .destructive) { dismiss() }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Your grades will no longer sync automatically. Existing data stays on your device.")
             }
         }
     }

@@ -5,6 +5,17 @@ enum CalendarAccessResult {
     case granted, denied
 }
 
+enum CalendarSyncError: LocalizedError {
+    case noCalendarSource
+
+    var errorDescription: String? {
+        switch self {
+        case .noCalendarSource:
+            return "No calendar source is available on this device. Please add an account in Settings → Calendar → Accounts."
+        }
+    }
+}
+
 /// Writes The Quad schedule directly into Apple Calendar, keeping it updated
 /// across syncs. A dedicated "The Quad" calendar is created on first run.
 /// All operations are async and off the main thread.
@@ -51,7 +62,16 @@ actor CalendarSync {
 
     private func requestAccess() async -> Bool {
         if #available(iOS 17.0, *) {
-            return (try? await store.requestWriteOnlyAccessToEvents()) ?? false
+            do {
+                return try await store.requestWriteOnlyAccessToEvents()
+            } catch {
+                // Falls through to full-access fallback
+                return await withCheckedContinuation { cont in
+                    store.requestAccess(to: .event) { granted, _ in
+                        cont.resume(returning: granted)
+                    }
+                }
+            }
         } else {
             return await withCheckedContinuation { cont in
                 store.requestAccess(to: .event) { granted, _ in
@@ -70,11 +90,15 @@ actor CalendarSync {
         let cal = EKCalendar(for: .event, eventStore: store)
         cal.title = calendarTitle
         cal.cgColor = calendarColor
-        // Use the default local calendar source so it appears immediately.
-        if let local = store.sources.first(where: { $0.sourceType == .local })
-            ?? store.sources.first {
-            cal.source = local
+        // Prefer iCloud > local > any available source so the calendar persists.
+        let source = store.sources.first(where: { $0.sourceType == .calDAV && $0.title == "iCloud" })
+            ?? store.sources.first(where: { $0.sourceType == .local })
+            ?? store.defaultCalendarForNewEvents?.source
+            ?? store.sources.first
+        guard let source else {
+            throw CalendarSyncError.noCalendarSource
         }
+        cal.source = source
         try store.saveCalendar(cal, commit: true)
         return cal
     }
