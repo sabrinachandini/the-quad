@@ -1,7 +1,11 @@
 import SwiftUI
 
 struct TodayView: View {
-    @State private var model = TodayViewModel()
+    @State private var model: TodayViewModel
+
+    init(model: TodayViewModel = TodayViewModel()) {
+        _model = State(initialValue: model)
+    }
 
     private func timeString(_ comps: DateComponents) -> String {
         var c = DateComponents()
@@ -23,6 +27,7 @@ struct TodayView: View {
                         nextCard(next)
                     }
                     fullDay
+                    tomorrowSection
                 }
                 .padding(DesignTokens.Spacing.lg)
                 .padding(.bottom, DesignTokens.Spacing.xxxl)
@@ -168,8 +173,51 @@ struct TodayView: View {
         .background(DesignTokens.Colors.surface)
         .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium))
     }
+
+    // MARK: - Tomorrow section
+
+    private var tomorrowSection: some View {
+        VStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
+            Text("Tomorrow · \(model.tomorrowLabel)")
+                .font(DesignTokens.Typography.quadHeadline.weight(.semibold))
+                .foregroundStyle(DesignTokens.Colors.primary)
+            if model.tomorrowSessions.isEmpty {
+                Text("No school tomorrow")
+                    .font(DesignTokens.Typography.quadBody)
+                    .foregroundStyle(DesignTokens.Colors.secondary)
+                    .opacity(0.8)
+            } else {
+                ForEach(model.tomorrowSessions) { session in
+                    tomorrowRow(session)
+                }
+            }
+        }
+    }
+
+    private func tomorrowRow(_ session: CourseSession) -> some View {
+        let color = CourseColors.color(atIndex: session.course.colorIndex)
+        return HStack(spacing: DesignTokens.Spacing.md) {
+            RoundedRectangle(cornerRadius: 2).fill(color).frame(width: 3, height: 22)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(session.course.name)
+                    .font(DesignTokens.Typography.quadBody.weight(.medium))
+                    .foregroundStyle(DesignTokens.Colors.primary)
+                if let room = session.course.room {
+                    Text(room)
+                        .font(DesignTokens.Typography.quadCaption)
+                        .foregroundStyle(DesignTokens.Colors.secondary)
+                }
+            }
+            Spacer()
+        }
+        .padding(DesignTokens.Spacing.md)
+        .background(DesignTokens.Colors.surface)
+        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium))
+        .opacity(0.8)
+    }
 }
 
 #Preview {
-    TodayView().preferredColorScheme(.dark)
+    TodayView(model: TodayViewModel(previewDate: Calendar.current.date(from: DateComponents(year: 2025, month: 9, day: 4, hour: 10, minute: 20))!))
+        .preferredColorScheme(.dark)
 }
