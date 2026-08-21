@@ -28,3 +28,6 @@ DerivedData/
 .DS_Store
 *.swp
 .claude/
+
+# Google OAuth credentials (never commit — copy from GoogleService.plist.template)
+TheQuad/Config/GoogleService.plist

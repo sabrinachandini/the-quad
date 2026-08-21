@@ -14,8 +14,9 @@ final class AppState {
     var graduationYear: Int
     var classRemindersEnabled: Bool
 
-    // MARK: - Aspen
+    // MARK: - Providers
     var aspenProvider: AspenGradeProvider = .shared
+    var classroomProvider: ClassroomAuthProvider = .shared
 
     // MARK: - Social
 
@@ -109,8 +110,9 @@ final class AppState {
         ]
         self.friendCourses = fc
 
-        // Try to resume Aspen session in background
+        // Try to resume provider sessions in background
         Task { await AspenGradeProvider.shared.tryResumeSession() }
+        Task { await ClassroomAuthProvider.shared.tryResumeSession() }
     }
 
     // MARK: - Mock Directory
