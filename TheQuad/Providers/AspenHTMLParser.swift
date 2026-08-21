@@ -113,13 +113,15 @@ struct AspenHTMLParser {
         var courses: [AspenCourseSummary] = []
         for row in dataRows {
             guard let course = parseCourseRow(row) else { continue }
-            // A valid course row must have a non-empty name that isn't a UI element label
+            // Drop obvious UI chrome: very short, or pure numeric, or known nav labels
             let name = course.name
-            guard name.count >= 3,
-                  !name.lowercased().contains("navigation"),
-                  !name.lowercased().contains("select"),
-                  !name.lowercased().contains("search"),
-                  !name.lowercased().contains("filter") else { continue }
+            let lower = name.lowercased()
+            guard name.count >= 2,
+                  Double(name) == nil,
+                  lower != "navigation",
+                  lower != "search",
+                  lower != "filter",
+                  lower != "select" else { continue }
             courses.append(course)
         }
         return courses

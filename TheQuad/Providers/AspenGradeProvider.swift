@@ -172,6 +172,14 @@ final class AspenGradeProvider {
 
         } catch let error as AspenSessionError {
             await handleSessionError(error)
+        } catch AspenParseError.noCoursesFound {
+            // No courses in the current term — valid in summer or between terms.
+            // Mark as connected with an empty list rather than failing.
+            let syncDate = Date()
+            await MainActor.run {
+                lastSyncDate = syncDate
+                connectionState = .connected(lastSync: syncDate)
+            }
         } catch let error as AspenParseError {
             await MainActor.run {
                 connectionState = .failed(error.errorDescription ?? "Could not parse grade data.")
