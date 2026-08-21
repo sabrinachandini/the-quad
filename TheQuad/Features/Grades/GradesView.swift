@@ -152,7 +152,7 @@ struct CourseGradeDetailView: View {
                 .padding(DesignTokens.Spacing.lg)
                 .padding(.bottom, DesignTokens.Spacing.xxxl)
             }
-            .onTapGesture { focusedField = nil }
+            .simultaneousGesture(TapGesture().onEnded { focusedField = nil })
         }
         .navigationTitle(course?.name ?? "Grade Detail")
         .navigationBarTitleDisplayMode(.inline)

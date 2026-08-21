@@ -28,6 +28,19 @@ struct AskEngine {
         self.scheduleEngine = scheduleEngine
     }
 
+    /// The reference "now" used for all date-relative answers.
+    /// In DEBUG builds matches TodayViewModel's hardcoded preview date so the
+    /// bot answers correctly when the simulator is pinned to a school day.
+    private var now: Date {
+        #if DEBUG
+        return Calendar.current.date(
+            from: DateComponents(year: 2026, month: 9, day: 8, hour: 10)
+        ) ?? Date()
+        #else
+        return Date()
+        #endif
+    }
+
     func answer(_ question: String) -> AskResponse {
         let q = question.lowercased().trimmingCharacters(in: .whitespaces)
 
@@ -55,7 +68,9 @@ struct AskEngine {
     }
 
     private func matchesDayType(_ q: String) -> Bool {
-        (q.contains("day") && (q.contains("what") || q.contains("which"))) || q.contains("rotation")
+        // Use word-boundary regex so "today" (where "day" is not standalone) doesn't match.
+        let standaloneDay = q.range(of: "\\bday\\b", options: .regularExpression) != nil
+        return (standaloneDay && (q.contains("what") || q.contains("which"))) || q.contains("rotation")
     }
 
     private func matchesFreeBlocks(_ q: String) -> Bool {
@@ -92,7 +107,7 @@ struct AskEngine {
     // MARK: - Handlers
 
     private func answerToday(_ q: String) -> AskResponse {
-        let today = Date()
+        let today = now
         let sessions = scheduleEngine.studentMeetings(
             for: today,
             enrollments: AppState.shared.enrollments,
@@ -118,7 +133,7 @@ struct AskEngine {
     }
 
     private func answerTomorrow(_ q: String) -> AskResponse {
-        guard let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date()) else {
+        guard let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: now) else {
             return fallback(q)
         }
         let sessions = scheduleEngine.studentMeetings(
@@ -140,7 +155,7 @@ struct AskEngine {
     }
 
     private func answerDayType(_ q: String) -> AskResponse {
-        let today = Date()
+        let today = now
         let dt = scheduleEngine.dayType(for: today)
         let label = dayLabel(for: today)
         return AskResponse(
@@ -152,7 +167,7 @@ struct AskEngine {
     }
 
     private func answerNextDay(_ q: String) -> AskResponse {
-        let today = Date()
+        let today = now
         var targetDayType: DayType? = nil
         for n in 1...6 where q.contains("day \(n)") {
             targetDayType = DayType(rawValue: "day\(n)")
@@ -187,7 +202,7 @@ struct AskEngine {
     }
 
     private func answerFreeBlocks(_ q: String) -> AskResponse {
-        let today = Date()
+        let today = now
         let allSlots = scheduleEngine.meetings(for: today)
         let sessions = scheduleEngine.studentMeetings(
             for: today,
@@ -228,7 +243,6 @@ struct AskEngine {
     }
 
     private func answerMissing(_ q: String) -> AskResponse {
-        let now = Date()
         let missing = AppState.shared.assignments.filter { a in
             guard !a.isCompleted, let due = a.dueDate else { return false }
             return due < now
@@ -334,7 +348,7 @@ struct AskEngine {
             return fallback(q)
         }
 
-        let today = Date()
+        let today = now
         let allSlots = scheduleEngine.meetings(for: today)
 
         let mySessions = scheduleEngine.studentMeetings(
