@@ -24,6 +24,7 @@ targets:
     dependencies:
       - sdk: WidgetKit.framework
       - sdk: UserNotifications.framework
+      - sdk: AuthenticationServices.framework
     resources:
       - TheQuad/Resources/Assets.xcassets
     settings:

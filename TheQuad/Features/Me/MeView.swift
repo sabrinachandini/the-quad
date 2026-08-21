@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MeView: View {
     @State private var appState = AppState.shared
+    @State private var classroomProvider = ClassroomAuthProvider.shared
     @State private var showClassroomSheet = false
     @State private var showAspenSheet = false
     @State private var icsExportURL: URL? = nil
@@ -86,9 +87,7 @@ struct MeView: View {
                             .font(DesignTokens.Typography.quadBody)
                             .foregroundStyle(DesignTokens.Colors.primary)
                         Spacer()
-                        Text("Connect")
-                            .font(DesignTokens.Typography.quadCaption.weight(.semibold))
-                            .foregroundStyle(DesignTokens.Colors.accent)
+                        classroomBadge
                     }
                 }
                 .buttonStyle(.plain)
@@ -196,10 +195,47 @@ struct MeView: View {
         .navigationTitle("Me")
         .navigationBarTitleDisplayMode(.large)
         .sheet(isPresented: $showClassroomSheet) {
-            ClassroomIntegrationSheet()
+            if case .connected = classroomProvider.authState {
+                ClassroomIntegrationSheet()
+            } else {
+                ClassroomConnectView()
+            }
         }
         .sheet(isPresented: $showAspenSheet) {
             AspenIntegrationSheet()
+        }
+    }
+
+    @ViewBuilder
+    private var classroomBadge: some View {
+        switch classroomProvider.authState {
+        case .connected(let email, _):
+            HStack(spacing: 4) {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(.green)
+                    .font(.caption)
+                VStack(alignment: .trailing, spacing: 0) {
+                    Text("Connected")
+                        .font(DesignTokens.Typography.quadCaption.weight(.semibold))
+                        .foregroundStyle(.green)
+                    Text(email)
+                        .font(.system(size: 10))
+                        .foregroundStyle(DesignTokens.Colors.secondary)
+                        .lineLimit(1)
+                }
+            }
+        case .blockedBySchoolPolicy:
+            Text("Policy Blocked")
+                .font(DesignTokens.Typography.quadCaption.weight(.semibold))
+                .foregroundStyle(.orange)
+        case .notConfigured:
+            Text("Setup Required")
+                .font(DesignTokens.Typography.quadCaption)
+                .foregroundStyle(DesignTokens.Colors.secondary)
+        default:
+            Text("Connect")
+                .font(DesignTokens.Typography.quadCaption.weight(.semibold))
+                .foregroundStyle(DesignTokens.Colors.accent)
         }
     }
 

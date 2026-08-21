@@ -14,6 +14,9 @@ final class AppState {
     var graduationYear: Int
     var classRemindersEnabled: Bool
 
+    // MARK: - Providers
+    var classroomProvider: ClassroomAuthProvider = .shared
+
     // MARK: - Social
 
     /// The signed-in student as a User record.
@@ -100,6 +103,9 @@ final class AppState {
                    block: .f, classCode: nil, colorIndex: 7, provenance: .parsedSchedule),
         ]
         self.friendCourses = fc
+
+        // Try to resume Classroom session in background
+        Task { await ClassroomAuthProvider.shared.tryResumeSession() }
     }
 
     // MARK: - Mock Directory
