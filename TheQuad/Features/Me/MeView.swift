@@ -153,35 +153,37 @@ struct MeView: View {
             // MARK: - Calendar Export
             Section {
                 VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
-                    Text("Subscribe to your rotating schedule in any calendar app.")
+                    Text("Add your rotating LHS schedule directly to Apple Calendar.")
                         .font(DesignTokens.Typography.quadCaption)
                         .foregroundStyle(DesignTokens.Colors.secondary)
                         .fixedSize(horizontal: false, vertical: true)
 
+                    // Primary: open .ics directly so iOS shows the native "Add to Calendar" dialog
+                    Button {
+                        openInCalendar()
+                    } label: {
+                        HStack {
+                            Image(systemName: "calendar.badge.plus")
+                                .foregroundStyle(DesignTokens.Colors.accent)
+                            Text("Add to Apple Calendar")
+                                .font(DesignTokens.Typography.quadBody)
+                                .foregroundStyle(DesignTokens.Colors.accent)
+                        }
+                    }
+                    .buttonStyle(.plain)
+
+                    // Secondary: share sheet for other calendar apps
                     if let url = icsExportURL {
                         ShareLink(
                             item: url,
                             preview: SharePreview("LHS Schedule", image: Image(systemName: "calendar"))
                         ) {
                             HStack {
-                                Image(systemName: "calendar.badge.checkmark")
-                                    .foregroundStyle(DesignTokens.Colors.accent)
+                                Image(systemName: "square.and.arrow.up")
+                                    .foregroundStyle(DesignTokens.Colors.secondary)
                                 Text("Share .ics File")
-                                    .font(DesignTokens.Typography.quadBody)
-                                    .foregroundStyle(DesignTokens.Colors.accent)
-                            }
-                        }
-                        .buttonStyle(.plain)
-                    } else {
-                        Button {
-                            generateICSFile()
-                        } label: {
-                            HStack {
-                                Image(systemName: "calendar.badge.plus")
-                                    .foregroundStyle(DesignTokens.Colors.accent)
-                                Text("Export .ics File")
-                                    .font(DesignTokens.Typography.quadBody)
-                                    .foregroundStyle(DesignTokens.Colors.accent)
+                                    .font(DesignTokens.Typography.quadCaption)
+                                    .foregroundStyle(DesignTokens.Colors.secondary)
                             }
                         }
                         .buttonStyle(.plain)
@@ -262,10 +264,19 @@ struct MeView: View {
         }
     }
 
-    private func generateICSFile() {
+    /// Opens the .ics file directly in iOS Calendar — shows the native "Add to Calendar" dialog.
+    private func openInCalendar() {
+        let tempURL = buildICSFile()
+        guard let url = tempURL else { return }
+        // Opening a file:// URL with .ics extension triggers iOS Calendar natively.
+        UIApplication.shared.open(url)
+    }
+
+    @discardableResult
+    private func buildICSFile() -> URL? {
         let engine = appState.scheduleEngine
         let today = Date()
-        guard let sixMonths = Calendar.current.date(byAdding: .month, value: 6, to: today) else { return }
+        guard let sixMonths = Calendar.current.date(byAdding: .month, value: 6, to: today) else { return nil }
 
         let icsString = ICSGenerator().generate(
             courses: appState.courses,
@@ -279,9 +290,14 @@ struct MeView: View {
         do {
             try icsString.write(to: tempURL, atomically: true, encoding: .utf8)
             icsExportURL = tempURL
+            return tempURL
         } catch {
-            // If write fails, silently no-op — button remains visible for retry
+            return nil
         }
+    }
+
+    private func generateICSFile() {
+        buildICSFile()
     }
 
     private func sectionHeader(_ title: String) -> some View {

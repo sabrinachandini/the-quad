@@ -25,6 +25,16 @@ enum AspenSessionError: Error, LocalizedError {
     }
 }
 
+// MARK: - Auth Response
+
+private struct AspenAuthResponse: Decodable {
+    let csrfToken: String?
+    let aspenUrl: String?
+    let authToken: String?
+    let code: Int?
+    let message: String?
+}
+
 // MARK: - Session Actor
 
 /// HTTP session actor scoped to the Aspen portal.
@@ -33,13 +43,13 @@ actor AspenSession {
     static let shared = AspenSession()
 
     let baseURL = "https://ma-lexington.myfollett.com"
+    private let deploymentID = "ma-lexington"
 
     private var session: URLSession
     private var isAuthenticated = false
 
     private init() {
         let config = URLSessionConfiguration.ephemeral
-        // Private cookie storage — never shared with the rest of the app
         config.httpCookieStorage = HTTPCookieStorage()
         config.httpCookieAcceptPolicy = .always
         config.httpShouldSetCookies = true
@@ -50,53 +60,68 @@ actor AspenSession {
 
     // MARK: - Public API
 
+    /// Authenticates against Aspen's new Angular SPA login system.
+    ///
+    /// Flow:
+    ///   1. POST /app/rest/auth (username + password body, deploymentId header)
+    ///   2. On success, parse JSON response for aspenUrl
+    ///   3. GET aspenUrl to establish the classic /aspen/ session cookie
     func authenticate(username: String, password: String) async throws {
         isAuthenticated = false
 
-        guard let url = URL(string: "\(baseURL)/aspen/logon.do") else {
+        // Step 1 — authenticate with the REST auth endpoint
+        guard let authURL = URL(string: "\(baseURL)/app/rest/auth") else {
             throw AspenSessionError.serverUnavailable
         }
 
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-        request.setValue("Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15",
-                         forHTTPHeaderField: "User-Agent")
-        request.setValue(baseURL, forHTTPHeaderField: "Origin")
-        request.setValue("\(baseURL)/aspen/logon.do", forHTTPHeaderField: "Referer")
+        var authRequest = URLRequest(url: authURL)
+        authRequest.httpMethod = "POST"
+        authRequest.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-type")
+        authRequest.setValue("application/json", forHTTPHeaderField: "Accept")
+        authRequest.setValue(deploymentID, forHTTPHeaderField: "deploymentId")
+        authRequest.setValue("Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15",
+                             forHTTPHeaderField: "User-Agent")
 
-        let body = "username=\(percentEncode(username))&password=\(percentEncode(password))&mobile=false"
-        request.httpBody = body.data(using: .utf8)
+        // password must be URL-encoded per the Angular client
+        let encodedPassword = password.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? password
+        let body = "username=\(percentEncode(username))&password=\(encodedPassword)"
+        authRequest.httpBody = body.data(using: .utf8)
 
         do {
-            let (data, response) = try await session.data(for: request)
+            let (data, response) = try await session.data(for: authRequest)
 
             guard let httpResponse = response as? HTTPURLResponse else {
                 throw AspenSessionError.serverUnavailable
             }
 
-            // Server error range
             if httpResponse.statusCode >= 500 {
                 throw AspenSessionError.serverUnavailable
             }
 
-            // Check final URL — if still on logon.do, auth failed
-            let finalURL = httpResponse.url?.absoluteString ?? ""
-            if finalURL.contains("logon.do") {
-                // Also check body for error messages
-                let body = String(data: data, encoding: .utf8) ?? ""
-                if body.contains("Invalid login") ||
-                   body.contains("user name or password") ||
-                   body.contains("authentication failed") ||
-                   AspenHTMLParser.isLoginPage(body) {
-                    throw AspenSessionError.invalidCredentials
-                }
-                // Ambiguous redirect back to login — treat as invalid creds
+            if httpResponse.statusCode == 401 {
                 throw AspenSessionError.invalidCredentials
             }
 
-            guard httpResponse.statusCode == 200 || httpResponse.statusCode == 302 else {
+            guard httpResponse.statusCode == 200 else {
+                // Try to parse error message from JSON before throwing
+                if let parsed = try? JSONDecoder().decode(AspenAuthResponse.self, from: data),
+                   let msg = parsed.message?.lowercased(),
+                   (msg.contains("invalid") || msg.contains("password") || msg.contains("username")) {
+                    throw AspenSessionError.invalidCredentials
+                }
                 throw AspenSessionError.unexpectedResponse(httpResponse.statusCode)
+            }
+
+            // Step 2 — parse auth response
+            let authResp = try? JSONDecoder().decode(AspenAuthResponse.self, from: data)
+
+            // Step 3 — if there's an aspenUrl, follow it to bridge into the classic /aspen/ session
+            if let aspenUrlString = authResp?.aspenUrl,
+               let bridgeURL = URL(string: aspenUrlString.hasPrefix("http") ? aspenUrlString : "\(baseURL)\(aspenUrlString)") {
+                var bridgeRequest = URLRequest(url: bridgeURL)
+                bridgeRequest.setValue("Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15",
+                                       forHTTPHeaderField: "User-Agent")
+                _ = try? await session.data(for: bridgeRequest)
             }
 
             isAuthenticated = true
@@ -143,7 +168,6 @@ actor AspenSession {
                 throw AspenSessionError.unexpectedResponse(httpResponse.statusCode)
             }
 
-            // Detect session expiry — redirected back to login
             if AspenHTMLParser.isLoginPage(html) {
                 isAuthenticated = false
                 throw AspenSessionError.sessionExpired
@@ -169,7 +193,6 @@ actor AspenSession {
 
     func reset() {
         isAuthenticated = false
-        // Rebuild session to clear all cookies
         let config = URLSessionConfiguration.ephemeral
         config.httpCookieStorage = HTTPCookieStorage()
         config.httpCookieAcceptPolicy = .always
