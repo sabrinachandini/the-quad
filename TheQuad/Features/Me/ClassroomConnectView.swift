@@ -116,20 +116,47 @@ struct ClassroomConnectView: View {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 50))
                 .foregroundStyle(.orange)
-            Text("School Account Restriction")
+            Text("Couldn't Connect to Classroom")
                 .font(.title3.bold())
-            Text("Your LHS Google account doesn't allow third-party app connections.")
+            VStack(alignment: .leading, spacing: 8) {
+                Label("You cancelled sign-in", systemImage: "xmark.circle")
+                    .foregroundStyle(.secondary)
+                Label("Your school's Google Workspace blocks third-party apps", systemImage: "lock.shield")
+                    .foregroundStyle(.secondary)
+            }
+            .font(.subheadline)
+            .padding(.vertical, 4)
+
+            Text("LPS has confirmed this restriction is a district policy.\nThe Quad can't override it.")
                 .multilineTextAlignment(.center)
-            Text("This is a Lexington Public Schools policy — not a bug in The Quad.")
-                .multilineTextAlignment(.center)
+                .font(.caption)
                 .foregroundStyle(.secondary)
+
             Divider()
-            Text("You can still use The Quad without Classroom sync.\nAdd assignments manually using the + button in Work.")
-                .multilineTextAlignment(.center)
-                .foregroundStyle(.secondary)
-            Button("Done") { dismiss() }
-                .buttonStyle(.borderedProminent)
-                .padding(.top, 8)
+
+            VStack(spacing: 6) {
+                Text("You can still track all your work manually.")
+                    .font(.subheadline.weight(.medium))
+                Text("Use the + button in the Work tab to add assignments.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .multilineTextAlignment(.center)
+
+            HStack(spacing: 12) {
+                Button("Try Again") {
+                    Task {
+                        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                              let rootVC = windowScene.windows.first?.rootViewController else { return }
+                        await provider.connect(from: rootVC)
+                    }
+                }
+                .buttonStyle(.bordered)
+
+                Button("Got It") { dismiss() }
+                    .buttonStyle(.borderedProminent)
+            }
+            .padding(.top, 4)
         }
     }
 

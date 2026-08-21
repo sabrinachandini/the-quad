@@ -100,7 +100,10 @@ final class ClassroomAuthProvider: NSObject {
             connectedEmail = email
             authState = .connected(email: email ?? "LHS Student", lastSync: Date())
         } catch let error as ASWebAuthenticationSessionError where error.code == .canceledLogin {
-            authState = .disconnected
+            // LPS Workspace admin-block shows a "This app is blocked" page and never
+            // redirects back — the user closes the browser, which looks like a cancel.
+            // Treat as blockedBySchoolPolicy so the user gets a meaningful next step.
+            authState = .blockedBySchoolPolicy
         } catch {
             authState = .failed(error.localizedDescription)
         }
