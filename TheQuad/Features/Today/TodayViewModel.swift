@@ -16,9 +16,9 @@ final class TodayViewModel {
     /// - Parameter previewDate: When set (Previews only), `now` is pinned to
     ///   this value and the live timer is never started.
     init(
-        engine: ScheduleEngine = MockStudentSchedule.engine(),
-        enrollments: [Enrollment] = MockStudentSchedule.enrollments,
-        courses: [Course] = MockStudentSchedule.courses,
+        engine: ScheduleEngine = AppState.shared.scheduleEngine,
+        enrollments: [Enrollment] = AppState.shared.enrollments,
+        courses: [Course] = AppState.shared.courses,
         previewDate: Date? = nil
     ) {
         self.engine = engine
