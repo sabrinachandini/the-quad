@@ -34,12 +34,12 @@ enum DesignTokens {
 
     // MARK: - Typography
     enum Typography {
-        static let quadDisplay = Font.system(size: 48, weight: .black, design: .default)
-        static let quadLabel = Font.system(size: 11, weight: .semibold, design: .default).smallCaps()
-        static let quadTitle = Font.system(size: 34, weight: .bold, design: .default)
+        static let quadDisplay  = Font.system(size: 52, weight: .bold, design: .default)
+        static let quadLabel    = Font.system(size: 11, weight: .semibold, design: .default).uppercaseSmallCaps()
+        static let quadTitle    = Font.system(size: 34, weight: .bold, design: .default)
         static let quadHeadline = Font.system(size: 22, weight: .semibold, design: .default)
-        static let quadBody = Font.system(size: 17, weight: .regular, design: .default)
-        static let quadCaption = Font.system(size: 13, weight: .regular, design: .default)
+        static let quadBody     = Font.system(size: 17, weight: .regular, design: .default)
+        static let quadCaption  = Font.system(size: 13, weight: .regular, design: .default)
     }
 
     // MARK: - Spacing (4pt grid)

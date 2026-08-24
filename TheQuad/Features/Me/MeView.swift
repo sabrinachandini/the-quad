@@ -151,6 +151,25 @@ struct MeView: View {
                 sectionHeader("Notifications")
             }
 
+            // MARK: - Grades
+            Section {
+                Picker("Grade updates", selection: $appState.gradeDisplayPreference) {
+                    ForEach(GradePreference.allCases, id: \.self) { pref in
+                        Text(pref.label).tag(pref)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .padding(.vertical, DesignTokens.Spacing.xs)
+            } header: {
+                sectionHeader("Grades")
+            } footer: {
+                Text(appState.gradeDisplayPreference == .keepUpdated
+                     ? "The Quad will surface grade changes as they arrive."
+                     : "Grades stay quiet until you open the Grades tab.")
+                    .font(DesignTokens.Typography.quadCaption)
+                    .foregroundStyle(DesignTokens.Colors.secondary)
+            }
+
             // MARK: - Calendar Export
             Section {
                 VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {

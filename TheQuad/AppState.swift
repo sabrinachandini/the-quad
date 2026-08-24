@@ -1,6 +1,20 @@
 import Foundation
 import Observation
 
+// MARK: - Grade Display Preference
+
+enum GradePreference: String, CaseIterable {
+    case keepUpdated = "keepUpdated"
+    case whenAsked   = "whenAsked"
+
+    var label: String {
+        switch self {
+        case .keepUpdated: return "Keep me updated"
+        case .whenAsked:   return "When I ask"
+        }
+    }
+}
+
 @Observable
 final class AppState {
     static let shared = AppState()
@@ -13,6 +27,7 @@ final class AppState {
     var displayName: String
     var graduationYear: Int
     var classRemindersEnabled: Bool
+    var gradeDisplayPreference: GradePreference = .keepUpdated
 
     // MARK: - Providers
     var aspenProvider: AspenGradeProvider = .shared
