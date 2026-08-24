@@ -61,6 +61,74 @@ final class TodayViewModel {
         timer?.invalidate()
     }
 
+    // MARK: - Today State
+
+    enum TodayState {
+        case beforeSchool
+        case duringClass
+        case freeBlock
+        case afterSchool
+        case noSchool
+    }
+
+    var todayState: TodayState {
+        guard engine.dayType(for: now) != nil else { return .noSchool }
+        let slots = engine.meetings(for: now)
+        guard !slots.isEmpty else { return .noSchool }
+
+        let minutesNow = Calendar.current.component(.hour, from: now) * 60
+            + Calendar.current.component(.minute, from: now)
+
+        // Find first and last slot boundaries
+        let firstSlotStart = (slots.first.map { ($0.startTime.hour ?? 0) * 60 + ($0.startTime.minute ?? 0) }) ?? 0
+        let lastSlotEnd = (slots.last.map { ($0.endTime.hour ?? 0) * 60 + ($0.endTime.minute ?? 0) }) ?? 0
+
+        if minutesNow < firstSlotStart {
+            return .beforeSchool
+        }
+        if minutesNow >= lastSlotEnd {
+            return .afterSchool
+        }
+        if currentSession != nil {
+            return .duringClass
+        }
+        // We're between first start and last end, no class — free block
+        return .freeBlock
+    }
+
+    // MARK: - Free Block
+
+    var freeBlockMinutesRemaining: Int {
+        let slots = engine.meetings(for: now)
+        let mySessions = engine.studentMeetings(for: now, enrollments: enrollments, courses: courses)
+        let occupiedIDs = Set(mySessions.map { $0.slot.id })
+
+        let minutesNow = Calendar.current.component(.hour, from: now) * 60
+            + Calendar.current.component(.minute, from: now)
+
+        // Find the current free slot (the one we're currently inside)
+        let currentFreeSlot = slots.first { slot in
+            guard !slot.isLunch, !occupiedIDs.contains(slot.id) else { return false }
+            let slotStart = (slot.startTime.hour ?? 0) * 60 + (slot.startTime.minute ?? 0)
+            let slotEnd = (slot.endTime.hour ?? 0) * 60 + (slot.endTime.minute ?? 0)
+            return minutesNow >= slotStart && minutesNow < slotEnd
+        }
+        guard let freeSlot = currentFreeSlot else { return 0 }
+        let slotEnd = (freeSlot.endTime.hour ?? 0) * 60 + (freeSlot.endTime.minute ?? 0)
+        return max(0, slotEnd - minutesNow)
+    }
+
+    var upcomingAssignmentsForFree: [Assignment] {
+        let remaining = freeBlockMinutesRemaining
+        guard remaining > 0 else { return [] }
+        return AppState.shared.assignments
+            .filter { !$0.isCompleted }
+            .filter { ($0.estimatedMinutes ?? 0) <= remaining && ($0.estimatedMinutes ?? 0) > 0 }
+            .sorted { ($0.estimatedMinutes ?? 0) < ($1.estimatedMinutes ?? 0) }
+            .prefix(2)
+            .map { $0 }
+    }
+
     // MARK: - Today
 
     var todayLabel: String {
@@ -69,6 +137,26 @@ final class TodayViewModel {
             return "\(weekday), Day \(n + 1)"
         }
         return weekday
+    }
+
+    /// "TUESDAY" uppercase weekday
+    var weekdayUppercase: String {
+        now.formatted(.dateTime.weekday(.wide)).uppercased()
+    }
+
+    /// "DAY 4" or "NO SCHOOL" or "SPECIAL"
+    var dayNumberLabel: String {
+        if let type = engine.dayType(for: now), let n = type.rotationIndex {
+            return "DAY \(n + 1)"
+        }
+        if engine.dayType(for: now) == nil { return "NO SCHOOL" }
+        return "SPECIAL"
+    }
+
+    /// "SEP 8" style date
+    var shortDateLabel: String {
+        now.formatted(.dateTime.month(.abbreviated).day())
+            .uppercased()
     }
 
     var dayBadge: String {
@@ -126,6 +214,58 @@ final class TodayViewModel {
         return "\(minutes)m left"
     }
 
+    /// Minutes remaining in current class session (integer)
+    var minutesRemainingInCurrent: Int {
+        guard let current = currentSession else { return 0 }
+        let remaining = current.endDateTime.timeIntervalSince(now)
+        return max(0, Int(remaining / 60))
+    }
+
+    /// Progress fraction 0–1 for time elapsed in current session
+    var currentSessionProgress: Double {
+        guard let current = currentSession else { return 0 }
+        let total = current.endDateTime.timeIntervalSince(current.startDateTime)
+        let elapsed = now.timeIntervalSince(current.startDateTime)
+        guard total > 0 else { return 0 }
+        return min(1, max(0, elapsed / total))
+    }
+
+    // MARK: - Slot status
+
+    enum SlotStatus {
+        case past
+        case current
+        case free(minutes: Int)
+        case future
+        case lunch
+    }
+
+    func slotStatus(for slot: MeetingSlot) -> SlotStatus {
+        if slot.isLunch { return .lunch }
+
+        let minutesNow = Calendar.current.component(.hour, from: now) * 60
+            + Calendar.current.component(.minute, from: now)
+        let slotStart = (slot.startTime.hour ?? 0) * 60 + (slot.startTime.minute ?? 0)
+        let slotEnd = (slot.endTime.hour ?? 0) * 60 + (slot.endTime.minute ?? 0)
+
+        // Check if this slot is occupied by current session
+        if let current = currentSession, current.slot.id == slot.id {
+            return .current
+        }
+
+        if slotEnd <= minutesNow {
+            return .past
+        }
+
+        // Free block check
+        if course(for: slot) == nil && !slot.isLunch {
+            let mins = slotEnd - slotStart
+            return .free(minutes: mins)
+        }
+
+        return .future
+    }
+
     // MARK: - Tomorrow
 
     private var tomorrowDate: Date {
@@ -138,6 +278,20 @@ final class TodayViewModel {
             return "\(weekday), Day \(n + 1)"
         }
         return weekday
+    }
+
+    /// "MONDAY · DAY 2" for next school day
+    var nextSchoolDayLabel: String {
+        // Search forward up to 7 days
+        let cal = Calendar.current
+        for offset in 1...7 {
+            guard let candidate = cal.date(byAdding: .day, value: offset, to: now) else { continue }
+            if let type = engine.dayType(for: candidate), let n = type.rotationIndex {
+                let weekday = candidate.formatted(.dateTime.weekday(.wide)).uppercased()
+                return "\(weekday) · DAY \(n + 1)"
+            }
+        }
+        return "NO SCHOOL UPCOMING"
     }
 
     var tomorrowSessions: [CourseSession] {
@@ -213,5 +367,11 @@ final class TodayViewModel {
             }
         }
         return Array(result.prefix(2))
+    }
+
+    /// Friends free right now (during current free block)
+    var friendsFreeNow: [(friend: User, sharedBlock: AvailabilityInterval)] {
+        guard todayState == .freeBlock else { return [] }
+        return friendsFreeSoon
     }
 }
