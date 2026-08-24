@@ -1,95 +1,49 @@
 import Foundation
 import Observation
-import SwiftUI
+import UIKit
 
 @Observable
 final class OnboardingViewModel {
 
     static let studentId = UUID(uuidString: "22222222-2222-2222-2222-222222222222")!
 
-    /// All eight LHS blocks shown during schedule entry.
-    static let scheduleBlocks: [AcademicBlock] = [.a, .b, .c, .d, .e, .f, .g, .h]
+    /// The six course blocks shown during schedule entry.
+    static let scheduleBlocks: [AcademicBlock] = [.a, .b, .c, .d, .e, .f]
 
+    // MARK: - Step navigation (new 6-step flow)
+    /// 0=launch 1=lhs 2=profile 3=schedule 4=parsing 5=done
+    var currentStep: Int = 0
+
+    // Legacy alias used by old code (step 0/1/2 mapped into currentStep)
+    var step: Int {
+        get { currentStep }
+        set { currentStep = newValue }
+    }
+
+    // MARK: - Profile
+    var firstName: String = ""
+    var lastName: String = ""
+    var graduationYear: Int = 2026
+    var profilePhoto: UIImage? = nil
+    var showPhotoPicker: Bool = false
+
+    // MARK: - Schedule
     var courseNames: [AcademicBlock: String] = [:]
     var teachers: [AcademicBlock: String] = [:]
     var rooms: [AcademicBlock: String] = [:]
 
-    // MARK: - Step state
-    // 0 = welcome, 1 = import choice, 2 = manual entry, 3 = done
-    var step: Int = 0
-
-    // MARK: - Import flow state
-    var showImagePicker = false
-    var showDocumentPicker = false
-    var isAnalyzing = false
-    var importFailed = false       // true → fell back to manual after failed parse
-    var importSucceeded = false   // true → parsed successfully, fields pre-filled
+    // MARK: - Import/camera state (kept from previous implementation)
+    var showCamera: Bool = false
+    var showFilePicker: Bool = false
 
     var hasAtLeastOneCourse: Bool {
         courseNames.values.contains { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
     }
 
-    // MARK: - Import handlers
-
-    func handleImageSelected(_ image: UIImage) {
-        isAnalyzing = true
-        Task { @MainActor in
-            try? await Task.sleep(for: .seconds(1.8))
-            prefillFromParsedSchedule()
-            isAnalyzing = false
-            withAnimation { step = 2 }
-        }
+    var profileComplete: Bool {
+        !firstName.trimmingCharacters(in: .whitespaces).isEmpty &&
+        !lastName.trimmingCharacters(in: .whitespaces).isEmpty
     }
-
-    func handleDocumentSelected() {
-        isAnalyzing = true
-        Task { @MainActor in
-            try? await Task.sleep(for: .seconds(1.8))
-            prefillFromParsedSchedule()
-            isAnalyzing = false
-            withAnimation { step = 2 }
-        }
-    }
-
-    /// Pre-fills course, teacher, and room data as if the schedule image was parsed by OCR.
-    /// In production this would come from Vision + AI; here it uses fixture data matching
-    /// the printed 2025-26 Q1 schedule (Bhattacharjya, Sabrina, GR: 10, HR: 178).
-    private func prefillFromParsedSchedule() {
-        importSucceeded = true
-        importFailed = false
-        courseNames = [
-            .a: "Repertoire Orch/Strings",
-            .b: "World History II",
-            .c: "Spanish III",
-            .d: "Biology",
-            .e: "Math 3: Alg 2, Trig, Stat",
-            .f: "Intro to Economics",
-            .g: "Lit and Comp II",
-            .h: "Mind Body Mechanics"
-        ]
-        teachers = [
-            .a: "Billings-White",
-            .b: "Prasad, Christine",
-            .c: "Barbieri-Feeney, Olivia",
-            .d: "Raboin, Anna",
-            .e: "LeBlanc, Rachel",
-            .f: "Cravedi, Sarah",
-            .g: "Cooper, Edward",
-            .h: "DeVincenzo, Tia"
-        ]
-        rooms = [
-            .a: "133",
-            .b: "225",
-            .c: "612",
-            .d: "408",
-            .e: "827",
-            .f: "235",
-            .g: "164",
-            .h: "140"
-        ]
-    }
-
-    // MARK: - Build & persist
 
     func buildCourses() -> [Course] {
         Self.scheduleBlocks.enumerated().compactMap { index, block in
@@ -111,13 +65,18 @@ final class OnboardingViewModel {
     }
 
     func complete() {
+        // Persist profile
+        let fullName = firstName.isEmpty ? "Student" : "\(firstName) \(lastName)".trimmingCharacters(in: .whitespaces)
+        AppState.shared.displayName = fullName
+        AppState.shared.graduationYear = graduationYear
+
         let courses = buildCourses()
         let enrollments: [Enrollment] = courses.map { course in
             Enrollment(
                 id: UUID(),
                 studentId: Self.studentId,
                 courseId: course.id,
-                schoolYear: "2026-27"
+                schoolYear: "2025-26"
             )
         }
         AppState.shared.courses = courses
