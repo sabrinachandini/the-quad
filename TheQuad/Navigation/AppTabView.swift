@@ -22,23 +22,34 @@ struct AppTabView: View {
         ZStack(alignment: .bottom) {
             TabView(selection: $selectedTab) {
                 TodayView()
-                    .tabItem { Label("Today", systemImage: "sun.max.fill") }
+                    .tabItem {
+                        Label("Today", systemImage: selectedTab == .today ? "house.fill" : "house")
+                    }
                     .tag(Tab.today)
                 WorkView()
-                    .tabItem { Label("Work", systemImage: "checkmark.circle.fill") }
+                    .tabItem {
+                        Label("Work", systemImage: selectedTab == .work ? "checkmark.circle.fill" : "checkmark.circle")
+                    }
                     .tag(Tab.work)
                     .badge(workBadgeCount)
                 GradesView()
-                    .tabItem { Label("Grades", systemImage: "chart.bar.fill") }
+                    .tabItem {
+                        Label("Grades", systemImage: selectedTab == .grades ? "chart.bar.fill" : "chart.bar")
+                    }
                     .tag(Tab.grades)
                 SchoolView()
-                    .tabItem { Label("School", systemImage: "building.columns.fill") }
+                    .tabItem {
+                        Label("School", systemImage: selectedTab == .school ? "person.2.fill" : "person.2")
+                    }
                     .tag(Tab.school)
                 MeView()
-                    .tabItem { Label("Me", systemImage: "person.fill") }
+                    .tabItem {
+                        Label("Me", systemImage: selectedTab == .me ? "person.crop.circle.fill" : "person.crop.circle")
+                    }
                     .tag(Tab.me)
             }
-            // Floating Ask button
+            .tint(DesignTokens.Colors.accent)
+            // Floating Ask button — positioned above the tab bar
             Button(action: { showAsk = true }) {
                 Image(systemName: "sparkles")
                     .font(.system(size: 20, weight: .semibold))
