@@ -113,6 +113,7 @@ final class GradesViewModel {
             // Repertoire Orch/Strings — Performance 100%
             CourseGrade(
                 id: UUID(), courseId: MockStudentSchedule.orchestraStrings.id,
+                name: MockStudentSchedule.orchestraStrings.name,
                 currentGrade: nil, letterGrade: nil,
                 categories: [
                     GradeCategory(id: UUID(), name: "Performance", weight: 1.00, entries: [
@@ -126,6 +127,7 @@ final class GradesViewModel {
             // World History II — Essays 50%, Quizzes 30%, Participation 20%
             CourseGrade(
                 id: UUID(), courseId: MockStudentSchedule.worldHistory.id,
+                name: MockStudentSchedule.worldHistory.name,
                 currentGrade: nil, letterGrade: nil,
                 categories: [
                     GradeCategory(id: UUID(), name: "Essays", weight: 0.50, entries: [
@@ -146,6 +148,7 @@ final class GradesViewModel {
             // Spanish III — Speaking 40%, Tests 40%, Homework 20%
             CourseGrade(
                 id: UUID(), courseId: MockStudentSchedule.spanishIII.id,
+                name: MockStudentSchedule.spanishIII.name,
                 currentGrade: nil, letterGrade: nil,
                 categories: [
                     GradeCategory(id: UUID(), name: "Speaking", weight: 0.40, entries: [
@@ -166,6 +169,7 @@ final class GradesViewModel {
             // Biology — Tests 50%, Labs 30%, Homework 20%
             CourseGrade(
                 id: UUID(), courseId: MockStudentSchedule.biology.id,
+                name: MockStudentSchedule.biology.name,
                 currentGrade: nil, letterGrade: nil,
                 categories: [
                     GradeCategory(id: UUID(), name: "Tests", weight: 0.50, entries: [
@@ -187,6 +191,7 @@ final class GradesViewModel {
             // Math 3: Alg 2, Trig, Stat — Tests 60%, Homework 30%, Quizzes 10%
             CourseGrade(
                 id: UUID(), courseId: MockStudentSchedule.math3.id,
+                name: MockStudentSchedule.math3.name,
                 currentGrade: nil, letterGrade: nil,
                 categories: [
                     GradeCategory(id: UUID(), name: "Tests", weight: 0.60, entries: [
@@ -209,6 +214,7 @@ final class GradesViewModel {
             // Intro to Economics — Tests 60%, Projects 40%
             CourseGrade(
                 id: UUID(), courseId: MockStudentSchedule.economics.id,
+                name: MockStudentSchedule.economics.name,
                 currentGrade: nil, letterGrade: nil,
                 categories: [
                     GradeCategory(id: UUID(), name: "Tests", weight: 0.60, entries: [
@@ -224,6 +230,7 @@ final class GradesViewModel {
             // Lit and Comp II — Essays 60%, Discussion 30%, Reading 10%
             CourseGrade(
                 id: UUID(), courseId: MockStudentSchedule.litAndComp.id,
+                name: MockStudentSchedule.litAndComp.name,
                 currentGrade: nil, letterGrade: nil,
                 categories: [
                     GradeCategory(id: UUID(), name: "Essays", weight: 0.60, entries: [
@@ -243,6 +250,7 @@ final class GradesViewModel {
             // Mind Body Mechanics — Participation 70%, Assessments 30%
             CourseGrade(
                 id: UUID(), courseId: MockStudentSchedule.mindBodyMechanics.id,
+                name: MockStudentSchedule.mindBodyMechanics.name,
                 currentGrade: nil, letterGrade: nil,
                 categories: [
                     GradeCategory(id: UUID(), name: "Participation", weight: 0.70, entries: [

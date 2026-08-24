@@ -43,22 +43,16 @@ struct GradesView: View {
             Image(systemName: "chart.bar.fill")
                 .font(.system(size: 48))
                 .foregroundStyle(DesignTokens.Colors.accent)
-            Text("Connect Aspen to import grades — or add manually.")
+            Text("Connect Aspen in the Me tab to sync your grades automatically.")
                 .font(DesignTokens.Typography.quadHeadline)
                 .foregroundStyle(DesignTokens.Colors.primary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, DesignTokens.Spacing.xl)
-            Button {
-                // TODO: navigate to manual grade entry
-            } label: {
-                Text("Add Grade")
-                    .font(DesignTokens.Typography.quadBody.weight(.semibold))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, DesignTokens.Spacing.xl)
-                    .padding(.vertical, DesignTokens.Spacing.md)
-                    .background(DesignTokens.Colors.accent)
-                    .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium))
-            }
+            Text("Aspen is Lexington Public Schools' grade portal. Tap Me → Aspen Grades to connect.")
+                .font(DesignTokens.Typography.quadCaption)
+                .foregroundStyle(DesignTokens.Colors.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, DesignTokens.Spacing.xl)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -79,7 +73,7 @@ private struct GradeCard: View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
-                    Text(course?.name ?? "Course")
+                    Text(course?.name ?? grade.name)
                         .font(DesignTokens.Typography.quadHeadline)
                         .foregroundStyle(DesignTokens.Colors.primary)
                     if let pct {
@@ -154,7 +148,7 @@ struct CourseGradeDetailView: View {
             }
             .simultaneousGesture(TapGesture().onEnded { focusedField = nil })
         }
-        .navigationTitle(course?.name ?? "Grade Detail")
+        .navigationTitle(course?.name ?? grade.name)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             model.selectedCourseGradeId = grade.id
@@ -174,7 +168,7 @@ struct CourseGradeDetailView: View {
         let livePct = model.overallPercentage(for: liveGrade)
         let liveLetter = model.letterGrade(for: liveGrade)
         return VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
-            Text(course?.name ?? "Course")
+            Text(course?.name ?? grade.name)
                 .font(DesignTokens.Typography.quadTitle)
                 .foregroundStyle(DesignTokens.Colors.primary)
             HStack(alignment: .firstTextBaseline, spacing: DesignTokens.Spacing.sm) {

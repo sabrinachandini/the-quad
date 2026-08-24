@@ -3,6 +3,7 @@ import Foundation
 struct CourseGrade: Identifiable, Codable {
     let id: UUID
     let courseId: UUID
+    var name: String          // display name — either from Aspen or the linked Course
     var currentGrade: Double?
     var letterGrade: String?
     var categories: [GradeCategory]

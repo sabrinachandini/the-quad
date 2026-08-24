@@ -59,7 +59,7 @@ final class SchoolViewModel {
 
         guard let theirCourses = AppState.shared.friendCourses[friend.id] else { return myFree }
         let theirEnrollments = theirCourses.map { course in
-            Enrollment(id: UUID(), studentId: friend.id, courseId: course.id, schoolYear: "2025-26")
+            Enrollment(id: UUID(), studentId: friend.id, courseId: course.id, schoolYear: "2026-27")
         }
         let theirSessions = engine.studentMeetings(for: today, enrollments: theirEnrollments, courses: theirCourses)
         let theirFree = freeEngine.freeBlocks(for: today, studentId: friend.id, allSlots: allSlots, studentSessions: theirSessions)

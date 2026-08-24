@@ -153,6 +153,7 @@ final class AspenGradeProvider {
                 let grade = CourseGrade(
                     id: stableId,
                     courseId: stableId,
+                    name: summary.name,
                     currentGrade: summary.termGradePercent,
                     letterGrade: summary.termGradeLetter,
                     categories: categories,

@@ -362,7 +362,7 @@ struct ClassroomIntegrationSheet: View {
                         )
 
                         // Note about docs
-                        Text("See docs/INTEGRATIONS.md in the project for technical details on the OAuth approach being investigated.")
+                        Text("Classroom sync is in progress. You'll be notified when it's ready.")
                             .font(DesignTokens.Typography.quadCaption)
                             .foregroundStyle(DesignTokens.Colors.secondary)
                             .padding(DesignTokens.Spacing.md)
@@ -521,7 +521,7 @@ struct AspenConnectedSheet: View {
                                     let pctStr = grade.currentGrade.map { String(format: "%.1f%%", $0) } ?? "—"
                                     HStack(spacing: DesignTokens.Spacing.md) {
                                         VStack(alignment: .leading, spacing: 2) {
-                                            Text("Course \(i + 1)")
+                                            Text(grade.name.isEmpty ? "Course \(i + 1)" : grade.name)
                                                 .font(DesignTokens.Typography.quadBody.weight(.medium))
                                                 .foregroundStyle(DesignTokens.Colors.primary)
                                             Text(pctStr)
