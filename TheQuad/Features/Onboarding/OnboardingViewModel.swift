@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import UIKit
 
 @Observable
 final class OnboardingViewModel {
@@ -9,15 +10,39 @@ final class OnboardingViewModel {
     /// The six course blocks shown during schedule entry.
     static let scheduleBlocks: [AcademicBlock] = [.a, .b, .c, .d, .e, .f]
 
+    // MARK: - Step navigation (new 6-step flow)
+    /// 0=launch 1=lhs 2=profile 3=schedule 4=parsing 5=done
+    var currentStep: Int = 0
+
+    // Legacy alias used by old code (step 0/1/2 mapped into currentStep)
+    var step: Int {
+        get { currentStep }
+        set { currentStep = newValue }
+    }
+
+    // MARK: - Profile
+    var firstName: String = ""
+    var lastName: String = ""
+    var graduationYear: Int = 2026
+    var profilePhoto: UIImage? = nil
+    var showPhotoPicker: Bool = false
+
+    // MARK: - Schedule
     var courseNames: [AcademicBlock: String] = [:]
     var teachers: [AcademicBlock: String] = [:]
     var rooms: [AcademicBlock: String] = [:]
 
-    /// 0 = welcome, 1 = schedule entry, 2 = done
-    var step: Int = 0
+    // MARK: - Import/camera state (kept from previous implementation)
+    var showCamera: Bool = false
+    var showFilePicker: Bool = false
 
     var hasAtLeastOneCourse: Bool {
         courseNames.values.contains { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
+    }
+
+    var profileComplete: Bool {
+        !firstName.trimmingCharacters(in: .whitespaces).isEmpty &&
+        !lastName.trimmingCharacters(in: .whitespaces).isEmpty
     }
 
     func buildCourses() -> [Course] {
@@ -40,6 +65,11 @@ final class OnboardingViewModel {
     }
 
     func complete() {
+        // Persist profile
+        let fullName = firstName.isEmpty ? "Student" : "\(firstName) \(lastName)".trimmingCharacters(in: .whitespaces)
+        AppState.shared.displayName = fullName
+        AppState.shared.graduationYear = graduationYear
+
         let courses = buildCourses()
         let enrollments: [Enrollment] = courses.map { course in
             Enrollment(
