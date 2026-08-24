@@ -1,13 +1,5 @@
 import SwiftUI
 
-// MARK: - quadLabel typography token (uppercase, tracked small caps)
-extension DesignTokens.Typography {
-    static let quadLabel = Font.system(size: 11, weight: .semibold, design: .default)
-        .lowercaseSmallCaps()
-    static let quadDisplay = Font.system(size: 72, weight: .black, design: .default)
-    static let quadDisplayMedium = Font.system(size: 28, weight: .black, design: .default)
-}
-
 // MARK: - Time formatting helpers (shared)
 
 private func formatSlotTime(_ comps: DateComponents) -> String {
