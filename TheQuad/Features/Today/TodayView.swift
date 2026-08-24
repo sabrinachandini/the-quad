@@ -126,6 +126,7 @@ private struct ScheduleRowView: View {
 
 struct TodayView: View {
     @State private var model: TodayViewModel
+    @State private var showFullSchedule = false
 
     init(model: TodayViewModel = TodayViewModel()) {
         _model = State(initialValue: model)
@@ -137,12 +138,17 @@ struct TodayView: View {
             VStack(spacing: 0) {
                 dayHeader
                 thinRule
-                heroSection
-                thinRule
-                scheduleStrip
-                Spacer()
+                if showFullSchedule {
+                    fullScheduleView
+                } else {
+                    heroSection
+                    thinRule
+                    scheduleStrip
+                    Spacer()
+                }
             }
         }
+        .animation(.easeInOut(duration: 0.22), value: showFullSchedule)
     }
 
     private var thinRule: some View {
@@ -167,12 +173,72 @@ struct TodayView: View {
                     .foregroundStyle(DesignTokens.Colors.primary)
             }
             Spacer()
-            Text(model.shortDateLabel)
-                .font(DesignTokens.Typography.quadLabel)
-                .foregroundStyle(DesignTokens.Colors.secondary)
+            Button {
+                showFullSchedule.toggle()
+            } label: {
+                Text(showFullSchedule ? "TODAY" : "SCHEDULE")
+                    .font(DesignTokens.Typography.quadLabel)
+                    .foregroundStyle(showFullSchedule ? DesignTokens.Colors.accent : DesignTokens.Colors.secondary)
+            }
+            .buttonStyle(.plain)
         }
         .padding(.horizontal, DesignTokens.Spacing.lg)
         .padding(.vertical, DesignTokens.Spacing.md)
+    }
+
+    // MARK: - Full Schedule View
+
+    private var fullScheduleView: some View {
+        ScrollView {
+            VStack(spacing: 0) {
+                ForEach(Array(AppState.shared.courses.sorted { $0.block.rawValue < $1.block.rawValue }.enumerated()), id: \.element.id) { idx, course in
+                    fullScheduleRow(course)
+                    Divider()
+                        .padding(.leading, DesignTokens.Spacing.lg + 8 + DesignTokens.Spacing.md + 14 + DesignTokens.Spacing.md)
+                }
+            }
+            .padding(.top, DesignTokens.Spacing.sm)
+            .padding(.bottom, DesignTokens.Spacing.xxxl)
+        }
+    }
+
+    private func fullScheduleRow(_ course: Course) -> some View {
+        let color = CourseColors.color(atIndex: course.colorIndex)
+        let isToday = model.allSlots.contains { model.course(for: $0)?.id == course.id }
+        return HStack(spacing: DesignTokens.Spacing.md) {
+            Circle()
+                .fill(color)
+                .frame(width: 8, height: 8)
+            Text(course.block.rawValue)
+                .font(DesignTokens.Typography.quadCaption)
+                .foregroundStyle(DesignTokens.Colors.secondary.opacity(0.45))
+                .frame(width: 14, alignment: .leading)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(course.name)
+                    .font(DesignTokens.Typography.quadBody)
+                    .foregroundStyle(DesignTokens.Colors.primary)
+                if let teacher = course.teacher {
+                    Text(teacher)
+                        .font(DesignTokens.Typography.quadCaption)
+                        .foregroundStyle(DesignTokens.Colors.secondary)
+                }
+            }
+            Spacer()
+            VStack(alignment: .trailing, spacing: 2) {
+                if let room = course.room {
+                    Text(room)
+                        .font(DesignTokens.Typography.quadCaption.weight(.medium))
+                        .foregroundStyle(DesignTokens.Colors.secondary)
+                }
+                if isToday {
+                    Text("TODAY")
+                        .font(DesignTokens.Typography.quadLabel)
+                        .foregroundStyle(color)
+                }
+            }
+        }
+        .padding(.horizontal, DesignTokens.Spacing.lg)
+        .padding(.vertical, 13)
     }
 
     // MARK: - Hero Section
