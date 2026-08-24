@@ -45,6 +45,7 @@ struct SchoolView: View {
                         // Pending requests
                         if !model.pendingRequests.isEmpty {
                             pendingSection
+                                .padding(.horizontal, DesignTokens.Spacing.lg)
                         }
 
                         // Friends
@@ -56,7 +57,7 @@ struct SchoolView: View {
                         // Directory
                         directorySection
                     }
-                    .padding(DesignTokens.Spacing.lg)
+                    .padding(.top, DesignTokens.Spacing.md)
                     .padding(.bottom, DesignTokens.Spacing.xxxl)
                 }
             }
@@ -132,17 +133,22 @@ struct SchoolView: View {
         return VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
             if model.searchText.isEmpty || !list.isEmpty {
                 sectionHeader(title: "Friends", count: list.count)
+                    .padding(.horizontal, DesignTokens.Spacing.lg)
                 if model.friends.isEmpty {
                     emptyHint("Search the directory and add friends to see free-block overlap.")
                 } else if list.isEmpty {
                     emptyHint("No friends match your search.")
                 } else {
-                    VStack(spacing: DesignTokens.Spacing.sm) {
-                        ForEach(list) { friend in
+                    VStack(spacing: 0) {
+                        ForEach(Array(list.enumerated()), id: \.element.id) { idx, friend in
                             NavigationLink(destination: FriendDetailView(friend: friend, model: model)) {
                                 friendRow(friend)
                             }
                             .buttonStyle(.plain)
+                            if idx < list.count - 1 {
+                                Divider()
+                                    .padding(.leading, DesignTokens.Spacing.lg + 44 + DesignTokens.Spacing.md)
+                            }
                         }
                     }
                 }
@@ -170,11 +176,10 @@ struct SchoolView: View {
             }
             Image(systemName: "chevron.right")
                 .font(.caption2)
-                .foregroundStyle(DesignTokens.Colors.secondary.opacity(0.5))
+                .foregroundStyle(DesignTokens.Colors.secondary.opacity(0.35))
         }
-        .padding(DesignTokens.Spacing.md)
-        .background(DesignTokens.Colors.surface)
-        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large))
+        .padding(.vertical, DesignTokens.Spacing.md)
+        .padding(.horizontal, DesignTokens.Spacing.lg)
     }
 
     // MARK: - Classmates
@@ -184,17 +189,22 @@ struct SchoolView: View {
         return VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
             if model.searchText.isEmpty || !list.isEmpty {
                 sectionHeader(title: "Classmates", count: list.count)
+                    .padding(.horizontal, DesignTokens.Spacing.lg)
                 if model.classmates.isEmpty {
                     emptyHint("No classmates in The Quad yet — share with friends to see them here.")
                 } else if list.isEmpty {
                     emptyHint("No classmates match your search.")
                 } else {
-                    VStack(spacing: DesignTokens.Spacing.sm) {
-                        ForEach(list) { user in
+                    VStack(spacing: 0) {
+                        ForEach(Array(list.enumerated()), id: \.element.id) { idx, user in
                             NavigationLink(destination: FriendDetailView(friend: user, model: model)) {
                                 classmateRow(user)
                             }
                             .buttonStyle(.plain)
+                            if idx < list.count - 1 {
+                                Divider()
+                                    .padding(.leading, DesignTokens.Spacing.lg + 36 + DesignTokens.Spacing.md)
+                            }
                         }
                     }
                 }
@@ -220,11 +230,10 @@ struct SchoolView: View {
             Spacer()
             Image(systemName: "chevron.right")
                 .font(.caption2)
-                .foregroundStyle(DesignTokens.Colors.secondary.opacity(0.5))
+                .foregroundStyle(DesignTokens.Colors.secondary.opacity(0.35))
         }
-        .padding(DesignTokens.Spacing.md)
-        .background(DesignTokens.Colors.surface)
-        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large))
+        .padding(.vertical, DesignTokens.Spacing.md)
+        .padding(.horizontal, DesignTokens.Spacing.lg)
     }
 
     // MARK: - Directory
@@ -232,9 +241,15 @@ struct SchoolView: View {
     private var directorySection: some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
             sectionHeader(title: "Directory", count: model.filteredDirectory.count)
-            VStack(spacing: DesignTokens.Spacing.sm) {
-                ForEach(model.filteredDirectory) { user in
+                .padding(.horizontal, DesignTokens.Spacing.lg)
+            let list = model.filteredDirectory
+            VStack(spacing: 0) {
+                ForEach(Array(list.enumerated()), id: \.element.id) { idx, user in
                     directoryRow(user)
+                    if idx < list.count - 1 {
+                        Divider()
+                            .padding(.leading, DesignTokens.Spacing.lg + 36 + DesignTokens.Spacing.md)
+                    }
                 }
             }
         }
@@ -265,9 +280,8 @@ struct SchoolView: View {
                     .clipShape(Capsule())
             }
         }
-        .padding(DesignTokens.Spacing.md)
-        .background(DesignTokens.Colors.surface)
-        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large))
+        .padding(.vertical, DesignTokens.Spacing.md)
+        .padding(.horizontal, DesignTokens.Spacing.lg)
     }
 
     // MARK: - Shared helpers
@@ -288,10 +302,9 @@ struct SchoolView: View {
         Text(text)
             .font(DesignTokens.Typography.quadCaption)
             .foregroundStyle(DesignTokens.Colors.secondary)
-            .padding(DesignTokens.Spacing.lg)
+            .padding(.horizontal, DesignTokens.Spacing.lg)
+            .padding(.vertical, DesignTokens.Spacing.sm)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(DesignTokens.Colors.surface)
-            .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large))
     }
 
     private func classOfLabel(_ year: Int) -> String {

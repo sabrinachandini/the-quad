@@ -69,6 +69,9 @@ final class OnboardingViewModel {
         let fullName = firstName.isEmpty ? "Student" : "\(firstName) \(lastName)".trimmingCharacters(in: .whitespaces)
         AppState.shared.displayName = fullName
         AppState.shared.graduationYear = graduationYear
+        if let photo = profilePhoto {
+            AppState.shared.saveAvatar(photo)
+        }
 
         let courses = buildCourses()
         let enrollments: [Enrollment] = courses.map { course in

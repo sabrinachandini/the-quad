@@ -140,8 +140,7 @@ struct TodayView: View {
                 heroSection
                 thinRule
                 scheduleStrip
-                thinRule
-                secondaryScroll
+                Spacer()
             }
         }
     }
@@ -214,75 +213,6 @@ struct TodayView: View {
         }
     }
 
-    // MARK: - Secondary Content (scrollable)
-
-    private var secondaryScroll: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
-                tomorrowSection
-                    .padding(.top, DesignTokens.Spacing.lg)
-                    .padding(.horizontal, DesignTokens.Spacing.lg)
-                    .padding(.bottom, DesignTokens.Spacing.xxxl)
-            }
-        }
-    }
-
-    // MARK: - Tomorrow Section
-
-    private var tomorrowSection: some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
-            HStack(spacing: 6) {
-                Text("TOMORROW")
-                    .font(DesignTokens.Typography.quadLabel)
-                    .foregroundStyle(DesignTokens.Colors.secondary)
-                Text("·")
-                    .font(DesignTokens.Typography.quadLabel)
-                    .foregroundStyle(DesignTokens.Colors.secondary)
-                Text(model.tomorrowLabel.uppercased())
-                    .font(DesignTokens.Typography.quadLabel)
-                    .foregroundStyle(DesignTokens.Colors.primary)
-            }
-
-            if model.tomorrowSessions.isEmpty {
-                Text("No school tomorrow")
-                    .font(DesignTokens.Typography.quadBody)
-                    .foregroundStyle(DesignTokens.Colors.secondary)
-                    .padding(.top, DesignTokens.Spacing.xs)
-            } else {
-                VStack(spacing: 0) {
-                    ForEach(Array(model.tomorrowSessions.enumerated()), id: \.element.id) { idx, session in
-                        tomorrowRow(session)
-                        if idx < model.tomorrowSessions.count - 1 {
-                            Rectangle()
-                                .fill(DesignTokens.Colors.secondary.opacity(0.10))
-                                .frame(height: 0.5)
-                                .padding(.leading, 20)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private func tomorrowRow(_ session: CourseSession) -> some View {
-        let color = CourseColors.color(atIndex: session.course.colorIndex)
-        return HStack(spacing: DesignTokens.Spacing.md) {
-            Circle()
-                .fill(color.opacity(0.4))
-                .frame(width: 8, height: 8)
-            Text(session.course.name)
-                .font(DesignTokens.Typography.quadBody)
-                .foregroundStyle(DesignTokens.Colors.primary.opacity(0.65))
-                .lineLimit(1)
-            Spacer()
-            if let room = session.course.room {
-                Text(room)
-                    .font(DesignTokens.Typography.quadCaption)
-                    .foregroundStyle(DesignTokens.Colors.secondary.opacity(0.55))
-            }
-        }
-        .padding(.vertical, 10)
-    }
 }
 
 // MARK: - Hero: During Class
@@ -479,6 +409,6 @@ private struct AfterOrNoSchoolHeroView: View {
 // MARK: - Preview
 
 #Preview {
-    TodayView(model: TodayViewModel(previewDate: Calendar.current.date(from: DateComponents(year: 2025, month: 9, day: 4, hour: 10, minute: 20))!))
+    TodayView(model: TodayViewModel(previewDate: Calendar.current.date(from: DateComponents(year: 2026, month: 9, day: 8, hour: 10, minute: 20))!))
         .preferredColorScheme(.dark)
 }

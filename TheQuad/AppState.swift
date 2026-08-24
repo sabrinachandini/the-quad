@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import UIKit
 
 // MARK: - Grade Display Preference
 
@@ -28,6 +29,7 @@ final class AppState {
     var graduationYear: Int
     var classRemindersEnabled: Bool
     var gradeDisplayPreference: GradePreference = .keepUpdated
+    var avatarImage: UIImage? = nil
 
     // MARK: - Providers
     var aspenProvider: AspenGradeProvider = .shared
@@ -58,6 +60,18 @@ final class AppState {
         )
     }
 
+    private static var avatarURL: URL {
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("quad_avatar.jpg")
+    }
+
+    func saveAvatar(_ image: UIImage) {
+        avatarImage = image
+        if let data = image.jpegData(compressionQuality: 0.85) {
+            try? data.write(to: AppState.avatarURL, options: .atomic)
+        }
+    }
+
     private init() {
         self.courses = MockStudentSchedule.courses
         self.enrollments = MockStudentSchedule.enrollments
@@ -72,6 +86,9 @@ final class AppState {
         self.displayName = "Student"
         self.graduationYear = 2026
         self.classRemindersEnabled = true
+        if let data = try? Data(contentsOf: AppState.avatarURL) {
+            self.avatarImage = UIImage(data: data)
+        }
 
         let dir = AppState.mockDirectory()
         self.directory = dir

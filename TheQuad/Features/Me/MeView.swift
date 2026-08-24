@@ -16,13 +16,23 @@ struct MeView: View {
             // MARK: - Profile
             Section {
                 HStack(spacing: DesignTokens.Spacing.md) {
-                    ZStack {
-                        Circle()
-                            .fill(DesignTokens.Colors.accent)
-                            .frame(width: 56, height: 56)
-                        Text(String(appState.displayName.prefix(1)).uppercased())
-                            .font(.system(size: 22, weight: .bold))
-                            .foregroundStyle(.white)
+                    Group {
+                        if let img = appState.avatarImage {
+                            Image(uiImage: img)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 56, height: 56)
+                                .clipShape(Circle())
+                        } else {
+                            ZStack {
+                                Circle()
+                                    .fill(DesignTokens.Colors.accent)
+                                    .frame(width: 56, height: 56)
+                                Text(String(appState.displayName.prefix(1)).uppercased())
+                                    .font(.system(size: 22, weight: .bold))
+                                    .foregroundStyle(.white)
+                            }
+                        }
                     }
                     VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
                         Text(appState.displayName)
@@ -42,14 +52,13 @@ struct MeView: View {
             Section {
                 ForEach(appState.courses) { course in
                     HStack(spacing: DesignTokens.Spacing.md) {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.small)
-                                .fill(CourseColors.color(atIndex: course.colorIndex))
-                                .frame(width: 32, height: 32)
-                            Text(course.block.rawValue.uppercased())
-                                .font(.system(size: 13, weight: .bold))
-                                .foregroundStyle(.white)
-                        }
+                        Circle()
+                            .fill(CourseColors.color(atIndex: course.colorIndex))
+                            .frame(width: 8, height: 8)
+                        Text(course.block.rawValue)
+                            .font(DesignTokens.Typography.quadCaption)
+                            .foregroundStyle(DesignTokens.Colors.secondary.opacity(0.5))
+                            .frame(width: 14, alignment: .leading)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(course.name)
                                 .font(DesignTokens.Typography.quadBody)
@@ -59,6 +68,12 @@ struct MeView: View {
                                     .font(DesignTokens.Typography.quadCaption)
                                     .foregroundStyle(DesignTokens.Colors.secondary)
                             }
+                        }
+                        Spacer()
+                        if let room = course.room {
+                            Text(room)
+                                .font(DesignTokens.Typography.quadCaption)
+                                .foregroundStyle(DesignTokens.Colors.secondary.opacity(0.55))
                         }
                     }
                     .padding(.vertical, 2)
