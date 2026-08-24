@@ -9,6 +9,7 @@ struct MeView: View {
     @State private var showAspenConnectSheet = false
     @State private var icsExportURL: URL? = nil
     @State private var showShareSheet = false
+    @State private var showCalendarOpenFailed = false
 
     var body: some View {
         List {
@@ -229,6 +230,11 @@ struct MeView: View {
         .sheet(isPresented: $showAspenConnectSheet) {
             AspenConnectView()
         }
+        .alert("Couldn't Open Calendar", isPresented: $showCalendarOpenFailed) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("iOS couldn't open the .ics file. Make sure the Calendar app is installed.")
+        }
     }
 
     @ViewBuilder
@@ -266,10 +272,12 @@ struct MeView: View {
 
     /// Opens the .ics file directly in iOS Calendar — shows the native "Add to Calendar" dialog.
     private func openInCalendar() {
-        let tempURL = buildICSFile()
-        guard let url = tempURL else { return }
-        // Opening a file:// URL with .ics extension triggers iOS Calendar natively.
-        UIApplication.shared.open(url)
+        guard let url = buildICSFile() else { return }
+        UIApplication.shared.open(url, options: [:]) { success in
+            if !success {
+                showCalendarOpenFailed = true
+            }
+        }
     }
 
     @discardableResult
@@ -294,10 +302,6 @@ struct MeView: View {
         } catch {
             return nil
         }
-    }
-
-    private func generateICSFile() {
-        buildICSFile()
     }
 
     private func sectionHeader(_ title: String) -> some View {
@@ -432,14 +436,6 @@ struct AspenConnectedSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var aspenProvider = AspenGradeProvider.shared
     @State private var showDisconnectAlert = false
-
-    private var gradeRows: [(courseName: String, letterGrade: String, percentage: String)] {
-        aspenProvider.courses.map { grade in
-            let letter = grade.letterGrade ?? (grade.currentGrade.map { GradeEngine.letterGrade(from: $0) } ?? "—")
-            let pctStr = grade.currentGrade.map { String(format: "%.1f%%", $0) } ?? "—"
-            return (courseName: "Course", letterGrade: letter, percentage: pctStr)
-        }
-    }
 
     private func gradeColor(_ letter: String) -> Color {
         switch letter {

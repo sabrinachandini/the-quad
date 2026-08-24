@@ -40,11 +40,14 @@ final class TodayViewModel {
             return Calendar.current.date(from: DateComponents(year: 2026, month: 9, day: 8, hour: 10))
         }()
         self.now = previewDate ?? debugDate ?? Date()
+        // Don't start the live timer when pinned to a debug date — it would override the pin after 30s.
+        let startTimer = previewDate == nil && debugDate == nil
         #else
         self.now = previewDate ?? Date()
+        let startTimer = previewDate == nil
         #endif
 
-        if previewDate == nil {
+        if startTimer {
             // Start a repeating timer that keeps `now` current.
             let t = Timer.scheduledTimer(withTimeInterval: 30, repeats: true) { [weak self] _ in
                 self?.now = Date()

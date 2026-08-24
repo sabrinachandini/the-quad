@@ -21,6 +21,7 @@ struct ICSGenerator {
         lines.append("METHOD:PUBLISH")
         lines.append("X-WR-CALNAME:\(calendarName)")
         lines.append("X-WR-TIMEZONE:America/New_York")
+        lines.append(contentsOf: vtimezone())
 
         var current = Calendar.current.startOfDay(for: startDate)
         while current <= endDate {
@@ -36,15 +37,39 @@ struct ICSGenerator {
         return lines.joined(separator: "\r\n")
     }
 
+    // MARK: - VTIMEZONE
+
+    private func vtimezone() -> [String] {
+        return [
+            "BEGIN:VTIMEZONE",
+            "TZID:America/New_York",
+            "BEGIN:DAYLIGHT",
+            "TZOFFSETFROM:-0500",
+            "TZOFFSETTO:-0400",
+            "TZNAME:EDT",
+            "DTSTART:19700308T020000",
+            "RRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3",
+            "END:DAYLIGHT",
+            "BEGIN:STANDARD",
+            "TZOFFSETFROM:-0400",
+            "TZOFFSETTO:-0500",
+            "TZNAME:EST",
+            "DTSTART:19701101T020000",
+            "RRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11",
+            "END:STANDARD",
+            "END:VTIMEZONE",
+        ]
+    }
+
     // MARK: - VEVENT builder
 
     private func vevent(for session: CourseSession) -> [String] {
         let dtStart = icsDate(session.startDateTime)
         let dtEnd = icsDate(session.endDateTime)
         let uid = "\(session.course.id)-\(dtStart)@thequad.app"
-        let summary = foldedLine("SUMMARY:\(session.course.name)")
-        let location = session.course.room ?? ""
-        let description = session.course.teacher.map { "Teacher: \($0)" } ?? ""
+        let summary = foldedLine("SUMMARY:\(escape(session.course.name))")
+        let location = escape(session.course.room ?? "")
+        let description = escape(session.course.teacher.map { "Teacher: \($0)" } ?? "")
         let now = icsDate(Date())
 
         return [
@@ -61,6 +86,15 @@ struct ICSGenerator {
     }
 
     // MARK: - Helpers
+
+    /// Escapes text per RFC 5545 §3.3.11: backslash, semicolon, comma, newline.
+    private func escape(_ text: String) -> String {
+        text
+            .replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: ";", with: "\\;")
+            .replacingOccurrences(of: ",", with: "\\,")
+            .replacingOccurrences(of: "\n", with: "\\n")
+    }
 
     /// Format a Date as ICS local datetime: YYYYMMDDTHHmmss
     private func icsDate(_ date: Date) -> String {

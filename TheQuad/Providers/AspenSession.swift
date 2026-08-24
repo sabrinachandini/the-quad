@@ -163,6 +163,11 @@ actor AspenSession {
                 throw AspenSessionError.serverUnavailable
             }
 
+            if httpResponse.statusCode == 401 {
+                isAuthenticated = false
+                throw AspenSessionError.sessionExpired
+            }
+
             guard let html = String(data: data, encoding: .utf8) ??
                              String(data: data, encoding: .isoLatin1) else {
                 throw AspenSessionError.unexpectedResponse(httpResponse.statusCode)

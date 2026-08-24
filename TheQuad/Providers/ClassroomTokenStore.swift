@@ -12,10 +12,11 @@ final class ClassroomTokenStore {
         var accessToken: String
         var refreshToken: String?
         var expiresAt: Date?
+        var email: String?
     }
 
-    func save(accessToken: String, refreshToken: String?, expiresAt: Date?) throws {
-        let bundle = TokenBundle(accessToken: accessToken, refreshToken: refreshToken, expiresAt: expiresAt)
+    func save(accessToken: String, refreshToken: String?, expiresAt: Date?, email: String? = nil) throws {
+        let bundle = TokenBundle(accessToken: accessToken, refreshToken: refreshToken, expiresAt: expiresAt, email: email)
         let data = try JSONEncoder().encode(bundle)
 
         // Delete existing item first
@@ -31,7 +32,7 @@ final class ClassroomTokenStore {
             kSecAttrService as String: service,
             kSecAttrAccount as String: account,
             kSecValueData as String: data,
-            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly
         ]
         let status = SecItemAdd(addQuery as CFDictionary, nil)
         guard status == errSecSuccess else {
@@ -49,6 +50,10 @@ final class ClassroomTokenStore {
 
     func loadExpiry() throws -> Date? {
         try loadBundle()?.expiresAt
+    }
+
+    func loadEmail() throws -> String? {
+        try loadBundle()?.email
     }
 
     func delete() throws {

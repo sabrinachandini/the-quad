@@ -94,7 +94,8 @@ final class ClassroomAuthProvider: NSObject {
             try ClassroomTokenStore.shared.save(
                 accessToken: tokenResponse.accessToken,
                 refreshToken: tokenResponse.refreshToken,
-                expiresAt: expiresAt
+                expiresAt: expiresAt,
+                email: email
             )
 
             connectedEmail = email
@@ -153,8 +154,9 @@ final class ClassroomAuthProvider: NSObject {
             return
         }
 
-        // Attempt to restore email from stored token
-        let email = connectedEmail ?? "LHS Student"
+        // Restore email from keychain — was saved at connect time
+        let email = (try? ClassroomTokenStore.shared.loadEmail()) ?? connectedEmail ?? "LHS Student"
+        connectedEmail = email
         authState = .connected(email: email, lastSync: Date())
     }
 

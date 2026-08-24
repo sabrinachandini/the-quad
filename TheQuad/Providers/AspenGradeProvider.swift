@@ -148,11 +148,11 @@ final class AspenGradeProvider {
 
             for summary in summaries {
                 let categories = await fetchCourseDetail(oid: summary.oid, courseName: summary.name)
-                let courseId = UUID()  // Stable in practice; see note below
+                let stableId = stableID(from: summary.oid)
 
                 let grade = CourseGrade(
-                    id: UUID(),
-                    courseId: courseId,
+                    id: stableId,
+                    courseId: stableId,
                     currentGrade: summary.termGradePercent,
                     letterGrade: summary.termGradeLetter,
                     categories: categories,
@@ -203,6 +203,31 @@ final class AspenGradeProvider {
             // Non-fatal — return empty categories rather than failing the whole fetch
             return []
         }
+    }
+
+    // MARK: - Private: Stable ID
+
+    /// Derives a deterministic UUID from an Aspen OID string using FNV-1a so that
+    /// the same course always gets the same UUID across syncs. This prevents What-If
+    /// grade entries from being orphaned when grades are re-fetched.
+    private func stableID(from string: String) -> UUID {
+        var h: UInt64 = 14695981039346656037
+        for byte in string.utf8 {
+            h ^= UInt64(byte)
+            h = h &* 1099511628211
+        }
+        let lo = h
+        let hi = ~h
+        return UUID(uuid: (
+            UInt8(truncatingIfNeeded: lo >> 56), UInt8(truncatingIfNeeded: lo >> 48),
+            UInt8(truncatingIfNeeded: lo >> 40), UInt8(truncatingIfNeeded: lo >> 32),
+            UInt8(truncatingIfNeeded: lo >> 24), UInt8(truncatingIfNeeded: lo >> 16),
+            UInt8(truncatingIfNeeded: lo >> 8),  UInt8(truncatingIfNeeded: lo),
+            UInt8(truncatingIfNeeded: hi >> 56), UInt8(truncatingIfNeeded: hi >> 48),
+            UInt8(truncatingIfNeeded: hi >> 40), UInt8(truncatingIfNeeded: hi >> 32),
+            UInt8(truncatingIfNeeded: hi >> 24), UInt8(truncatingIfNeeded: hi >> 16),
+            UInt8(truncatingIfNeeded: hi >> 8),  UInt8(truncatingIfNeeded: hi)
+        ))
     }
 
     // MARK: - Private: Persistence

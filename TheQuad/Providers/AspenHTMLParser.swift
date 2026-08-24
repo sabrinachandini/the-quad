@@ -246,13 +246,13 @@ struct AspenHTMLParser {
         let cells = extractCells(from: row)
         guard cells.count >= 2 else { return nil }
 
-        // Extract OID from href in the row
-        let oid = extractOID(from: row) ?? UUID().uuidString
-
-        // Aspen typically: Course Name | Teacher | Term Grade | Letter Grade | ...
-        // Cell positions vary by district config. We try positional then fallback.
+        // Extract name first so we can use it as a stable OID fallback.
         let name = cells[0].trimmingCharacters(in: .whitespacesAndNewlines)
         guard !name.isEmpty else { return nil }
+
+        // Use the real Aspen OID if present; fall back to "name:<courseName>" so the
+        // same course gets the same identifier across syncs even when no OID link exists.
+        let oid = extractOID(from: row) ?? "name:\(name)"
 
         let teacher = cells.count > 1 ? nilIfEmpty(cells[1]) : nil
         let gradeString = cells.count > 2 ? cells[2].trimmingCharacters(in: .whitespacesAndNewlines) : ""
