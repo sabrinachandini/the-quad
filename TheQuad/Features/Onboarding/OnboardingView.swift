@@ -136,7 +136,7 @@ private struct ProfileStep: View {
     @State private var firstNameText: String = ""
     @State private var lastNameText: String = ""
 
-    private let gradYears = [2025, 2026, 2027, 2028]
+    private let gradYears = [2026, 2027, 2028, 2029]
 
     private var profileComplete: Bool {
         !firstNameText.trimmingCharacters(in: .whitespaces).isEmpty &&

@@ -79,7 +79,7 @@ final class OnboardingViewModel {
                 id: UUID(),
                 studentId: Self.studentId,
                 courseId: course.id,
-                schoolYear: "2025-26"
+                schoolYear: "2026-27"
             )
         }
         AppState.shared.courses = courses
