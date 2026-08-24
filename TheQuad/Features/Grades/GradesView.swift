@@ -13,19 +13,28 @@ struct GradesView: View {
                     emptyState
                 } else {
                     ScrollView {
-                        VStack(alignment: .leading, spacing: DesignTokens.Spacing.xl) {
+                        VStack(alignment: .leading, spacing: 0) {
                             Text("Grades")
                                 .font(DesignTokens.Typography.quadTitle)
                                 .foregroundStyle(DesignTokens.Colors.primary)
+                                .padding(.horizontal, DesignTokens.Spacing.lg)
+                                .padding(.top, DesignTokens.Spacing.lg)
+                                .padding(.bottom, DesignTokens.Spacing.xl)
 
-                            ForEach(model.grades) { grade in
-                                NavigationLink(value: grade.id) {
-                                    GradeCard(grade: grade, model: model)
+                            VStack(spacing: 0) {
+                                ForEach(Array(model.grades.enumerated()), id: \.element.id) { index, grade in
+                                    NavigationLink(value: grade.id) {
+                                        GradeRow(grade: grade, model: model)
+                                    }
+                                    .buttonStyle(.plain)
+
+                                    if index < model.grades.count - 1 {
+                                        Divider()
+                                            .padding(.leading, DesignTokens.Spacing.lg)
+                                    }
                                 }
-                                .buttonStyle(.plain)
                             }
                         }
-                        .padding(DesignTokens.Spacing.lg)
                         .padding(.bottom, DesignTokens.Spacing.xxxl)
                     }
                 }
@@ -64,9 +73,9 @@ struct GradesView: View {
     }
 }
 
-// MARK: - Grade Card
+// MARK: - Grade Row (editorial, accent-band style)
 
-private struct GradeCard: View {
+private struct GradeRow: View {
     let grade: CourseGrade
     let model: GradesViewModel
 
@@ -76,40 +85,52 @@ private struct GradeCard: View {
         let pct = model.overallPercentage(for: grade)
         let letter = model.letterGrade(for: grade)
 
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
-            HStack(alignment: .top) {
+        // Build category summary string: "Tests 50% · HW 30%"
+        let categorySummary: String? = {
+            let cats = grade.categories
+            guard !cats.isEmpty else { return nil }
+            return cats.map { "\($0.name) \(Int($0.weight * 100))%" }.joined(separator: " · ")
+        }()
+
+        HStack(spacing: 0) {
+            // Left accent band
+            Rectangle()
+                .fill(color)
+                .frame(width: 4)
+
+            // Content
+            HStack(alignment: .center, spacing: 0) {
                 VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
                     Text(course?.name ?? "Course")
-                        .font(DesignTokens.Typography.quadHeadline)
+                        .font(DesignTokens.Typography.quadBody)
                         .foregroundStyle(DesignTokens.Colors.primary)
+                    if let summary = categorySummary {
+                        Text(summary)
+                            .font(DesignTokens.Typography.quadCaption)
+                            .foregroundStyle(DesignTokens.Colors.secondary)
+                            .lineLimit(1)
+                    }
+                }
+                .padding(.leading, DesignTokens.Spacing.md)
+
+                Spacer()
+
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(letter)
+                        .font(DesignTokens.Typography.quadTitle.weight(.bold))
+                        .foregroundStyle(color)
                     if let pct {
                         Text(String(format: "%.1f%%", pct))
                             .font(DesignTokens.Typography.quadCaption)
                             .foregroundStyle(DesignTokens.Colors.secondary)
                     }
                 }
-                Spacer()
-                Text(letter)
-                    .font(.system(size: 34, weight: .bold))
-                    .foregroundStyle(color)
+                .padding(.trailing, DesignTokens.Spacing.lg)
             }
-
-            // Progress bar
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 2)
-                        .fill(color.opacity(0.18))
-                        .frame(height: 4)
-                    RoundedRectangle(cornerRadius: 2)
-                        .fill(color)
-                        .frame(width: geo.size.width * CGFloat((pct ?? 0) / 100.0), height: 4)
-                }
-            }
-            .frame(height: 4)
+            .padding(.vertical, DesignTokens.Spacing.lg)
         }
-        .padding(DesignTokens.Spacing.lg)
-        .background(DesignTokens.Colors.surface)
-        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large))
+        .frame(maxWidth: .infinity)
+        .background(DesignTokens.Colors.background)
     }
 }
 
@@ -132,7 +153,6 @@ struct CourseGradeDetailView: View {
     private var pct: Double? { model.overallPercentage(for: grade) }
     private var letter: String { model.letterGrade(for: grade) }
 
-    // Live grade: use updated grade from AppState so what-if changes reflect
     private var liveGrade: CourseGrade {
         model.grades.first { $0.id == grade.id } ?? grade
     }
@@ -143,19 +163,16 @@ struct CourseGradeDetailView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: DesignTokens.Spacing.xl) {
                     gradeHeader
-                    ForEach(liveGrade.categories) { category in
-                        CategorySection(category: category, courseColor: color)
-                    }
-                    whatIfCard
-                    finalExamCard
+                    categoriesSection
+                    whatIfSection
+                    finalExamSection
                 }
-                .padding(DesignTokens.Spacing.lg)
                 .padding(.bottom, DesignTokens.Spacing.xxxl)
             }
             .onTapGesture { focusedField = nil }
         }
         .navigationTitle(course?.name ?? "Grade Detail")
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarTitleDisplayMode(.large)
         .onAppear {
             model.selectedCourseGradeId = grade.id
             if model.hypotheticalCategoryId == nil {
@@ -174,121 +191,145 @@ struct CourseGradeDetailView: View {
         let livePct = model.overallPercentage(for: liveGrade)
         let liveLetter = model.letterGrade(for: liveGrade)
         return VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
-            Text(course?.name ?? "Course")
-                .font(DesignTokens.Typography.quadTitle)
-                .foregroundStyle(DesignTokens.Colors.primary)
-            HStack(alignment: .firstTextBaseline, spacing: DesignTokens.Spacing.sm) {
-                Text(liveLetter)
-                    .font(.system(size: 52, weight: .bold))
-                    .foregroundStyle(color)
-                if let livePct {
-                    Text(String(format: "%.1f%%", livePct))
+            Text(liveLetter)
+                .font(.system(size: 72, weight: .bold, design: .default))
+                .foregroundStyle(color)
+                .tracking(-1)
+            if let livePct {
+                Text(String(format: "%.1f%%", livePct))
+                    .font(DesignTokens.Typography.quadHeadline)
+                    .foregroundStyle(color.opacity(0.75))
+            }
+        }
+        .padding(.horizontal, DesignTokens.Spacing.lg)
+        .padding(.top, DesignTokens.Spacing.sm)
+    }
+
+    // MARK: - Categories
+
+    private var categoriesSection: some View {
+        VStack(alignment: .leading, spacing: DesignTokens.Spacing.xl) {
+            ForEach(liveGrade.categories) { category in
+                VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
+                    // Section header — uppercase tracked label
+                    HStack {
+                        Text("\(category.name.uppercased()) · \(Int(category.weight * 100))%")
+                            .font(DesignTokens.Typography.quadLabel)
+                            .foregroundStyle(DesignTokens.Colors.secondary)
+                        Spacer()
+                        if let avg = GradeEngine.categoryAverage(category) {
+                            Text(String(format: "%.1f%%", avg))
+                                .font(DesignTokens.Typography.quadCaption.weight(.semibold))
+                                .foregroundStyle(color)
+                        }
+                    }
+                    .padding(.horizontal, DesignTokens.Spacing.lg)
+
+                    // Entry rows with dividers
+                    VStack(spacing: 0) {
+                        ForEach(Array(category.entries.enumerated()), id: \.element.id) { idx, entry in
+                            DetailEntryRow(entry: entry, courseColor: color)
+                            if idx < category.entries.count - 1 {
+                                Divider()
+                                    .padding(.leading, DesignTokens.Spacing.lg)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - What-If (inline bordered region)
+
+    private var whatIfSection: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // Thin rule on top
+            Rectangle()
+                .fill(DesignTokens.Colors.secondary.opacity(0.25))
+                .frame(height: 1)
+                .padding(.horizontal, DesignTokens.Spacing.lg)
+
+            VStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
+                Text("WHAT IF?")
+                    .font(DesignTokens.Typography.quadLabel)
+                    .foregroundStyle(DesignTokens.Colors.secondary)
+
+                // Category picker
+                Picker("Category", selection: Binding(
+                    get: { model.hypotheticalCategoryId ?? liveGrade.categories.first?.id },
+                    set: { model.hypotheticalCategoryId = $0 }
+                )) {
+                    ForEach(liveGrade.categories) { cat in
+                        Text(cat.name).tag(Optional(cat.id))
+                    }
+                }
+                .pickerStyle(.segmented)
+
+                // Score inputs
+                HStack(spacing: DesignTokens.Spacing.md) {
+                    VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
+                        Text("Score")
+                            .font(DesignTokens.Typography.quadCaption)
+                            .foregroundStyle(DesignTokens.Colors.secondary)
+                        TextField("0", text: $model.hypotheticalScore)
+                            .keyboardType(.decimalPad)
+                            .focused($focusedField, equals: .score)
+                            .padding(DesignTokens.Spacing.sm)
+                            .background(DesignTokens.Colors.surface)
+                            .font(DesignTokens.Typography.quadBody)
+                            .foregroundStyle(DesignTokens.Colors.primary)
+                    }
+                    Text("/")
                         .font(DesignTokens.Typography.quadHeadline)
                         .foregroundStyle(DesignTokens.Colors.secondary)
+                        .padding(.top, DesignTokens.Spacing.xl)
+                    VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
+                        Text("Out of")
+                            .font(DesignTokens.Typography.quadCaption)
+                            .foregroundStyle(DesignTokens.Colors.secondary)
+                        TextField("100", text: $model.hypotheticalPossible)
+                            .keyboardType(.decimalPad)
+                            .focused($focusedField, equals: .possible)
+                            .padding(DesignTokens.Spacing.sm)
+                            .background(DesignTokens.Colors.surface)
+                            .font(DesignTokens.Typography.quadBody)
+                            .foregroundStyle(DesignTokens.Colors.primary)
+                    }
+                }
+
+                if let whatIf = model.whatIfGrade {
+                    HStack(spacing: DesignTokens.Spacing.xs) {
+                        Text("Grade would be")
+                            .font(DesignTokens.Typography.quadBody)
+                            .foregroundStyle(DesignTokens.Colors.secondary)
+                        Text(String(format: "%.1f%%", whatIf))
+                            .font(DesignTokens.Typography.quadBody.weight(.semibold))
+                            .foregroundStyle(color)
+                        Text("(\(GradeEngine.letterGrade(from: whatIf)))")
+                            .font(DesignTokens.Typography.quadBody.weight(.semibold))
+                            .foregroundStyle(color)
+                    }
                 }
             }
+            .padding(DesignTokens.Spacing.lg)
         }
-        .padding(DesignTokens.Spacing.lg)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(DesignTokens.Colors.surface)
-        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large))
     }
 
-    // MARK: - What-If Card
+    // MARK: - Final Exam (compact)
 
-    private var whatIfCard: some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
-            HStack {
-                Image(systemName: "wand.and.sparkles")
-                    .foregroundStyle(color)
-                Text("What If?")
-                    .font(DesignTokens.Typography.quadHeadline)
-                    .foregroundStyle(DesignTokens.Colors.primary)
-            }
+    private var finalExamSection: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Rectangle()
+                .fill(DesignTokens.Colors.secondary.opacity(0.25))
+                .frame(height: 1)
+                .padding(.horizontal, DesignTokens.Spacing.lg)
 
-            // Category picker
-            Picker("Category", selection: Binding(
-                get: { model.hypotheticalCategoryId ?? liveGrade.categories.first?.id },
-                set: { model.hypotheticalCategoryId = $0 }
-            )) {
-                ForEach(liveGrade.categories) { cat in
-                    Text(cat.name).tag(Optional(cat.id))
-                }
-            }
-            .pickerStyle(.segmented)
-
-            // Score inputs
-            HStack(spacing: DesignTokens.Spacing.md) {
-                VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
-                    Text("Score")
-                        .font(DesignTokens.Typography.quadCaption)
-                        .foregroundStyle(DesignTokens.Colors.secondary)
-                    TextField("0", text: $model.hypotheticalScore)
-                        .keyboardType(.decimalPad)
-                        .focused($focusedField, equals: .score)
-                        .padding(DesignTokens.Spacing.sm)
-                        .background(DesignTokens.Colors.background)
-                        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.small))
-                        .font(DesignTokens.Typography.quadBody)
-                        .foregroundStyle(DesignTokens.Colors.primary)
-                }
-                Text("/")
-                    .font(DesignTokens.Typography.quadHeadline)
+            VStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
+                Text("NEED ON FINAL")
+                    .font(DesignTokens.Typography.quadLabel)
                     .foregroundStyle(DesignTokens.Colors.secondary)
-                    .padding(.top, DesignTokens.Spacing.xl)
-                VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
-                    Text("Out of")
-                        .font(DesignTokens.Typography.quadCaption)
-                        .foregroundStyle(DesignTokens.Colors.secondary)
-                    TextField("100", text: $model.hypotheticalPossible)
-                        .keyboardType(.decimalPad)
-                        .focused($focusedField, equals: .possible)
-                        .padding(DesignTokens.Spacing.sm)
-                        .background(DesignTokens.Colors.background)
-                        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.small))
-                        .font(DesignTokens.Typography.quadBody)
-                        .foregroundStyle(DesignTokens.Colors.primary)
-                }
-            }
 
-            // Live preview
-            if let whatIf = model.whatIfGrade {
-                HStack {
-                    Image(systemName: "arrow.right.circle.fill")
-                        .foregroundStyle(color)
-                    Text("Grade would be ")
-                        .font(DesignTokens.Typography.quadBody)
-                        .foregroundStyle(DesignTokens.Colors.secondary)
-                    + Text(String(format: "%.1f%%", whatIf))
-                        .font(DesignTokens.Typography.quadBody.weight(.semibold))
-                        .foregroundStyle(color)
-                    + Text(" (\(GradeEngine.letterGrade(from: whatIf)))")
-                        .font(DesignTokens.Typography.quadBody.weight(.semibold))
-                        .foregroundStyle(color)
-                }
-                .padding(DesignTokens.Spacing.sm)
-                .background(color.opacity(0.10))
-                .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.small))
-            }
-        }
-        .padding(DesignTokens.Spacing.lg)
-        .background(DesignTokens.Colors.surface)
-        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large))
-    }
-
-    // MARK: - Final Exam Calculator
-
-    private var finalExamCard: some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
-            HStack {
-                Image(systemName: "calendar.badge.checkmark")
-                    .foregroundStyle(color)
-                Text("Need on Final")
-                    .font(DesignTokens.Typography.quadHeadline)
-                    .foregroundStyle(DesignTokens.Colors.primary)
-            }
-
-            VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
                 HStack {
                     Text("Target grade")
                         .font(DesignTokens.Typography.quadBody)
@@ -300,88 +341,44 @@ struct CourseGradeDetailView: View {
                 }
                 Slider(value: $model.targetGradePercent, in: 70...100, step: 1)
                     .tint(color)
-            }
 
-            if let result = GradeEngine.scoreNeededOnFinal(
-                currentGrade: liveGrade,
-                finalWeight: 0.20,
-                targetPercentage: model.targetGradePercent
-            ) {
-                let scoreText = String(format: "%.1f%%", result.score)
-                HStack(spacing: DesignTokens.Spacing.sm) {
-                    Image(systemName: result.isAchievable ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
-                        .foregroundStyle(result.isAchievable ? color : DesignTokens.Colors.destructive)
-                    if result.score <= 0 {
-                        Text("You've already reached \(String(format: "%.0f%%", model.targetGradePercent))!")
-                            .font(DesignTokens.Typography.quadBody)
-                            .foregroundStyle(color)
-                    } else if result.isAchievable {
-                        Text("You need \(scoreText) on a 20% final to reach \(String(format: "%.0f%%", model.targetGradePercent)).")
-                            .font(DesignTokens.Typography.quadBody)
-                            .foregroundStyle(DesignTokens.Colors.primary)
-                    } else {
-                        Text("You'd need \(scoreText) — not achievable. Consider a lower target.")
-                            .font(DesignTokens.Typography.quadBody)
-                            .foregroundStyle(DesignTokens.Colors.destructive)
+                if let result = GradeEngine.scoreNeededOnFinal(
+                    currentGrade: liveGrade,
+                    finalWeight: 0.20,
+                    targetPercentage: model.targetGradePercent
+                ) {
+                    let scoreText = String(format: "%.1f%%", result.score)
+                    HStack(spacing: DesignTokens.Spacing.sm) {
+                        Image(systemName: result.isAchievable ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
+                            .foregroundStyle(result.isAchievable ? color : DesignTokens.Colors.destructive)
+                        if result.score <= 0 {
+                            Text("You've already reached \(String(format: "%.0f%%", model.targetGradePercent))!")
+                                .font(DesignTokens.Typography.quadBody)
+                                .foregroundStyle(color)
+                        } else if result.isAchievable {
+                            Text("You need \(scoreText) on a 20% final to reach \(String(format: "%.0f%%", model.targetGradePercent)).")
+                                .font(DesignTokens.Typography.quadBody)
+                                .foregroundStyle(DesignTokens.Colors.primary)
+                        } else {
+                            Text("You'd need \(scoreText) — not achievable. Consider a lower target.")
+                                .font(DesignTokens.Typography.quadBody)
+                                .foregroundStyle(DesignTokens.Colors.destructive)
+                        }
                     }
-                }
-                .padding(DesignTokens.Spacing.sm)
-                .background((result.isAchievable ? color : DesignTokens.Colors.destructive).opacity(0.10))
-                .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.small))
-            } else {
-                Text("Not enough grade data to calculate.")
-                    .font(DesignTokens.Typography.quadBody)
-                    .foregroundStyle(DesignTokens.Colors.secondary)
-            }
-        }
-        .padding(DesignTokens.Spacing.lg)
-        .background(DesignTokens.Colors.surface)
-        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large))
-    }
-}
-
-// MARK: - Category Section
-
-private struct CategorySection: View {
-    let category: GradeCategory
-    let courseColor: Color
-
-    private var avg: Double? {
-        GradeEngine.categoryAverage(category)
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
-            HStack {
-                Text("\(category.name) · \(Int(category.weight * 100))%")
-                    .font(DesignTokens.Typography.quadHeadline)
-                    .foregroundStyle(DesignTokens.Colors.primary)
-                Spacer()
-                if let avg {
-                    Text(String(format: "%.1f%%", avg))
-                        .font(DesignTokens.Typography.quadCaption.weight(.semibold))
-                        .foregroundStyle(courseColor)
-                        .padding(.horizontal, DesignTokens.Spacing.sm)
-                        .padding(.vertical, DesignTokens.Spacing.xs)
-                        .background(courseColor.opacity(0.15))
-                        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.small))
+                } else {
+                    Text("Not enough grade data to calculate.")
+                        .font(DesignTokens.Typography.quadBody)
+                        .foregroundStyle(DesignTokens.Colors.secondary)
                 }
             }
-
-            VStack(spacing: 1) {
-                ForEach(category.entries) { entry in
-                    EntryRow(entry: entry, courseColor: courseColor)
-                }
-            }
-            .background(DesignTokens.Colors.surface)
-            .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium))
+            .padding(DesignTokens.Spacing.lg)
         }
     }
 }
 
-// MARK: - Entry Row
+// MARK: - Detail Entry Row
 
-private struct EntryRow: View {
+private struct DetailEntryRow: View {
     let entry: GradeEntry
     let courseColor: Color
 
@@ -400,18 +397,10 @@ private struct EntryRow: View {
             Spacer()
 
             if let earned = entry.pointsEarned, let pct {
-                HStack(spacing: DesignTokens.Spacing.xs) {
-                    Text(String(format: "%.0f/%.0f", earned, entry.pointsPossible))
-                        .font(DesignTokens.Typography.quadCaption)
-                        .foregroundStyle(DesignTokens.Colors.secondary)
-                        .strikethrough(entry.isDropped)
-                    Text("·")
-                        .foregroundStyle(DesignTokens.Colors.secondary)
-                    Text(String(format: "%.0f%%", pct))
-                        .font(DesignTokens.Typography.quadCaption.weight(.semibold))
-                        .foregroundStyle(entry.isDropped ? DesignTokens.Colors.secondary : courseColor)
-                        .strikethrough(entry.isDropped)
-                }
+                Text(String(format: "%.0f/%.0f · %.0f%%", earned, entry.pointsPossible, pct))
+                    .font(DesignTokens.Typography.quadCaption)
+                    .foregroundStyle(entry.isDropped ? DesignTokens.Colors.secondary : courseColor)
+                    .strikethrough(entry.isDropped)
             } else {
                 Text("—")
                     .font(DesignTokens.Typography.quadCaption)
