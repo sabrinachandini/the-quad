@@ -22,6 +22,16 @@ final class SchoolViewModel {
     var friends: [User] { AppState.shared.friends }
     var pendingRequests: [User] { AppState.shared.pendingFriends }
 
+    var filteredFriends: [User] {
+        guard !searchText.isEmpty else { return friends }
+        return friends.filter { $0.displayName.localizedCaseInsensitiveContains(searchText) }
+    }
+
+    var filteredClassmates: [User] {
+        guard !searchText.isEmpty else { return classmates }
+        return classmates.filter { $0.displayName.localizedCaseInsensitiveContains(searchText) }
+    }
+
     // MARK: - Classmates
 
     /// Directory users who share at least one block with the current user.

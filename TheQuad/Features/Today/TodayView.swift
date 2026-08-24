@@ -343,6 +343,6 @@ struct TodayView: View {
 }
 
 #Preview {
-    TodayView(model: TodayViewModel(previewDate: Calendar.current.date(from: DateComponents(year: 2025, month: 9, day: 4, hour: 10, minute: 20))!))
+    TodayView(model: TodayViewModel(previewDate: Calendar.current.date(from: DateComponents(year: 2026, month: 9, day: 8, hour: 10, minute: 0))!))
         .preferredColorScheme(.dark)
 }

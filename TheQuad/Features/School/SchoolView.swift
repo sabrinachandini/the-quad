@@ -128,17 +128,22 @@ struct SchoolView: View {
     // MARK: - Friends
 
     private var friendsSection: some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
-            sectionHeader(title: "Friends", count: model.friends.count)
-            if model.friends.isEmpty {
-                emptyHint("Search the directory and add friends to see free-block overlap.")
-            } else {
-                VStack(spacing: DesignTokens.Spacing.sm) {
-                    ForEach(model.friends) { friend in
-                        NavigationLink(destination: FriendDetailView(friend: friend, model: model)) {
-                            friendRow(friend)
+        let list = model.filteredFriends
+        return VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
+            if model.searchText.isEmpty || !list.isEmpty {
+                sectionHeader(title: "Friends", count: list.count)
+                if model.friends.isEmpty {
+                    emptyHint("Search the directory and add friends to see free-block overlap.")
+                } else if list.isEmpty {
+                    emptyHint("No friends match your search.")
+                } else {
+                    VStack(spacing: DesignTokens.Spacing.sm) {
+                        ForEach(list) { friend in
+                            NavigationLink(destination: FriendDetailView(friend: friend, model: model)) {
+                                friendRow(friend)
+                            }
+                            .buttonStyle(.plain)
                         }
-                        .buttonStyle(.plain)
                     }
                 }
             }
@@ -175,17 +180,22 @@ struct SchoolView: View {
     // MARK: - Classmates
 
     private var classmatesSection: some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
-            sectionHeader(title: "Classmates", count: model.classmates.count)
-            if model.classmates.isEmpty {
-                emptyHint("No classmates in The Quad yet — share with friends to see them here.")
-            } else {
-                VStack(spacing: DesignTokens.Spacing.sm) {
-                    ForEach(model.classmates) { user in
-                        NavigationLink(destination: FriendDetailView(friend: user, model: model)) {
-                            classmateRow(user)
+        let list = model.filteredClassmates
+        return VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
+            if model.searchText.isEmpty || !list.isEmpty {
+                sectionHeader(title: "Classmates", count: list.count)
+                if model.classmates.isEmpty {
+                    emptyHint("No classmates in The Quad yet — share with friends to see them here.")
+                } else if list.isEmpty {
+                    emptyHint("No classmates match your search.")
+                } else {
+                    VStack(spacing: DesignTokens.Spacing.sm) {
+                        ForEach(list) { user in
+                            NavigationLink(destination: FriendDetailView(friend: user, model: model)) {
+                                classmateRow(user)
+                            }
+                            .buttonStyle(.plain)
                         }
-                        .buttonStyle(.plain)
                     }
                 }
             }

@@ -40,10 +40,13 @@ final class WorkViewModel {
                 return cal.isDate(due, inSameDayAs: today)
             }
         case .thisWeek:
+            // Use the actual Mon–Sun calendar week, not a rolling 7-day window.
+            let weekStart = cal.date(from: cal.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today)) ?? startOfToday
+            let weekEnd = cal.date(byAdding: .day, value: 7, to: weekStart) ?? startOfNextWeek
             filtered = assignments.filter { a in
                 guard !a.isCompleted, let due = a.dueDate else { return false }
                 let startOfDue = cal.startOfDay(for: due)
-                return startOfDue >= startOfToday && startOfDue < startOfNextWeek
+                return startOfDue >= startOfToday && startOfDue < weekEnd
             }
         }
 
