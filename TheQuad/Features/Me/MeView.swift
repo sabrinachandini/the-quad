@@ -173,6 +173,22 @@ struct MeView: View {
                     }
                     .buttonStyle(.plain)
 
+                    // LHS school calendar via AgendaHero
+                    Button {
+                        if let url = URL(string: "https://agendahero.com/page/lexington26-27") {
+                            UIApplication.shared.open(url)
+                        }
+                    } label: {
+                        HStack {
+                            Image(systemName: "calendar.badge.clock")
+                                .foregroundStyle(DesignTokens.Colors.accent)
+                            Text("View LHS School Calendar")
+                                .font(DesignTokens.Typography.quadBody)
+                                .foregroundStyle(DesignTokens.Colors.accent)
+                        }
+                    }
+                    .buttonStyle(.plain)
+
                     // Secondary: share sheet for other calendar apps
                     if let url = icsExportURL {
                         ShareLink(
