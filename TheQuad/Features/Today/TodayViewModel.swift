@@ -372,6 +372,17 @@ final class TodayViewModel {
     /// Friends free right now (during current free block)
     var friendsFreeNow: [(friend: User, sharedBlock: AvailabilityInterval)] {
         guard todayState == .freeBlock else { return [] }
-        return friendsFreeSoon
+        let slots = engine.meetings(for: now)
+        let mySessions = engine.studentMeetings(for: now, enrollments: enrollments, courses: courses)
+        let occupiedIDs = Set(mySessions.map { $0.slot.id })
+        let minutesNow = Calendar.current.component(.hour, from: now) * 60
+                       + Calendar.current.component(.minute, from: now)
+        guard let currentFreeSlot = slots.first(where: { slot in
+            guard !slot.isLunch, !occupiedIDs.contains(slot.id) else { return false }
+            let slotStart = (slot.startTime.hour ?? 0) * 60 + (slot.startTime.minute ?? 0)
+            let slotEnd   = (slot.endTime.hour ?? 0) * 60 + (slot.endTime.minute ?? 0)
+            return minutesNow >= slotStart && minutesNow < slotEnd
+        }) else { return [] }
+        return friendsFreeSoon(forSlot: currentFreeSlot)
     }
 }
