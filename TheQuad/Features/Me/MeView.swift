@@ -154,26 +154,11 @@ struct MeView: View {
             // MARK: - Calendar Export
             Section {
                 VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
-                    Text("Add your rotating LHS schedule directly to Apple Calendar.")
+                    Text("View the full LHS 2026-27 school calendar — every day number, holiday, and break. Create a free AgendaHero account to add it to Google Calendar, Apple Calendar, or any calendar app of your choice.")
                         .font(DesignTokens.Typography.quadCaption)
                         .foregroundStyle(DesignTokens.Colors.secondary)
                         .fixedSize(horizontal: false, vertical: true)
 
-                    // Primary: open .ics directly so iOS shows the native "Add to Calendar" dialog
-                    Button {
-                        openInCalendar()
-                    } label: {
-                        HStack {
-                            Image(systemName: "calendar.badge.plus")
-                                .foregroundStyle(DesignTokens.Colors.accent)
-                            Text("Add to Apple Calendar")
-                                .font(DesignTokens.Typography.quadBody)
-                                .foregroundStyle(DesignTokens.Colors.accent)
-                        }
-                    }
-                    .buttonStyle(.plain)
-
-                    // LHS school calendar via AgendaHero
                     Button {
                         if let url = URL(string: "https://agendahero.com/page/lexington26-27") {
                             UIApplication.shared.open(url)
@@ -188,23 +173,6 @@ struct MeView: View {
                         }
                     }
                     .buttonStyle(.plain)
-
-                    // Secondary: share sheet for other calendar apps
-                    if let url = icsExportURL {
-                        ShareLink(
-                            item: url,
-                            preview: SharePreview("LHS Schedule", image: Image(systemName: "calendar"))
-                        ) {
-                            HStack {
-                                Image(systemName: "square.and.arrow.up")
-                                    .foregroundStyle(DesignTokens.Colors.secondary)
-                                Text("Share .ics File")
-                                    .font(DesignTokens.Typography.quadCaption)
-                                    .foregroundStyle(DesignTokens.Colors.secondary)
-                            }
-                        }
-                        .buttonStyle(.plain)
-                    }
                 }
                 .padding(.vertical, DesignTokens.Spacing.xs)
             } header: {
