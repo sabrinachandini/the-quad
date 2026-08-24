@@ -28,7 +28,7 @@ struct MeView: View {
                         Text(appState.displayName)
                             .font(DesignTokens.Typography.quadHeadline)
                             .foregroundStyle(DesignTokens.Colors.primary)
-                        Text("Class of \(appState.graduationYear) · LHS")
+                        Text("Class of '\(String(format: "%02d", appState.graduationYear % 100)) · LHS")
                             .font(DesignTokens.Typography.quadCaption)
                             .foregroundStyle(DesignTokens.Colors.secondary)
                     }
