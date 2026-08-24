@@ -69,14 +69,20 @@ private struct LaunchStep: View {
             QColor.background.ignoresSafeArea()
             VStack(spacing: 0) {
                 Spacer()
-                VStack(alignment: .leading, spacing: QSpace.sm) {
-                    Text("THE QUAD")
-                        .font(.system(size: 52, weight: .black))
-                        .tracking(2)
-                        .foregroundStyle(QColor.primary)
-                    Text("Everything LHS.")
-                        .font(QFont.quadBody)
-                        .foregroundStyle(QColor.secondary)
+                VStack(alignment: .leading, spacing: QSpace.lg) {
+                    Image("QuadLogo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 80, height: 80)
+                    VStack(alignment: .leading, spacing: QSpace.xs) {
+                        Text("THE QUAD")
+                            .font(.system(size: 52, weight: .black))
+                            .tracking(2)
+                            .foregroundStyle(QColor.primary)
+                        Text("Everything LHS.")
+                            .font(QFont.quadBody)
+                            .foregroundStyle(QColor.secondary)
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, QSpace.xl)
