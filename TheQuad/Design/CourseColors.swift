@@ -6,14 +6,14 @@ enum CourseColors {
 
     /// 8 distinct accent colors, high-contrast in both light and dark mode.
     static let palette: [Color] = [
-        Color(red: 0.35, green: 0.34, blue: 0.84), // indigo
-        Color(red: 0.95, green: 0.46, blue: 0.21), // orange
-        Color(red: 0.18, green: 0.68, blue: 0.53), // teal
-        Color(red: 0.85, green: 0.27, blue: 0.51), // magenta
-        Color(red: 0.20, green: 0.55, blue: 0.90), // blue
-        Color(red: 0.55, green: 0.44, blue: 0.90), // violet
-        Color(red: 0.90, green: 0.70, blue: 0.20), // amber
-        Color(red: 0.30, green: 0.72, blue: 0.35)  // green
+        Color(light: Color(hex: "#4B48CC"), dark: Color(hex: "#7573F0")), // indigo
+        Color(light: Color(hex: "#E06818"), dark: Color(hex: "#F07830")), // orange
+        Color(light: Color(hex: "#1A9B72"), dark: Color(hex: "#22C090")), // teal
+        Color(light: Color(hex: "#C43578"), dark: Color(hex: "#E04E8C")), // magenta
+        Color(light: Color(hex: "#2175D4"), dark: Color(hex: "#4090E8")), // blue
+        Color(light: Color(hex: "#7250D8"), dark: Color(hex: "#9070F0")), // violet
+        Color(light: Color(hex: "#C49010"), dark: Color(hex: "#E0AA20")), // amber
+        Color(light: Color(hex: "#2EA048"), dark: Color(hex: "#40BC5C")), // green
     ]
 
     /// Color for a specific palette index (wraps around the palette).

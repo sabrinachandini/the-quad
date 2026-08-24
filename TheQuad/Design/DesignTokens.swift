@@ -34,10 +34,14 @@ enum DesignTokens {
 
     // MARK: - Typography
     enum Typography {
+        static let quadDisplay = Font.system(size: 56, weight: .bold, design: .default)
+        static let quadDisplayMedium = Font.system(size: 40, weight: .bold, design: .default)
         static let quadTitle = Font.system(size: 34, weight: .bold, design: .default)
         static let quadHeadline = Font.system(size: 22, weight: .semibold, design: .default)
         static let quadBody = Font.system(size: 17, weight: .regular, design: .default)
         static let quadCaption = Font.system(size: 13, weight: .regular, design: .default)
+        /// Use with .tracking(1.5).textCase(.uppercase) at call sites
+        static let quadLabel = Font.system(size: 11, weight: .semibold, design: .default)
     }
 
     // MARK: - Spacing (4pt grid)
@@ -53,6 +57,7 @@ enum DesignTokens {
 
     // MARK: - Corner Radius
     enum CornerRadius {
+        static let none: CGFloat = 0
         static let small: CGFloat = 8
         static let medium: CGFloat = 12
         static let large: CGFloat = 16
@@ -74,5 +79,19 @@ extension Color {
                 ? UIColor(dark)
                 : UIColor(light)
         })
+    }
+}
+
+// MARK: - Hex Color helper
+extension Color {
+    /// Creates a color from a hex string (e.g. "#4B48CC" or "4B48CC").
+    init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let r = Double((int >> 16) & 0xFF) / 255
+        let g = Double((int >> 8) & 0xFF) / 255
+        let b = Double(int & 0xFF) / 255
+        self.init(red: r, green: g, blue: b)
     }
 }
