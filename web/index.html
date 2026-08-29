@@ -1,558 +1,726 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>The Quad — LHS</title>
-  <meta name="description" content="Your schedule, grades, and school life — all in one place. Built for Lexington High School." />
-
-  <!-- PWA / Home Screen -->
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="The Quad" />
-  <link rel="apple-touch-icon" href="/logo.png" />
-  <link rel="manifest" href="/manifest.json" />
-  <meta name="theme-color" content="#000000" />
-
-  <!-- OG -->
-  <meta property="og:title" content="The Quad — LHS" />
-  <meta property="og:description" content="Your schedule, grades, and school life — all in one place." />
-  <meta property="og:image" content="/logo.png" />
-  <link rel="icon" href="/logo.png" />
-
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <title>The Quad</title>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="The Quad"/>
+  <link rel="apple-touch-icon" href="/logo.png"/>
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="theme-color" content="#000"/>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg: #000;
-      --surface: #111;
-      --border: rgba(255,255,255,0.08);
-      --primary: #fff;
-      --secondary: rgba(255,255,255,0.42);
-      --accent: #7574f2;
-      --accent-glow: rgba(117,116,242,0.18);
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#000;--surface:#111;--surface2:#1c1c1e;
+      --border:rgba(255,255,255,0.08);
+      --p:#fff;--s:rgba(255,255,255,0.42);
+      --accent:#7574f2;--accent-dim:rgba(117,116,242,0.14);
+    }
+    html{font-size:16px;-webkit-text-size-adjust:100%;height:100%}
+    body{
+      background:var(--bg);color:var(--p);
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
+      height:100%;max-width:480px;margin:0 auto;
+      display:flex;flex-direction:column;
+      -webkit-font-smoothing:antialiased;
+      padding-bottom:env(safe-area-inset-bottom);
     }
 
-    html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+    /* screens */
+    .screen{display:none;flex:1;flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch}
+    .screen.active{display:flex}
 
-    body {
-      background: var(--bg);
-      color: var(--primary);
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
-      min-height: 100vh;
-      min-height: 100dvh;
-      display: flex;
-      flex-direction: column;
-      -webkit-font-smoothing: antialiased;
-    }
+    /* ── LANDING ── */
+    #s-landing{align-items:center;justify-content:center;text-align:center;padding:48px 24px;position:relative;overflow:hidden}
+    #s-landing::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+      width:400px;height:280px;background:radial-gradient(ellipse at 50% 0%,rgba(117,116,242,.22) 0%,transparent 70%);pointer-events:none}
+    #s-landing img{width:80px;height:80px;border-radius:18px;margin-bottom:24px;box-shadow:0 0 0 1px rgba(255,255,255,.08),0 20px 40px rgba(0,0,0,.6);position:relative;z-index:1}
+    #s-landing p.eye{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:12px;z-index:1;position:relative}
+    #s-landing h1{font-size:40px;font-weight:800;letter-spacing:-.03em;line-height:1.08;margin-bottom:14px;z-index:1;position:relative}
+    #s-landing p.sub{font-size:16px;color:var(--s);line-height:1.6;margin-bottom:36px;z-index:1;position:relative}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:#fff;font-size:16px;font-weight:600;padding:15px 32px;border-radius:16px;border:none;cursor:pointer;width:100%;max-width:320px;-webkit-tap-highlight-color:transparent;transition:opacity .15s;text-decoration:none}
+    .btn:active{opacity:.8}
+    .btn-ghost{background:transparent;color:var(--s);font-size:14px;font-weight:500;border:none;cursor:pointer;padding:12px;-webkit-tap-highlight-color:transparent}
+    #s-landing .add-hint{font-size:12px;color:var(--s);margin-top:10px;z-index:1;position:relative}
 
-    /* ── NAV ── */
-    nav {
-      display: flex;
-      align-items: center;
-      padding: 18px 24px;
-      border-bottom: 1px solid var(--border);
-    }
+    /* ── ONBOARDING ── */
+    .ob-wrap{padding:48px 24px 32px;flex:1;display:flex;flex-direction:column}
+    .ob-step{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:16px}
+    .ob-wrap h2{font-size:32px;font-weight:800;letter-spacing:-.02em;margin-bottom:8px}
+    .ob-wrap p.hint{font-size:14px;color:var(--s);margin-bottom:32px;line-height:1.5}
+    .field{margin-bottom:20px}
+    .field label{display:block;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--s);margin-bottom:8px}
+    .field input{width:100%;background:var(--surface);color:var(--p);font-size:16px;padding:14px 16px;border:1px solid var(--border);border-radius:12px;outline:none;-webkit-appearance:none;font-family:inherit}
+    .field input:focus{border-color:var(--accent)}
+    .grad-pills{display:flex;gap:8px;flex-wrap:wrap}
+    .grad-pill{background:var(--surface);color:var(--p);font-size:15px;font-weight:600;padding:10px 20px;border-radius:10px;border:1px solid var(--border);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s,color .15s}
+    .grad-pill.sel{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .ob-foot{margin-top:auto;padding-top:24px}
+    .rule{height:1px;background:var(--border);margin:0}
 
-    .nav-logo {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      text-decoration: none;
-    }
+    /* schedule blocks grid */
+    .block-list{display:flex;flex-direction:column;gap:0}
+    .block-row{padding:14px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+    .block-row:last-child{border-bottom:none}
+    .block-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+    .block-label{font-size:15px;font-weight:600;width:20px;flex-shrink:0}
+    .block-name{font-size:15px;color:var(--p);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .block-name.empty{color:var(--s)}
+    .block-chevron{font-size:12px;color:rgba(255,255,255,.2)}
 
-    .nav-logo img {
-      width: 26px;
-      height: 26px;
-      border-radius: 6px;
-    }
+    /* block edit sheet */
+    .sheet{display:none;position:fixed;inset:0;z-index:50;align-items:flex-end;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+    .sheet.open{display:flex}
+    .sheet-body{background:var(--surface2);border-radius:20px 20px 0 0;width:100%;padding:20px 20px 40px;border-top:1px solid rgba(255,255,255,.1)}
+    .sheet-handle{width:36px;height:4px;background:rgba(255,255,255,.18);border-radius:2px;margin:0 auto 20px}
+    .sheet-body h3{font-size:18px;font-weight:700;margin-bottom:20px}
+    .sheet-body .field{margin-bottom:16px}
+    .sheet-actions{display:flex;gap:10px;margin-top:8px}
+    .sheet-actions .btn{flex:1}
+    .btn-outline{background:var(--surface);color:var(--p);border:1px solid var(--border)}
 
-    .nav-logo span {
-      font-size: 14px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      color: var(--primary);
-    }
+    /* ── APP SHELL ── */
+    #s-app{flex-direction:column;padding-bottom:0}
+    .app-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:80px}
+    .tab-bar{display:flex;background:rgba(0,0,0,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);padding-bottom:env(safe-area-inset-bottom);flex-shrink:0}
+    .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 0 6px;border:none;background:transparent;color:var(--s);cursor:pointer;font-size:10px;font-weight:500;-webkit-tap-highlight-color:transparent;transition:color .15s;letter-spacing:.03em}
+    .tab-btn.active{color:var(--accent)}
+    .tab-btn svg{width:22px;height:22px}
 
-    .nav-pill {
-      margin-left: auto;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--accent);
-      background: var(--accent-glow);
-      border: 1px solid rgba(117,116,242,0.3);
-      padding: 5px 12px;
-      border-radius: 999px;
-    }
+    /* tabs */
+    .tab-panel{display:none;flex-direction:column}
+    .tab-panel.active{display:flex}
 
-    /* ── HERO ── */
-    .hero {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 56px 24px 48px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
+    /* ── TODAY TAB ── */
+    .day-header{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 12px}
+    .day-info{display:flex;align-items:center;gap:6px}
+    .day-label{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--s)}
+    .day-num{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--p)}
+    .thin-rule{height:.5px;background:rgba(255,255,255,.12)}
+    .hero-block{padding:20px 16px;border-bottom:.5px solid rgba(255,255,255,.1)}
+    .hero-course{font-size:26px;font-weight:900;letter-spacing:-.02em;text-transform:uppercase;line-height:1;margin-bottom:6px}
+    .hero-meta{font-size:13px;color:var(--s)}
+    .hero-countdown{font-size:64px;font-weight:900;line-height:1;margin:12px 0 8px;letter-spacing:-.03em}
+    .hero-countdown span{font-size:20px;font-weight:700;color:var(--s)}
+    .no-school-hero{padding:32px 16px;text-align:center}
+    .no-school-hero h2{font-size:32px;font-weight:900;margin-bottom:8px}
+    .no-school-hero p{font-size:14px;color:var(--s)}
+    .slot-row{display:flex;align-items:center;gap:10px;padding:12px 16px}
+    .slot-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .slot-blk{font-size:12px;color:var(--s);width:12px;flex-shrink:0}
+    .slot-course{font-size:16px;flex:1}
+    .slot-course.past{color:var(--s)}
+    .slot-course.free{color:rgba(255,255,255,.3)}
+    .slot-right{font-size:12px;color:var(--s);text-align:right}
+    .slot-now{font-size:11px;font-weight:700;letter-spacing:.06em}
+    .slot-divider{height:.5px;background:rgba(255,255,255,.07);margin-left:16px}
+    .section-label{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--s);padding:16px 16px 8px}
 
-    /* subtle radial glow behind the logo */
-    .hero::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 50%;
-      transform: translateX(-50%);
-      width: 500px;
-      height: 320px;
-      background: radial-gradient(ellipse at 50% 0%, rgba(117,116,242,0.22) 0%, transparent 70%);
-      pointer-events: none;
-    }
+    /* ── WORK TAB ── */
+    .work-header{display:flex;align-items:center;justify-content:space-between;padding:20px 16px 12px}
+    .work-header h2{font-size:28px;font-weight:800;letter-spacing:-.02em}
+    .work-add-btn{width:32px;height:32px;border-radius:50%;background:var(--accent-dim);border:none;color:var(--accent);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
+    .assign-row{display:flex;align-items:center;gap:12px;padding:13px 16px}
+    .check-btn{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);background:transparent;cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;transition:background .15s,border-color .15s}
+    .check-btn.done{background:var(--accent);border-color:var(--accent)}
+    .check-btn.done::after{content:'✓';font-size:11px;color:#fff;font-weight:700}
+    .assign-info{flex:1;min-width:0}
+    .assign-title{font-size:15px}
+    .assign-title.done{color:var(--s);text-decoration:line-through}
+    .assign-sub{font-size:12px;color:var(--s);margin-top:2px}
+    .assign-due{font-size:12px;color:var(--s);flex-shrink:0}
+    .assign-due.today{color:var(--accent);font-weight:600}
+    .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px;text-align:center;gap:12px}
+    .empty-state p{font-size:15px;color:var(--s)}
 
-    .hero-icon {
-      width: 88px;
-      height: 88px;
-      border-radius: 20px;
-      margin-bottom: 28px;
-      position: relative;
-      z-index: 1;
-      box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 24px 48px rgba(0,0,0,0.6);
-    }
+    /* ── ME TAB ── */
+    .me-header{padding:24px 16px 16px}
+    .me-avatar{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;margin-bottom:12px}
+    .me-name{font-size:24px;font-weight:800;letter-spacing:-.02em}
+    .me-class{font-size:14px;color:var(--s);margin-top:2px}
+    .me-section{margin:0 0 0}
+    .me-section-header{padding:16px 16px 8px;font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--s)}
+    .me-row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:.5px solid rgba(255,255,255,.07)}
+    .me-row:last-child{border-bottom:none}
+    .me-row-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .me-row-blk{font-size:12px;color:var(--s);width:14px}
+    .me-row-label{font-size:15px;flex:1}
+    .me-row-val{font-size:13px;color:var(--s)}
 
-    .hero-eyebrow {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 14px;
-      position: relative;
-      z-index: 1;
-    }
-
-    h1 {
-      font-size: clamp(36px, 9vw, 64px);
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      line-height: 1.06;
-      margin-bottom: 18px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .hero-sub {
-      font-size: clamp(15px, 2.5vw, 18px);
-      color: var(--secondary);
-      max-width: 380px;
-      line-height: 1.6;
-      margin-bottom: 40px;
-      position: relative;
-      z-index: 1;
-    }
-
-    /* ── ADD BUTTON ── */
-    .add-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--accent);
-      color: #fff;
-      font-size: 16px;
-      font-weight: 600;
-      padding: 15px 32px;
-      border-radius: 16px;
-      border: none;
-      cursor: pointer;
-      text-decoration: none;
-      letter-spacing: -0.01em;
-      position: relative;
-      z-index: 1;
-      transition: opacity 0.15s;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .add-btn:active { opacity: 0.82; }
-
-    .add-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
-
-    .add-hint {
-      font-size: 12px;
-      color: var(--secondary);
-      margin-top: 12px;
-      position: relative;
-      z-index: 1;
-    }
-
-    /* ── STEPS ── */
-    .steps-section {
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      padding: 32px 24px;
-    }
-
-    .steps-label {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--secondary);
-      text-align: center;
-      margin-bottom: 24px;
-    }
-
-    .steps {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      max-width: 480px;
-      margin: 0 auto;
-    }
-
-    .step {
-      display: flex;
-      align-items: flex-start;
-      gap: 16px;
-      padding: 16px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .step:last-child { border-bottom: none; }
-
-    .step-num {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: var(--accent-glow);
-      border: 1px solid rgba(117,116,242,0.35);
-      color: var(--accent);
-      font-size: 13px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
-    .step-text strong {
-      display: block;
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--primary);
-      margin-bottom: 3px;
-    }
-
-    .step-text span {
-      font-size: 13px;
-      color: var(--secondary);
-      line-height: 1.5;
-    }
-
-    .step-icon {
-      display: inline-block;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 2px 6px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--accent);
-      vertical-align: middle;
-      margin: 0 2px;
-    }
-
-    /* ── FEATURES ── */
-    .features-section {
-      padding: 40px 24px 0;
-    }
-
-    .features-label {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--secondary);
-      text-align: center;
-      margin-bottom: 24px;
-    }
-
-    .features {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1px;
-      background: var(--border);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      overflow: hidden;
-      max-width: 520px;
-      margin: 0 auto;
-    }
-
-    .feature {
-      background: var(--bg);
-      padding: 24px 20px;
-    }
-
-    .feature-icon { font-size: 24px; margin-bottom: 10px; }
-
-    .feature-title {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--primary);
-      margin-bottom: 6px;
-    }
-
-    .feature-desc {
-      font-size: 13px;
-      color: var(--secondary);
-      line-height: 1.5;
-    }
-
-    /* ── FOOTER ── */
-    footer {
-      padding: 24px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-top: 40px;
-      border-top: 1px solid var(--border);
-    }
-
-    footer p {
-      font-size: 12px;
-      color: var(--secondary);
-    }
-
-    /* ── MODAL (Add to Home Screen instructions overlay) ── */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.7);
-      z-index: 100;
-      align-items: flex-end;
-      justify-content: center;
-      padding: 0;
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-    }
-
-    .modal-overlay.open { display: flex; }
-
-    .modal {
-      background: #1c1c1e;
-      border-radius: 20px 20px 0 0;
-      width: 100%;
-      max-width: 540px;
-      padding: 28px 24px 40px;
-      border-top: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .modal-handle {
-      width: 36px;
-      height: 4px;
-      background: rgba(255,255,255,0.2);
-      border-radius: 2px;
-      margin: 0 auto 24px;
-    }
-
-    .modal h2 {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
-
-    .modal-sub {
-      font-size: 14px;
-      color: var(--secondary);
-      margin-bottom: 28px;
-      line-height: 1.5;
-    }
-
-    .modal-steps { display: flex; flex-direction: column; gap: 0; }
-
-    .modal-step {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 14px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-
-    .modal-step:last-child { border-bottom: none; }
-
-    .modal-step-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      background: var(--accent-glow);
-      border: 1px solid rgba(117,116,242,0.25);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      flex-shrink: 0;
-    }
-
-    .modal-step-text strong {
-      display: block;
-      font-size: 15px;
-      font-weight: 600;
-    }
-
-    .modal-step-text span {
-      font-size: 13px;
-      color: var(--secondary);
-    }
-
-    .modal-close {
-      width: 100%;
-      margin-top: 24px;
-      padding: 14px;
-      border-radius: 14px;
-      background: var(--accent);
-      color: #fff;
-      font-size: 16px;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
+    /* add work sheet extra */
+    .field select{width:100%;background:var(--surface);color:var(--p);font-size:16px;padding:14px 16px;border:1px solid var(--border);border-radius:12px;outline:none;-webkit-appearance:none;font-family:inherit}
   </style>
 </head>
 <body>
 
-  <nav>
-    <a class="nav-logo" href="/">
-      <img src="/logo.png" alt="The Quad" />
-      <span>THE QUAD</span>
-    </a>
-    <span class="nav-pill">LHS</span>
-  </nav>
+<!-- ── LANDING ── -->
+<div id="s-landing" class="screen active">
+  <img src="/logo.png" alt="The Quad"/>
+  <p class="eye">Lexington High School</p>
+  <h1>School, without<br/>the chaos.</h1>
+  <p class="sub">Your block schedule, grades, and assignments — all in one place.</p>
+  <button class="btn" onclick="go('s-ob-name')">Get started →</button>
+  <p class="add-hint">Free · No account needed</p>
+</div>
 
-  <section class="hero">
-    <img class="hero-icon" src="/logo.png" alt="The Quad" />
-    <p class="hero-eyebrow">Lexington High School</p>
-    <h1>School, without<br />the chaos.</h1>
-    <p class="hero-sub">Your block schedule, live Aspen grades, and assignments — exactly when you need them.</p>
-
-    <a class="add-btn" href="#" onclick="showModal(); return false;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 5v14M5 12h14"/>
-      </svg>
-      Add to Home Screen
-    </a>
-    <p class="add-hint">Free · Works on iPhone · No account needed</p>
-  </section>
-
-  <section class="steps-section">
-    <p class="steps-label">How to install</p>
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">1</div>
-        <div class="step-text">
-          <strong>Open this page in Safari</strong>
-          <span>Make sure you're using Safari — not Chrome or another browser.</span>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <div class="step-text">
-          <strong>Tap the Share button</strong>
-          <span>That's the <span class="step-icon">⬆ Share</span> icon at the bottom of Safari.</span>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <div class="step-text">
-          <strong>Tap "Add to Home Screen"</strong>
-          <span>Scroll down in the share sheet and tap <span class="step-icon">＋ Add to Home Screen</span>.</span>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">4</div>
-        <div class="step-text">
-          <strong>Tap Add — you're in</strong>
-          <span>The Quad appears on your home screen like any other app.</span>
-        </div>
-      </div>
+<!-- ── ONBOARD: NAME ── -->
+<div id="s-ob-name" class="screen">
+  <div class="ob-wrap">
+    <p class="ob-step">Step 1 of 2</p>
+    <h2>What's your name?</h2>
+    <p class="hint">And when do you graduate?</p>
+    <div class="field">
+      <label>First name</label>
+      <input id="ob-first" type="text" placeholder="e.g. Sabrina" autocomplete="given-name"/>
     </div>
-  </section>
-
-  <section class="features-section">
-    <p class="features-label">What's inside</p>
-    <div class="features">
-      <div class="feature">
-        <div class="feature-icon">📅</div>
-        <div class="feature-title">Today</div>
-        <div class="feature-desc">6-day block schedule with live class countdown.</div>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">📊</div>
-        <div class="feature-title">Grades</div>
-        <div class="feature-desc">Live sync from Aspen. What-if calculator.</div>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">✅</div>
-        <div class="feature-title">Work</div>
-        <div class="feature-desc">All assignments in one list, by due date.</div>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">👥</div>
-        <div class="feature-title">School</div>
-        <div class="feature-desc">See when you and friends are free.</div>
-      </div>
+    <div class="field">
+      <label>Last name</label>
+      <input id="ob-last" type="text" placeholder="e.g. Chandini" autocomplete="family-name"/>
     </div>
-  </section>
+    <div class="field">
+      <label>Graduation year</label>
+      <div class="grad-pills" id="grad-pills"></div>
+    </div>
+    <div class="ob-foot">
+      <button class="btn" id="ob-name-next" onclick="obNameNext()">Continue →</button>
+    </div>
+  </div>
+</div>
 
-  <footer>
-    <p>Made for LHS · © 2026 The Quad</p>
-  </footer>
+<!-- ── ONBOARD: SCHEDULE ── -->
+<div id="s-ob-sched" class="screen">
+  <div class="ob-wrap">
+    <p class="ob-step">Step 2 of 2</p>
+    <h2>Your schedule</h2>
+    <p class="hint">Tap each block to add your course. You can skip any you don't have.</p>
+    <div class="block-list" id="ob-block-list"></div>
+    <div class="ob-foot">
+      <button class="btn" onclick="obSchedDone()">Done — open The Quad →</button>
+      <div style="height:12px"></div>
+      <button class="btn-ghost" style="width:100%" onclick="obSchedDone()">Skip for now</button>
+    </div>
+  </div>
+</div>
 
-  <!-- Modal -->
-  <div class="modal-overlay" id="modal" onclick="if(event.target===this) hideModal()">
-    <div class="modal">
-      <div class="modal-handle"></div>
-      <h2>Add to Home Screen</h2>
-      <p class="modal-sub">Follow these steps in Safari to install The Quad on your iPhone.</p>
-      <div class="modal-steps">
-        <div class="modal-step">
-          <div class="modal-step-icon">⬆️</div>
-          <div class="modal-step-text">
-            <strong>Tap Share</strong>
-            <span>The share icon at the bottom of Safari</span>
-          </div>
+<!-- ── APP ── -->
+<div id="s-app" class="screen">
+  <div class="app-body">
+    <!-- TODAY -->
+    <div id="tab-today" class="tab-panel active">
+      <div class="day-header">
+        <div class="day-info">
+          <span class="day-label" id="t-weekday">—</span>
+          <span class="day-label">·</span>
+          <span class="day-num" id="t-daynum">—</span>
         </div>
-        <div class="modal-step">
-          <div class="modal-step-icon">➕</div>
-          <div class="modal-step-text">
-            <strong>Add to Home Screen</strong>
-            <span>Scroll down in the share sheet to find it</span>
-          </div>
-        </div>
-        <div class="modal-step">
-          <div class="modal-step-icon">✅</div>
-          <div class="modal-step-text">
-            <strong>Tap Add</strong>
-            <span>The Quad will appear on your home screen</span>
-          </div>
-        </div>
+        <span id="t-date" style="font-size:12px;color:var(--s)"></span>
       </div>
-      <button class="modal-close" onclick="hideModal()">Got it</button>
+      <div class="thin-rule"></div>
+      <div id="t-hero"></div>
+      <div class="thin-rule"></div>
+      <div id="t-slots"></div>
+    </div>
+
+    <!-- WORK -->
+    <div id="tab-work" class="tab-panel">
+      <div class="work-header">
+        <h2>Work</h2>
+        <button class="work-add-btn" onclick="openAddWork()">+</button>
+      </div>
+      <div class="thin-rule"></div>
+      <div id="w-list"></div>
+    </div>
+
+    <!-- ME -->
+    <div id="tab-me" class="tab-panel">
+      <div class="me-header">
+        <div class="me-avatar" id="me-avatar"></div>
+        <div class="me-name" id="me-name">—</div>
+        <div class="me-class" id="me-class">—</div>
+      </div>
+      <div class="thin-rule"></div>
+      <div class="me-section">
+        <div class="me-section-header">My Schedule</div>
+        <div id="me-schedule"></div>
+      </div>
+      <div class="thin-rule" style="margin-top:8px"></div>
+      <div style="padding:16px">
+        <button class="btn btn-outline" onclick="editSchedule()" style="margin-bottom:10px">Edit schedule</button>
+        <button class="btn-ghost" style="width:100%;color:rgba(255,80,80,.7)" onclick="resetApp()">Sign out &amp; reset</button>
+      </div>
     </div>
   </div>
 
-  <script>
-    function showModal() {
-      document.getElementById('modal').classList.add('open');
-    }
-    function hideModal() {
-      document.getElementById('modal').classList.remove('open');
-    }
-  </script>
+  <nav class="tab-bar">
+    <button class="tab-btn active" id="tb-today" onclick="switchTab('today')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Today
+    </button>
+    <button class="tab-btn" id="tb-work" onclick="switchTab('work')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+      Work
+    </button>
+    <button class="tab-btn" id="tb-me" onclick="switchTab('me')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Me
+    </button>
+  </nav>
+</div>
 
+<!-- ── BLOCK EDIT SHEET ── -->
+<div class="sheet" id="block-sheet" onclick="if(event.target===this)closeBlockSheet()">
+  <div class="sheet-body">
+    <div class="sheet-handle"></div>
+    <h3 id="bs-title">Block A</h3>
+    <div class="field"><label>Course name</label><input id="bs-name" type="text" placeholder="e.g. AP Physics"/></div>
+    <div class="field"><label>Teacher (optional)</label><input id="bs-teacher" type="text" placeholder="e.g. Mr. Smith"/></div>
+    <div class="field"><label>Room (optional)</label><input id="bs-room" type="text" placeholder="e.g. 214"/></div>
+    <div class="sheet-actions">
+      <button class="btn btn-outline" onclick="closeBlockSheet()">Cancel</button>
+      <button class="btn" onclick="saveBlock()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ADD WORK SHEET ── -->
+<div class="sheet" id="work-sheet" onclick="if(event.target===this)closeWorkSheet()">
+  <div class="sheet-body">
+    <div class="sheet-handle"></div>
+    <h3>Add assignment</h3>
+    <div class="field"><label>Title</label><input id="ws-title" type="text" placeholder="e.g. Essay draft"/></div>
+    <div class="field"><label>Course (optional)</label>
+      <select id="ws-course"><option value="">No course</option></select>
+    </div>
+    <div class="field"><label>Due date (optional)</label><input id="ws-due" type="date"/></div>
+    <div class="sheet-actions">
+      <button class="btn btn-outline" onclick="closeWorkSheet()">Cancel</button>
+      <button class="btn" onclick="saveWork()">Add</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ──────────────────────────────────────────────
+// DATA
+// ──────────────────────────────────────────────
+
+const BLOCKS = ['A','B','C','D','E','F','G','H'];
+const COLORS = ['#7574f2','#e8734a','#4aae78','#d4a843','#e05c8a','#4a9ee8','#8b5cf6','#14b8a6'];
+const GRAD_YEARS = [2026,2027,2028,2029];
+
+// Bell times (start minutes from midnight)
+const PERIODS = [
+  {start:8*60+30, end:9*60+30},
+  {start:9*60+35, end:10*60+35},
+  {start:10*60+40, end:11*60+40},
+  {start:12*60+15, end:13*60+10},
+  {start:13*60+15, end:14*60+10},
+  {start:14*60+15, end:15*60+10}
+];
+const LUNCH = {start:11*60+40, end:12*60+15};
+
+// Block order per day type
+const BLOCK_ORDER = {
+  1:['A','B','C','D','E','F'],
+  2:['E','F','G','H','HR','D'],
+  3:['B','A','G','H','FL','C'],
+  4:['A','B','C','D','E','F'],
+  5:['E','F','G','H','FL','D'],
+  6:['B','A','G','H','FL','C']
+};
+
+// 2026-27 holidays (YYYY-MM-DD)
+const HOLIDAYS = new Set([
+  '2026-09-07','2026-10-12','2026-11-11',
+  '2026-11-25','2026-11-26','2026-11-27',
+  '2026-12-23','2026-12-24','2026-12-25','2026-12-26','2026-12-27',
+  '2026-12-28','2026-12-29','2026-12-30','2026-12-31','2027-01-01',
+  '2027-01-18',
+  '2027-02-15','2027-02-16','2027-02-17','2027-02-18','2027-02-19',
+  '2027-04-19','2027-04-20','2027-04-21','2027-04-22','2027-04-23',
+  '2027-05-31'
+]);
+
+function dateKey(d) {
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+
+function getDayType(date) {
+  const key = dateKey(date);
+  const sep1 = new Date(2026,8,1);
+  const sep2 = new Date(2026,8,2);
+  const end  = new Date(2027,5,11);
+  const wd   = date.getDay(); // 0=Sun,6=Sat
+  if (date < sep1 || date > end) return 0;
+  if (wd === 0 || wd === 6) return 0;
+  if (key === '2026-09-01') return 'special';
+  if (HOLIDAYS.has(key)) return 0;
+  // count school days from Sep 2
+  let count = 0;
+  let cur = new Date(sep2);
+  while (cur <= date) {
+    const k = dateKey(cur);
+    const w = cur.getDay();
+    if (w !== 0 && w !== 6 && !HOLIDAYS.has(k) && k !== '2026-09-01') count++;
+    if (cur < date) cur.setDate(cur.getDate()+1); else break;
+    cur.setDate(cur.getDate());
+    // prevent infinite — safe advance
+    if (cur > date) break;
+  }
+  // Actually recalculate cleanly
+  count = 0;
+  cur = new Date(sep2);
+  let target = new Date(date);
+  target.setHours(0,0,0,0);
+  let c2 = new Date(sep2); c2.setHours(0,0,0,0);
+  while (c2 <= target) {
+    const k2 = dateKey(c2);
+    const w2 = c2.getDay();
+    if (w2 !== 0 && w2 !== 6 && !HOLIDAYS.has(k2)) count++;
+    c2.setDate(c2.getDate()+1);
+  }
+  return ((count - 1) % 6) + 1; // 1-6
+}
+
+function fmtTime(mins) {
+  const h = Math.floor(mins/60);
+  const m = mins%60;
+  const ampm = h<12?'AM':'PM';
+  return (h>12?h-12:h===0?12:h)+':'+(m===0?'00':String(m).padStart(2,'0'))+' '+ampm;
+}
+
+// ──────────────────────────────────────────────
+// STATE
+// ──────────────────────────────────────────────
+
+let STATE = {
+  name:'', gradYear:2027,
+  courses:{},   // {A:{name,teacher,room}, ...}
+  assignments:[], // [{id,title,courseBlock,due,done}]
+  onboarded:false
+};
+
+function save() { localStorage.setItem('quad_state', JSON.stringify(STATE)); }
+function load() {
+  try { const s = localStorage.getItem('quad_state'); if(s) STATE=JSON.parse(s); } catch(e) {}
+}
+
+// ──────────────────────────────────────────────
+// NAVIGATION
+// ──────────────────────────────────────────────
+
+function go(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.getElementById('tb-'+tab).classList.add('active');
+  if(tab==='today') renderToday();
+  if(tab==='work') renderWork();
+  if(tab==='me') renderMe();
+}
+
+// ──────────────────────────────────────────────
+// ONBOARDING
+// ──────────────────────────────────────────────
+
+function initGradPills() {
+  const el = document.getElementById('grad-pills');
+  el.innerHTML = GRAD_YEARS.map(y=>`<button class="grad-pill${STATE.gradYear===y?' sel':''}" onclick="selectGrad(${y})">'${String(y).slice(2)}</button>`).join('');
+}
+
+function selectGrad(y) {
+  STATE.gradYear = y;
+  initGradPills();
+}
+
+function obNameNext() {
+  const first = document.getElementById('ob-first').value.trim();
+  const last  = document.getElementById('ob-last').value.trim();
+  if(!first) { document.getElementById('ob-first').focus(); return; }
+  STATE.name = first + (last?' '+last:'');
+  save();
+  renderBlockList('ob-block-list');
+  go('s-ob-sched');
+}
+
+function renderBlockList(containerId) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = BLOCKS.map((b,i)=>{
+    const c = STATE.courses[b];
+    return `<div class="block-row" onclick="openBlockSheet('${b}')">
+      <div class="block-dot" style="background:${COLORS[i]}"></div>
+      <span class="block-label">${b}</span>
+      <span class="block-name ${c&&c.name?'':'empty'}">${c&&c.name?c.name:'Tap to add course'}</span>
+      <span class="block-chevron">›</span>
+    </div>`;
+  }).join('');
+}
+
+function obSchedDone() {
+  STATE.onboarded = true;
+  save();
+  renderToday();
+  renderMe();
+  go('s-app');
+}
+
+// ──────────────────────────────────────────────
+// BLOCK SHEET
+// ──────────────────────────────────────────────
+
+let currentBlock = null;
+let blockSheetContext = null; // 'onboard' | 'me'
+
+function openBlockSheet(block, ctx) {
+  currentBlock = block;
+  blockSheetContext = ctx || 'onboard';
+  const c = STATE.courses[block] || {};
+  document.getElementById('bs-title').textContent = 'Block '+block;
+  document.getElementById('bs-name').value    = c.name    || '';
+  document.getElementById('bs-teacher').value = c.teacher || '';
+  document.getElementById('bs-room').value    = c.room    || '';
+  document.getElementById('block-sheet').classList.add('open');
+  setTimeout(()=>document.getElementById('bs-name').focus(),100);
+}
+
+function closeBlockSheet() {
+  document.getElementById('block-sheet').classList.remove('open');
+}
+
+function saveBlock() {
+  const name    = document.getElementById('bs-name').value.trim();
+  const teacher = document.getElementById('bs-teacher').value.trim();
+  const room    = document.getElementById('bs-room').value.trim();
+  if(!STATE.courses[currentBlock]) STATE.courses[currentBlock] = {};
+  STATE.courses[currentBlock] = {name, teacher, room};
+  save();
+  closeBlockSheet();
+  if(blockSheetContext==='me') { renderMe(); renderToday(); }
+  else renderBlockList('ob-block-list');
+}
+
+// ──────────────────────────────────────────────
+// TODAY
+// ──────────────────────────────────────────────
+
+function renderToday() {
+  const now  = new Date();
+  const dt   = getDayType(now);
+  const wds  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const mons = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  document.getElementById('t-weekday').textContent = wds[now.getDay()].toUpperCase();
+  document.getElementById('t-date').textContent    = mons[now.getMonth()]+' '+now.getDate();
+
+  const hero  = document.getElementById('t-hero');
+  const slots = document.getElementById('t-slots');
+
+  if(!dt || dt === 0) {
+    document.getElementById('t-daynum').textContent = 'NO SCHOOL';
+    hero.innerHTML = `<div class="no-school-hero"><h2>No School</h2><p>Enjoy your day off.</p></div>`;
+    slots.innerHTML = '';
+    return;
+  }
+  if(dt === 'special') {
+    document.getElementById('t-daynum').textContent = 'DAY 0';
+    hero.innerHTML = `<div class="no-school-hero"><h2>Orientation</h2><p>Welcome to LHS — Day 0.</p></div>`;
+    slots.innerHTML = '';
+    return;
+  }
+
+  document.getElementById('t-daynum').textContent = 'DAY '+dt;
+  const order = BLOCK_ORDER[dt];
+  const nowMins = now.getHours()*60+now.getMinutes();
+
+  // build slots: 6 periods + lunch after period 3
+  const allSlots = [];
+  for(let i=0;i<6;i++){
+    const blk = order[i];
+    const per = PERIODS[i];
+    allSlots.push({blk, start:per.start, end:per.end, isLunch:false});
+    if(i===2) allSlots.push({blk:'LUNCH', start:LUNCH.start, end:LUNCH.end, isLunch:true});
+  }
+
+  // find current slot
+  let currentIdx = -1;
+  allSlots.forEach((s,i)=>{
+    if(nowMins>=s.start && nowMins<s.end) currentIdx=i;
+  });
+
+  // hero
+  if(currentIdx>=0 && !allSlots[currentIdx].isLunch) {
+    const s = allSlots[currentIdx];
+    const course = STATE.courses[s.blk];
+    const minsLeft = s.end - nowMins;
+    const color = COLORS[BLOCKS.indexOf(s.blk)] || 'var(--accent)';
+    hero.innerHTML = `<div class="hero-block" style="background:${color}18;border-left:3px solid ${color}">
+      <div class="hero-course" style="color:${color}">${course&&course.name?course.name:s.blk+' Block'}</div>
+      <div class="hero-meta">${course&&course.room?'Room '+course.room+' · ':''} ${fmtTime(s.start)}–${fmtTime(s.end)}</div>
+      <div class="hero-countdown">${minsLeft}<span> min</span></div>
+    </div>`;
+  } else if(nowMins < PERIODS[0].start) {
+    const first = allSlots[0];
+    const course = STATE.courses[first.blk];
+    hero.innerHTML = `<div class="hero-block"><div class="hero-course">Good morning</div>
+      <div class="hero-meta">First up — ${course&&course.name?course.name:first.blk+' Block'} at ${fmtTime(PERIODS[0].start)}</div></div>`;
+  } else if(nowMins >= PERIODS[5].end) {
+    hero.innerHTML = `<div class="no-school-hero"><h2>After school</h2><p>That's a wrap on Day ${dt}.</p></div>`;
+  } else {
+    hero.innerHTML = `<div class="hero-block"><div class="hero-course">Between classes</div><div class="hero-meta">Passing period</div></div>`;
+  }
+
+  // slot list
+  slots.innerHTML = allSlots.map((s,i)=>{
+    if(s.isLunch){
+      return `<div class="slot-row">
+        <div class="slot-dot" style="background:rgba(255,255,255,.2)"></div>
+        <span class="slot-blk"></span>
+        <span class="slot-course" style="color:var(--s)">Lunch</span>
+        <span class="slot-right">${fmtTime(s.start)}–${fmtTime(s.end)}</span>
+      </div>${i<allSlots.length-1?'<div class="slot-divider"></div>':''}`;
+    }
+    const course = STATE.courses[s.blk];
+    const isCur = i===currentIdx;
+    const isPast = nowMins >= s.end;
+    const color = COLORS[BLOCKS.indexOf(s.blk)] || 'var(--accent)';
+    const dotOpacity = isCur?1:isPast?.25:.5;
+    const textClass = isCur?'':isPast?'past':course?'':'free';
+    const rightLabel = isCur
+      ? `<span class="slot-now" style="color:${color}">NOW</span>`
+      : isPast?'✓':fmtTime(s.start);
+    return `<div class="slot-row" style="${isCur?'background:'+color+'0d;':''}" >
+      <div class="slot-dot" style="background:${color};opacity:${dotOpacity}"></div>
+      <span class="slot-blk" style="opacity:.5">${s.blk}</span>
+      <span class="slot-course ${textClass}" style="${isCur?'font-weight:600;color:'+color:''}">${course&&course.name?course.name:'Free'}</span>
+      <span class="slot-right" style="${isCur?'color:'+color:isPast?'opacity:.3':''}">${rightLabel}</span>
+    </div>${i<allSlots.length-1?'<div class="slot-divider"></div>':''}`;
+  }).join('');
+}
+
+// ──────────────────────────────────────────────
+// WORK
+// ──────────────────────────────────────────────
+
+function renderWork() {
+  const list = document.getElementById('w-list');
+  const items = STATE.assignments;
+  if(!items.length){
+    list.innerHTML=`<div class="empty-state"><p>Nothing due — you're all caught up.</p></div>`;
+    return;
+  }
+  const sorted = [...items].sort((a,b)=>{
+    if(!a.due && !b.due) return 0;
+    if(!a.due) return 1;
+    if(!b.due) return -1;
+    return new Date(a.due)-new Date(b.due);
+  });
+  const todayKey = dateKey(new Date());
+  list.innerHTML = sorted.map((a,i)=>{
+    const dueLabel = a.due?(a.due===todayKey?'Today':a.due):'';
+    const isToday  = a.due===todayKey;
+    const color = a.courseBlock?COLORS[BLOCKS.indexOf(a.courseBlock)]||'var(--s)':'var(--s)';
+    return `<div>
+      <div class="assign-row">
+        <button class="check-btn ${a.done?'done':''}" onclick="toggleWork('${a.id}')"></button>
+        <div class="assign-info">
+          <div class="assign-title ${a.done?'done':''}">${a.title}</div>
+          ${a.courseBlock&&STATE.courses[a.courseBlock]&&STATE.courses[a.courseBlock].name?`<div class="assign-sub">${STATE.courses[a.courseBlock].name}</div>`:''}
+        </div>
+        ${dueLabel?`<span class="assign-due ${isToday?'today':''}">${dueLabel}</span>`:''}
+      </div>
+      ${i<sorted.length-1?'<div class="slot-divider"></div>':''}
+    </div>`;
+  }).join('');
+}
+
+function toggleWork(id) {
+  const a = STATE.assignments.find(x=>x.id===id);
+  if(a){ a.done=!a.done; save(); renderWork(); }
+}
+
+function openAddWork() {
+  const sel = document.getElementById('ws-course');
+  sel.innerHTML='<option value="">No course</option>'+
+    BLOCKS.filter(b=>STATE.courses[b]&&STATE.courses[b].name)
+          .map(b=>`<option value="${b}">${STATE.courses[b].name}</option>`).join('');
+  document.getElementById('ws-title').value='';
+  document.getElementById('ws-due').value='';
+  document.getElementById('work-sheet').classList.add('open');
+  setTimeout(()=>document.getElementById('ws-title').focus(),100);
+}
+
+function closeWorkSheet() { document.getElementById('work-sheet').classList.remove('open'); }
+
+function saveWork() {
+  const title = document.getElementById('ws-title').value.trim();
+  if(!title) return;
+  STATE.assignments.push({
+    id: Math.random().toString(36).slice(2),
+    title,
+    courseBlock: document.getElementById('ws-course').value||null,
+    due: document.getElementById('ws-due').value||null,
+    done: false
+  });
+  save(); closeWorkSheet(); renderWork();
+}
+
+// ──────────────────────────────────────────────
+// ME
+// ──────────────────────────────────────────────
+
+function renderMe() {
+  const initials = STATE.name.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2)||'?';
+  const av = document.getElementById('me-avatar');
+  av.textContent = initials;
+  av.style.background = 'var(--accent)';
+  document.getElementById('me-name').textContent  = STATE.name||'Student';
+  document.getElementById('me-class').textContent = "Class of '"+String(STATE.gradYear).slice(2)+' · LHS';
+  const sched = document.getElementById('me-schedule');
+  sched.innerHTML = BLOCKS.map((b,i)=>{
+    const c = STATE.courses[b];
+    return `<div class="me-row" onclick="openBlockSheet('${b}','me')" style="cursor:pointer">
+      <div class="me-row-dot" style="background:${COLORS[i]}"></div>
+      <span class="me-row-blk">${b}</span>
+      <span class="me-row-label">${c&&c.name?c.name:'—'}</span>
+      <span class="me-row-val">${c&&c.room?c.room:''}</span>
+    </div>`;
+  }).join('');
+}
+
+function editSchedule() {
+  renderBlockList('ob-block-list');
+  // reuse onboard schedule screen but in edit mode
+  blockSheetContext = 'me';
+  go('s-ob-sched');
+}
+
+function resetApp() {
+  if(!confirm('Reset The Quad and start over?')) return;
+  localStorage.removeItem('quad_state');
+  STATE={name:'',gradYear:2027,courses:{},assignments:[],onboarded:false};
+  go('s-landing');
+}
+
+// ──────────────────────────────────────────────
+// BOOT
+// ──────────────────────────────────────────────
+
+load();
+initGradPills();
+if(STATE.onboarded) {
+  renderToday(); renderMe();
+  go('s-app');
+  // refresh today every minute
+  setInterval(renderToday, 60000);
+}
+</script>
 </body>
 </html>
