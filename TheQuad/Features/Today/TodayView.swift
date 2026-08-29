@@ -56,8 +56,8 @@ private struct ScheduleRowView: View {
                 .fill(isCurrent ? rowColor : (isPast ? rowColor.opacity(0.25) : rowColor.opacity(0.5)))
                 .frame(width: 8, height: 8)
 
-            // Block letter (dimmed)
-            Text(slot.block.rawValue)
+            // Block letter (dimmed) — hidden for lunch/flex slots
+            Text(slot.isLunch ? "" : slot.block.rawValue)
                 .font(DesignTokens.Typography.quadCaption)
                 .foregroundStyle(DesignTokens.Colors.secondary.opacity(0.45))
                 .frame(width: 14, alignment: .leading)
@@ -149,6 +149,7 @@ struct TodayView: View {
             }
         }
         .animation(.easeInOut(duration: 0.22), value: showFullSchedule)
+        .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 80) }
     }
 
     private var thinRule: some View {
