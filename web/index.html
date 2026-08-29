@@ -235,6 +235,50 @@
     .preview-blk{font-size:11px;font-weight:600;color:var(--s);width:14px}
     .preview-name{font-size:14px;flex:1}
 
+    /* ─── SCHEDULE / CALENDAR ─── */
+    .cal-nav{display:flex;align-items:center;justify-content:space-between;padding:20px 16px 10px}
+    .cal-nav-btn{background:none;border:none;font-size:26px;color:var(--p);cursor:pointer;padding:4px 10px;font-family:inherit;-webkit-tap-highlight-color:transparent;font-weight:300;line-height:1}
+    .cal-nav-title{font-size:18px;font-weight:700;letter-spacing:-.01em}
+    .cal-weekdays{display:grid;grid-template-columns:repeat(5,1fr);padding:0 8px;margin-bottom:4px}
+    .cal-weekday{text-align:center;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--s);padding:3px 0}
+    .cal-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:0 8px 12px}
+    .cal-cell{
+      background:var(--surface);border-radius:10px;padding:7px 4px 5px;
+      display:flex;flex-direction:column;align-items:center;gap:2px;
+      cursor:pointer;-webkit-tap-highlight-color:transparent;
+      min-height:58px;border:1.5px solid transparent;transition:border-color .15s,background .15s;
+    }
+    .cal-cell:active{opacity:.7}
+    .cal-cell.no-school{background:transparent;opacity:.35;pointer-events:none}
+    .cal-cell.cal-today{border-color:var(--accent)}
+    .cal-cell.cal-sel{background:var(--accent);border-color:var(--accent)}
+    .cal-cell.cal-sel .cal-day-num,.cal-cell.cal-sel .cal-day-type{color:#fff}
+    .cal-cell.cal-sel .cal-day-type{background:rgba(255,255,255,.22)}
+    .cal-cell.cal-sel .cal-dot{background:rgba(255,255,255,.8)}
+    .cal-day-num{font-size:14px;font-weight:700;color:var(--p);line-height:1}
+    .cal-day-type{font-size:9px;font-weight:800;letter-spacing:.04em;color:var(--accent);background:var(--accent-dim);padding:1px 5px;border-radius:4px;min-height:14px;line-height:14px}
+    .cal-dots{display:flex;gap:3px;min-height:5px;margin-top:2px}
+    .cal-dot{width:4px;height:4px;border-radius:50%;background:var(--accent)}
+    .cal-tap-hint{padding:20px 16px;text-align:center;font-size:13px;color:var(--s)}
+    /* Day schedule panel */
+    .day-sched-wrap{margin:0 8px 16px;background:var(--surface);border-radius:14px;overflow:hidden;border:1px solid var(--border)}
+    .day-sched-hdr{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:.5px solid var(--divider)}
+    .day-sched-date{font-size:15px;font-weight:700;color:var(--p)}
+    .day-sched-badge{font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--accent);background:var(--accent-dim);padding:3px 8px;border-radius:6px;text-transform:uppercase}
+    .day-slot-row{display:flex;align-items:center;gap:10px;padding:10px 16px}
+    .day-slot-row+.day-slot-row{border-top:.5px solid var(--divider)}
+    .day-slot-blk{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0}
+    .day-slot-info{flex:1;min-width:0}
+    .day-slot-name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .day-slot-sub{font-size:11px;color:var(--s);margin-top:1px}
+    .day-slot-time{font-size:11px;color:var(--s);width:42px;flex-shrink:0;text-align:right}
+    .day-due-section{padding:4px 16px 14px;border-top:.5px solid var(--divider)}
+    .day-due-lbl{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--s);padding:10px 0 6px}
+    .day-due-row{display:flex;align-items:center;gap:8px;padding:4px 0}
+    .day-due-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+    .day-due-name{font-size:13px;color:var(--p)}
+    .day-due-course{font-size:11px;color:var(--s)}
+
     /* ─── APP SHELL ─── */
     #s-app{flex-direction:column;overflow:hidden}
     .app-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
@@ -248,11 +292,11 @@
     .tab-btn{
       flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
       padding:9px 0 5px;border:none;background:transparent;color:var(--s);
-      cursor:pointer;font-size:10px;font-weight:500;letter-spacing:.03em;
+      cursor:pointer;font-size:9px;font-weight:500;letter-spacing:.03em;
       -webkit-tap-highlight-color:transparent;transition:color .15s;font-family:inherit;
     }
     .tab-btn.active{color:var(--accent)}
-    .tab-btn svg{width:22px;height:22px}
+    .tab-btn svg{width:20px;height:20px}
     .tab-panel{display:none;flex-direction:column}
     .tab-panel.active{display:flex}
 
@@ -564,6 +608,22 @@
       <div id="t-slots"></div>
     </div>
 
+    <!-- SCHEDULE -->
+    <div id="tab-schedule" class="tab-panel">
+      <div class="cal-nav">
+        <button class="cal-nav-btn" onclick="calPrev()">‹</button>
+        <span class="cal-nav-title" id="cal-month-lbl"></span>
+        <button class="cal-nav-btn" onclick="calNext()">›</button>
+      </div>
+      <div class="cal-weekdays">
+        <div class="cal-weekday">Mon</div><div class="cal-weekday">Tue</div>
+        <div class="cal-weekday">Wed</div><div class="cal-weekday">Thu</div>
+        <div class="cal-weekday">Fri</div>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div id="day-sched-panel"><div class="cal-tap-hint">Tap a school day to see your block schedule</div></div>
+    </div>
+
     <!-- WORK -->
     <div id="tab-work" class="tab-panel">
       <div class="list-header">
@@ -621,6 +681,10 @@
     <button class="tab-btn active" id="tb-today" onclick="switchTab('today')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       Today
+    </button>
+    <button class="tab-btn" id="tb-schedule" onclick="switchTab('schedule')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Schedule
     </button>
     <button class="tab-btn" id="tb-work" onclick="switchTab('work')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
@@ -851,6 +915,7 @@ function switchTab(tab){
   document.getElementById('tab-'+tab).classList.add('active');
   document.getElementById('tb-'+tab).classList.add('active');
   if(tab==='today') renderToday();
+  if(tab==='schedule') renderCalendar();
   if(tab==='work') renderWork();
   if(tab==='grades') renderGrades();
   if(tab==='me') renderMe();
@@ -965,18 +1030,18 @@ function parseBlocksFromText(raw){
 
   // ── Pattern 1 (highest confidence): Token-based Aspen table parsing
   // Aspen "My Schedule" renders: Course Name | Block | Teacher | Room
-  // OCR produces one line per row with tokens separated by any whitespace.
-  // Strategy: split each line into tokens, find first standalone A-H token
-  // that appears AFTER at least one word of course name.
+  // Use the LAST standalone A-H token on each line — this handles course names
+  // that contain A-H letters (e.g. "AP Physics C E Mr. Brown" → block=E not C).
   for(const line of lines){
     const tokens=line.split(/\s+/).filter(Boolean);
     let blockIdx=-1;
     for(let ti=1;ti<tokens.length;ti++){
-      if(/^[A-H]$/.test(tokens[ti])){blockIdx=ti;break}
+      // Case-insensitive single A-H letter
+      if(/^[A-Ha-h]$/.test(tokens[ti])) blockIdx=ti; // overwrite → keeps LAST
     }
     if(blockIdx<1) continue;
     const rawCourse=tokens.slice(0,blockIdx).join(' ');
-    const blk=tokens[blockIdx];
+    const blk=tokens[blockIdx].toUpperCase();
     const name=cleanCourseName(rawCourse);
     if(name.length>=4&&BLOCKS.includes(blk)&&!found[blk]&&looksLikeCourse(name)){
       found[blk]=name;
@@ -1536,6 +1601,145 @@ function renderMe(){
 }
 
 // ════════════════════════════════════════════
+// SCHEDULE / CALENDAR
+// ════════════════════════════════════════════
+
+let calYear=2026, calMonth=8, selCalDate=null; // default: Sep 2026
+
+function initCalendar(){
+  const now=new Date();
+  calYear=now.getFullYear(); calMonth=now.getMonth();
+  // If outside the school year window, default to Sep 2026
+  const inYear=(calYear===2026&&calMonth>=8)||(calYear===2027&&calMonth<=5);
+  if(!inYear){calYear=2026;calMonth=8}
+  // Auto-select today if it's a school day
+  const dt=getDayType(now);
+  if(dt&&dt!==0) selCalDate=dateKey(now);
+}
+
+function calPrev(){calMonth--;if(calMonth<0){calMonth=11;calYear--}renderCalendar()}
+function calNext(){calMonth++;if(calMonth>11){calMonth=0;calYear++}renderCalendar()}
+
+function renderCalendar(){
+  const MO=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('cal-month-lbl').textContent=MO[calMonth]+' '+calYear;
+
+  const firstDay=new Date(calYear,calMonth,1);
+  const lastDay=new Date(calYear,calMonth+1,0);
+  const todayKey=dateKey(new Date());
+
+  // Find the Monday at/before firstDay
+  const startDate=new Date(firstDay);
+  const dow=firstDay.getDay(); // 0=Sun,1=Mon,...,6=Sat
+  startDate.setDate(startDate.getDate()-(dow===0?6:dow-1));
+  // If startDate landed on a weekend, push to Monday (shouldn't happen but guard)
+  while(startDate.getDay()===0||startDate.getDay()===6) startDate.setDate(startDate.getDate()+1);
+
+  let html='';
+  const cur=new Date(startDate);
+  while(cur<=lastDay){
+    for(let wd=0;wd<5;wd++){
+      const d=new Date(cur);d.setDate(d.getDate()+wd);
+      const inMonth=d.getMonth()===calMonth&&d.getFullYear()===calYear;
+      if(!inMonth){html+=`<div class="cal-cell" style="background:transparent;border-color:transparent;pointer-events:none"></div>`;continue}
+      const key=dateKey(d);
+      const dt=getDayType(d);
+      const noSchool=!dt||dt===0;
+      const isTod=key===todayKey;
+      const isSel=selCalDate===key;
+      const dues=S.assignments.filter(a=>a.due===key&&!a.done).length;
+      html+=`<div class="cal-cell${noSchool?' no-school':''}${isTod?' cal-today':''}${isSel?' cal-sel':''}" onclick="selectCalDay('${key}')">
+        <div class="cal-day-num">${d.getDate()}</div>
+        ${!noSchool?`<div class="cal-day-type">${dt==='special'?'0':dt}</div>`:'<div class="cal-day-type">&nbsp;</div>'}
+        <div class="cal-dots">${Array(Math.min(dues,3)).fill('<span class="cal-dot"></span>').join('')}</div>
+      </div>`;
+    }
+    cur.setDate(cur.getDate()+7);
+  }
+  document.getElementById('cal-grid').innerHTML=html;
+
+  const panel=document.getElementById('day-sched-panel');
+  if(selCalDate) panel.innerHTML=buildDaySched(selCalDate);
+  else panel.innerHTML='<div class="cal-tap-hint">Tap a school day to see your block schedule</div>';
+}
+
+function selectCalDay(key){
+  selCalDate=selCalDate===key?null:key;
+  renderCalendar();
+}
+
+function buildDaySched(key){
+  const [y,mo,d]=key.split('-').map(Number);
+  const date=new Date(y,mo-1,d);
+  const dt=getDayType(date);
+  const WD=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const dayLabel=`${WD[date.getDay()]}, ${MN[date.getMonth()]} ${d}`;
+
+  if(!dt||dt===0){
+    return `<div class="day-sched-wrap"><div class="day-sched-hdr">
+      <span class="day-sched-date">${dayLabel}</span>
+      <span class="day-sched-badge" style="color:var(--s);background:rgba(0,0,0,.06)">No School</span>
+    </div></div>`;
+  }
+
+  const realDt=dt==='special'?1:dt;
+  const order=BLOCK_ORDER[realDt];
+  // Build slot list with lunch after period 3
+  const slots=[];
+  for(let i=0;i<6;i++){
+    slots.push({blk:order[i],start:PERIODS[i].start,end:PERIODS[i].end,isLunch:false});
+    if(i===2) slots.push({blk:'LUNCH',start:LUNCH.start,end:LUNCH.end,isLunch:true});
+  }
+
+  const slotRows=slots.map(s=>{
+    if(s.isLunch) return `<div class="day-slot-row">
+      <span class="day-slot-time">${fmtTime(s.start)}</span>
+      <div class="day-slot-blk" style="background:rgba(0,0,0,.10);font-size:14px">🍽</div>
+      <div class="day-slot-info">
+        <div class="day-slot-name" style="color:var(--s)">Lunch</div>
+        <div class="day-slot-sub">${fmtTime(s.start)}–${fmtTime(s.end)}</div>
+      </div>
+    </div>`;
+    const special=['HR','FL'].includes(s.blk);
+    const c=!special?(S.courses[s.blk]||{}):{};
+    const col=!special?(COLORS[BLOCKS.indexOf(s.blk)]||'var(--accent)'):'rgba(0,0,0,.18)';
+    const courseName=c.name||(s.blk==='HR'?'Homeroom':s.blk==='FL'?'Flex Block':'Free period');
+    const isFree=!c.name&&!special;
+    return `<div class="day-slot-row">
+      <span class="day-slot-time">${fmtTime(s.start)}</span>
+      <div class="day-slot-blk" style="background:${col}">${s.blk}</div>
+      <div class="day-slot-info">
+        <div class="day-slot-name" style="${isFree?'color:var(--s)':''}">${courseName}</div>
+        <div class="day-slot-sub">${fmtTime(s.start)}–${fmtTime(s.end)}${c.room?' · Rm '+c.room:''}${c.teacher?' · '+c.teacher:''}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const due=S.assignments.filter(a=>a.due===key&&!a.done);
+  const dueHtml=due.length?`<div class="day-due-section">
+    <div class="day-due-lbl">Due today</div>
+    ${due.map(a=>{
+      const col=a.courseBlock?COLORS[BLOCKS.indexOf(a.courseBlock)]:'var(--accent)';
+      const cn=a.courseBlock&&S.courses[a.courseBlock]&&S.courses[a.courseBlock].name?S.courses[a.courseBlock].name:'';
+      return `<div class="day-due-row">
+        <div class="day-due-dot" style="background:${col}"></div>
+        <div><div class="day-due-name">${a.title}</div>${cn?`<div class="day-due-course">${cn}</div>`:''}</div>
+      </div>`;
+    }).join('')}
+  </div>`:'';
+
+  return `<div class="day-sched-wrap">
+    <div class="day-sched-hdr">
+      <span class="day-sched-date">${dayLabel}</span>
+      <span class="day-sched-badge">Day ${dt==='special'?'0':dt}</span>
+    </div>
+    ${slotRows}
+    ${dueHtml}
+  </div>`;
+}
+
+// ════════════════════════════════════════════
 // RESET
 // ════════════════════════════════════════════
 
@@ -1553,6 +1757,7 @@ function resetApp(){
 load();
 initGradPills();
 initFriendSlots();
+initCalendar();
 
 if(S.onboarded){
   renderToday();renderMe();renderGrades();
