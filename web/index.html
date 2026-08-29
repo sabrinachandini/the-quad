@@ -919,14 +919,14 @@ async function parseSchedule(){
     // Filter to only real course names
     const valid=Object.fromEntries(Object.entries(found).filter(([,n])=>looksLikeCourse(n)));
     const count=Object.keys(valid).length;
+    // Always show raw OCR snippet for debugging
+    const rawSnippet=text.split('\n').map(l=>l.trim()).filter(l=>l.length>3).slice(0,25).join('\n');
     if(count===0){
-      // Show raw OCR text so user can see what was extracted and enter manually
-      const rawLines=text.split('\n').map(l=>l.trim()).filter(l=>l.length>3).slice(0,30).join('\n');
-      status.innerHTML='Couldn\'t auto-detect courses. Make sure to screenshot your <strong>personal Aspen schedule</strong> (log in → My Schedule), not the general block schedule grid. Raw text found:';
+      status.innerHTML='Couldn\'t find courses. Raw text OCR extracted (tap a block below to enter manually):';
       document.getElementById('parse-result').style.display='block';
       document.getElementById('parse-result').style.background='rgba(0,0,0,.04)';
       document.getElementById('parse-result').style.borderColor='var(--border)';
-      document.getElementById('parse-result-rows').innerHTML=`<pre style="font-size:11px;white-space:pre-wrap;color:var(--s);max-height:140px;overflow-y:auto">${rawLines||'(no text found — try a clearer photo)'}</pre>`;
+      document.getElementById('parse-result-rows').innerHTML=`<pre style="font-size:11px;white-space:pre-wrap;color:var(--s);max-height:160px;overflow-y:auto">${rawSnippet||'(no text found — try a clearer photo)'}</pre>`;
     } else {
       Object.entries(valid).forEach(([b,name])=>{
         if(!S.courses[b]) S.courses[b]={name:'',teacher:'',room:''};
@@ -934,9 +934,11 @@ async function parseSchedule(){
       });
       save();renderBlockList('ob-block-list');
       document.getElementById('parse-result').style.display='block';
+      document.getElementById('parse-result').style.background='rgba(39,174,96,.08)';
+      document.getElementById('parse-result').style.borderColor='rgba(39,174,96,.2)';
       document.getElementById('parse-result-rows').innerHTML=
         Object.entries(valid).map(([b,n])=>`<div class="pr-row">Block ${b}: <strong>${n}</strong></div>`).join('');
-      status.textContent=`Found ${count} course${count!==1?'s':''}. Review and edit below.`;
+      status.textContent=`Found ${count} course${count!==1?'s':''}. Review and tap any block to edit.`;
     }
   }catch(e){
     status.textContent='Could not read image. Please enter courses manually.';
@@ -961,15 +963,20 @@ function parseBlocksFromText(raw){
   const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
   let m;
 
-  // ── Pattern 1 (highest confidence): Aspen "Course Name   A   Teacher   Room"
-  // Block letter is separated from course name by 2+ spaces (OCR table columns).
-  // Require 2+ spaces BEFORE the block letter to avoid matching letters inside names
-  // like "AP" (A in AP), "BC" (B/C in BC), etc.
+  // ── Pattern 1 (highest confidence): Token-based Aspen table parsing
+  // Aspen "My Schedule" renders: Course Name | Block | Teacher | Room
+  // OCR produces one line per row with tokens separated by any whitespace.
+  // Strategy: split each line into tokens, find first standalone A-H token
+  // that appears AFTER at least one word of course name.
   for(const line of lines){
-    // Must have 4+ chars (course name), then 2+ spaces, then single A-H, then 2+ spaces or end
-    const am=line.match(/^(.{4,}?)\s{2,}([A-H])(?:\s{2,}|$)/);
-    if(!am) continue;
-    const blk=am[2], rawCourse=am[1].trim();
+    const tokens=line.split(/\s+/).filter(Boolean);
+    let blockIdx=-1;
+    for(let ti=1;ti<tokens.length;ti++){
+      if(/^[A-H]$/.test(tokens[ti])){blockIdx=ti;break}
+    }
+    if(blockIdx<1) continue;
+    const rawCourse=tokens.slice(0,blockIdx).join(' ');
+    const blk=tokens[blockIdx];
     const name=cleanCourseName(rawCourse);
     if(name.length>=4&&BLOCKS.includes(blk)&&!found[blk]&&looksLikeCourse(name)){
       found[blk]=name;
@@ -990,7 +997,7 @@ function parseBlocksFromText(raw){
     }
   }
 
-  // ── Pattern 3: line starts with block letter "A  Course Name"
+  // ── Pattern 3: line starts with block letter then 2+ spaces then course
   if(Object.keys(found).length<3){
     for(const line of lines){
       const sm=line.match(/^([A-Ha-h])\s{2,}([^\n]{4,})/);
