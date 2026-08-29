@@ -13,35 +13,57 @@
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
-      --bg:#F5F5F7;
-      --surface:#FFFFFF;
-      --surface2:#FFFFFF;
-      --border:rgba(0,0,0,0.09);
-      --divider:rgba(0,0,0,0.08);
-      --p:#0D0D12;
-      --s:rgba(0,0,0,0.40);
-      --accent:#5957D8;
-      --accent-dim:rgba(89,87,216,0.10);
-      --destructive:#E03E3E;
+      --bg:#F5F5F7;--surface:#FFF;--surface2:#FFF;
+      --border:rgba(0,0,0,.09);--divider:rgba(0,0,0,.08);
+      --p:#0D0D12;--s:rgba(0,0,0,.40);
+      --accent:#5957D8;--accent-dim:rgba(89,87,216,.10);
+      --green:#27AE60;--red:#E03E3E;--orange:#E67E22;
     }
     html{font-size:16px;-webkit-text-size-adjust:100%;height:100%}
     body{
-      background:var(--bg);color:var(--p);
-      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Segoe UI",sans-serif;
-      height:100%;max-width:480px;margin:0 auto;
-      display:flex;flex-direction:column;
-      -webkit-font-smoothing:antialiased;
+      background:var(--bg);color:var(--p);height:100%;max-width:480px;margin:0 auto;
+      display:flex;flex-direction:column;-webkit-font-smoothing:antialiased;
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
     }
-
-    /* screens */
     .screen{display:none;flex:1;flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch}
     .screen.active{display:flex}
 
-    /* ── LANDING ── */
+    /* ─── SHARED ─── */
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      background:var(--accent);color:#fff;font-size:16px;font-weight:600;
+      padding:15px 28px;border-radius:14px;border:none;cursor:pointer;
+      width:100%;-webkit-tap-highlight-color:transparent;
+      transition:opacity .15s;font-family:inherit;
+    }
+    .btn:active{opacity:.8}
+    .btn-outline{background:var(--surface);color:var(--p);border:1.5px solid var(--border)}
+    .btn-ghost{
+      background:none;border:none;cursor:pointer;font-family:inherit;
+      width:100%;padding:12px;font-size:14px;color:var(--s);
+      -webkit-tap-highlight-color:transparent;
+    }
+    .quad-label{
+      font-size:11px;font-weight:600;letter-spacing:.1em;
+      text-transform:uppercase;color:var(--s);padding:16px 16px 8px;
+    }
+    .thin-rule{height:.5px;background:var(--divider)}
+    .field{margin-bottom:16px}
+    .field label{
+      display:block;font-size:11px;font-weight:600;letter-spacing:.1em;
+      text-transform:uppercase;color:var(--s);margin-bottom:8px;
+    }
+    .field input,.field select{
+      width:100%;background:var(--surface);color:var(--p);font-size:16px;
+      padding:13px 14px;border:1px solid var(--border);border-radius:12px;
+      outline:none;-webkit-appearance:none;font-family:inherit;
+    }
+    .field input:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+
+    /* ─── LANDING ─── */
     #s-landing{
       align-items:center;justify-content:center;text-align:center;
-      padding:48px 28px;position:relative;overflow:hidden;
-      background:var(--bg);
+      padding:52px 28px;position:relative;overflow:hidden;
     }
     #s-landing::before{
       content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
@@ -51,56 +73,20 @@
     }
     #s-landing img{
       width:80px;height:80px;border-radius:18px;margin-bottom:24px;
-      box-shadow:0 2px 16px rgba(89,87,216,.18),0 1px 3px rgba(0,0,0,.12);
+      box-shadow:0 2px 20px rgba(89,87,216,.20),0 1px 4px rgba(0,0,0,.10);
       position:relative;z-index:1;
     }
-    #s-landing .eyebrow{
-      font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
-      color:var(--accent);margin-bottom:10px;z-index:1;position:relative;
-    }
-    #s-landing h1{
-      font-size:38px;font-weight:800;letter-spacing:-.03em;line-height:1.08;
-      margin-bottom:12px;z-index:1;position:relative;color:var(--p);
-    }
-    #s-landing .sub{
-      font-size:15px;color:var(--s);line-height:1.6;margin-bottom:36px;
-      z-index:1;position:relative;
-    }
-    .btn{
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      background:var(--accent);color:#fff;font-size:16px;font-weight:600;
-      padding:15px 32px;border-radius:14px;border:none;cursor:pointer;
-      width:100%;max-width:320px;-webkit-tap-highlight-color:transparent;
-      transition:opacity .15s;text-decoration:none;font-family:inherit;
-    }
-    .btn:active{opacity:.8}
-    .btn-ghost{
-      background:transparent;color:var(--s);font-size:14px;font-weight:500;
-      border:none;cursor:pointer;padding:12px;-webkit-tap-highlight-color:transparent;
-      font-family:inherit;width:100%;
-    }
-    #s-landing .add-hint{font-size:12px;color:var(--s);margin-top:10px;z-index:1;position:relative}
+    .eyebrow{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;position:relative;z-index:1}
+    #s-landing h1{font-size:38px;font-weight:800;letter-spacing:-.03em;line-height:1.08;margin-bottom:12px;position:relative;z-index:1}
+    #s-landing .sub{font-size:15px;color:var(--s);line-height:1.6;margin-bottom:36px;position:relative;z-index:1}
 
-    /* ── ONBOARDING ── */
-    .ob-wrap{padding:48px 24px 32px;flex:1;display:flex;flex-direction:column}
-    .ob-step{
-      font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
-      color:var(--accent);margin-bottom:16px;
-    }
-    .ob-wrap h2{font-size:30px;font-weight:800;letter-spacing:-.02em;margin-bottom:6px;color:var(--p)}
-    .ob-wrap .hint{font-size:14px;color:var(--s);margin-bottom:28px;line-height:1.5}
-    .field{margin-bottom:18px}
-    .field label{
-      display:block;font-size:11px;font-weight:600;letter-spacing:.1em;
-      text-transform:uppercase;color:var(--s);margin-bottom:8px;
-    }
-    .field input{
-      width:100%;background:var(--surface);color:var(--p);font-size:16px;
-      padding:13px 14px;border:1px solid var(--border);border-radius:12px;
-      outline:none;-webkit-appearance:none;font-family:inherit;
-    }
-    .field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
-    .grad-pills{display:flex;gap:8px;flex-wrap:wrap}
+    /* ─── ONBOARDING SHELL ─── */
+    .ob{padding:52px 24px 36px;flex:1;display:flex;flex-direction:column}
+    .ob-step{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+    .ob h2{font-size:30px;font-weight:800;letter-spacing:-.025em;line-height:1.12;margin-bottom:8px;color:var(--p)}
+    .ob .hint{font-size:14px;color:var(--s);margin-bottom:28px;line-height:1.5}
+    .ob-foot{margin-top:auto;padding-top:24px;display:flex;flex-direction:column;gap:10px}
+    .grad-pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
     .grad-pill{
       background:var(--surface);color:var(--p);font-size:15px;font-weight:600;
       padding:10px 20px;border-radius:10px;border:1.5px solid var(--border);
@@ -108,32 +94,9 @@
       transition:background .15s,color .15s,border-color .15s;font-family:inherit;
     }
     .grad-pill.sel{background:var(--accent);color:#fff;border-color:var(--accent)}
-    .ob-foot{margin-top:auto;padding-top:24px}
-
-    /* schedule upload */
-    .upload-zone{
-      display:flex;align-items:center;gap:10px;padding:14px 16px;
-      background:var(--surface);border:1.5px dashed var(--border);
-      border-radius:12px;cursor:pointer;margin-bottom:16px;
-      -webkit-tap-highlight-color:transparent;transition:border-color .15s;
-    }
-    .upload-zone:active{border-color:var(--accent)}
-    .upload-zone .uz-icon{font-size:22px;flex-shrink:0}
-    .upload-zone .uz-text{font-size:14px;color:var(--s);line-height:1.4}
-    .upload-zone .uz-text strong{display:block;font-weight:600;color:var(--p);font-size:14px}
-    #photo-preview-wrap{display:none;margin-bottom:16px;border-radius:12px;overflow:hidden;border:1px solid var(--border)}
-    #photo-preview-wrap img{width:100%;display:block;max-height:240px;object-fit:cover}
-    #photo-preview-wrap .photo-hint{
-      padding:8px 12px;font-size:12px;color:var(--s);background:var(--surface);
-      display:flex;justify-content:space-between;align-items:center;
-    }
-    #photo-preview-wrap .photo-hint button{
-      font-size:12px;color:var(--destructive);background:none;border:none;
-      cursor:pointer;font-family:inherit;padding:0;
-    }
 
     /* schedule blocks */
-    .block-list{display:flex;flex-direction:column;gap:0}
+    .block-list{display:flex;flex-direction:column}
     .block-row{
       padding:13px 0;border-bottom:1px solid var(--border);
       display:flex;align-items:center;gap:12px;cursor:pointer;
@@ -141,123 +104,142 @@
     }
     .block-row:last-child{border-bottom:none}
     .block-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-    .block-label{font-size:14px;font-weight:600;width:18px;flex-shrink:0;color:var(--p)}
-    .block-name{font-size:15px;color:var(--p);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .block-lbl{font-size:14px;font-weight:700;width:18px;flex-shrink:0}
+    .block-name{font-size:15px;color:var(--p);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .block-name.empty{color:var(--s)}
-    .block-chevron{font-size:16px;color:var(--s);opacity:.5}
+    .block-chev{font-size:16px;color:var(--s);opacity:.4}
 
-    /* ── SHEET OVERLAY ── */
-    .sheet{
-      display:none;position:fixed;inset:0;z-index:50;
-      align-items:flex-end;background:rgba(0,0,0,.4);
-      backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+    /* photo upload */
+    .upload-zone{
+      display:flex;align-items:center;gap:12px;padding:14px 16px;
+      background:var(--surface);border:1.5px dashed var(--border);
+      border-radius:12px;cursor:pointer;margin-bottom:16px;
+      -webkit-tap-highlight-color:transparent;
     }
-    .sheet.open{display:flex}
-    .sheet-body{
-      background:var(--surface2);border-radius:20px 20px 0 0;width:100%;
-      padding:16px 20px calc(32px + env(safe-area-inset-bottom));
-      border-top:1px solid var(--border);
-      box-shadow:0 -4px 24px rgba(0,0,0,.08);
+    .upload-zone:active{border-color:var(--accent)}
+    .uz-icon{font-size:24px;flex-shrink:0}
+    .uz-text strong{display:block;font-weight:600;color:var(--p);font-size:14px;margin-bottom:2px}
+    .uz-text span{font-size:13px;color:var(--s)}
+    #photo-wrap{display:none;margin-bottom:14px;border-radius:12px;overflow:hidden;border:1px solid var(--border)}
+    #photo-wrap img{width:100%;display:block;max-height:220px;object-fit:cover}
+    #photo-wrap .photo-bar{padding:8px 12px;background:var(--surface);display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--s)}
+    #photo-wrap .photo-bar button{font-size:12px;color:var(--red);background:none;border:none;cursor:pointer;font-family:inherit;padding:0}
+
+    /* aspen */
+    .privacy-note{
+      display:flex;align-items:flex-start;gap:10px;padding:12px 14px;
+      background:rgba(89,87,216,.06);border-radius:10px;margin-top:4px;
     }
-    .sheet-handle{
-      width:36px;height:4px;background:rgba(0,0,0,.12);
-      border-radius:2px;margin:0 auto 20px;
+    .privacy-note span{font-size:13px;color:var(--s);line-height:1.5}
+    .aspen-status{
+      display:flex;align-items:center;gap:8px;padding:10px 14px;
+      border-radius:10px;font-size:13px;font-weight:500;margin-bottom:12px;
     }
-    .sheet-body h3{font-size:18px;font-weight:700;margin-bottom:20px;color:var(--p)}
-    .sheet-body .field{margin-bottom:14px}
-    .sheet-actions{display:flex;gap:10px;margin-top:8px}
-    .sheet-actions .btn{flex:1}
-    .btn-outline{background:var(--surface);color:var(--p);border:1.5px solid var(--border)}
-    .field select{
-      width:100%;background:var(--surface);color:var(--p);font-size:16px;
-      padding:13px 14px;border:1px solid var(--border);border-radius:12px;
-      outline:none;-webkit-appearance:none;font-family:inherit;
+    .aspen-status.ok{background:rgba(39,174,96,.1);color:var(--green)}
+    .aspen-status.err{background:rgba(224,62,62,.08);color:var(--red)}
+    .aspen-status.loading{background:rgba(89,87,216,.08);color:var(--accent)}
+    .pw-wrap{position:relative}
+    .pw-wrap input{padding-right:44px}
+    .pw-toggle{
+      position:absolute;right:12px;top:50%;transform:translateY(-50%);
+      background:none;border:none;cursor:pointer;font-size:16px;color:var(--s);
+      -webkit-tap-highlight-color:transparent;
     }
 
-    /* ── APP SHELL ── */
-    #s-app{flex-direction:column;padding-bottom:0;overflow:hidden}
-    .app-body{
-      flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
-      padding-bottom:calc(72px + env(safe-area-inset-bottom));
+    /* friends invite (Beli-style) */
+    .friend-slots{display:flex;flex-direction:column;gap:12px;margin-bottom:8px}
+    .friend-slot{
+      display:flex;align-items:center;gap:12px;padding:12px 14px;
+      background:var(--surface);border:1.5px solid var(--border);border-radius:12px;
     }
+    .friend-slot .avatar-sm{
+      width:36px;height:36px;border-radius:50%;background:var(--accent-dim);
+      display:flex;align-items:center;justify-content:center;
+      font-size:16px;flex-shrink:0;color:var(--s);
+    }
+    .friend-slot.filled .avatar-sm{background:var(--accent);color:#fff;font-size:14px;font-weight:700}
+    .friend-slot input{
+      flex:1;border:none;background:transparent;font-size:15px;color:var(--p);
+      font-family:inherit;outline:none;padding:0;
+    }
+    .friend-slot .share-btn{
+      background:var(--accent-dim);color:var(--accent);border:none;
+      padding:6px 12px;border-radius:8px;font-size:13px;font-weight:600;
+      cursor:pointer;-webkit-tap-highlight-color:transparent;font-family:inherit;
+      flex-shrink:0;
+    }
+    .friend-slot.filled .share-btn{background:rgba(39,174,96,.1);color:var(--green)}
+    .friends-count{font-size:13px;color:var(--s);text-align:center;margin-top:4px}
+
+    /* done screen */
+    #s-ob-done{align-items:center;justify-content:center;padding:40px 28px;text-align:center}
+    #s-ob-done .check-circle{
+      width:80px;height:80px;border-radius:50%;background:var(--accent);
+      display:flex;align-items:center;justify-content:center;
+      font-size:36px;margin:0 auto 24px;color:#fff;
+    }
+    #s-ob-done h2{font-size:32px;font-weight:800;letter-spacing:-.025em;margin-bottom:8px}
+    #s-ob-done .sub{font-size:15px;color:var(--s);margin-bottom:36px;line-height:1.5}
+    .preview-card{
+      background:var(--surface);border-radius:14px;padding:16px;
+      text-align:left;margin-bottom:32px;width:100%;
+    }
+    .preview-row{display:flex;align-items:center;gap:10px;padding:6px 0}
+    .preview-row:not(:last-child){border-bottom:1px solid var(--border)}
+    .preview-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .preview-blk{font-size:11px;font-weight:600;color:var(--s);width:14px}
+    .preview-name{font-size:14px;flex:1}
+
+    /* ─── APP SHELL ─── */
+    #s-app{flex-direction:column;overflow:hidden}
+    .app-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
     .tab-bar{
       display:flex;position:fixed;bottom:0;left:50%;transform:translateX(-50%);
       width:100%;max-width:480px;
-      background:rgba(245,245,247,.92);
-      backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-      border-top:.5px solid rgba(0,0,0,.12);
-      padding-bottom:env(safe-area-inset-bottom);
+      background:rgba(245,245,247,.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+      border-top:.5px solid rgba(0,0,0,.12);padding-bottom:env(safe-area-inset-bottom);
       flex-shrink:0;z-index:10;
     }
     .tab-btn{
       flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
-      padding:10px 0 6px;border:none;background:transparent;color:var(--s);
+      padding:9px 0 5px;border:none;background:transparent;color:var(--s);
       cursor:pointer;font-size:10px;font-weight:500;letter-spacing:.03em;
       -webkit-tap-highlight-color:transparent;transition:color .15s;font-family:inherit;
     }
     .tab-btn.active{color:var(--accent)}
     .tab-btn svg{width:22px;height:22px}
-
-    /* ── TAB PANELS ── */
     .tab-panel{display:none;flex-direction:column}
     .tab-panel.active{display:flex}
 
-    /* thin rules */
-    .thin-rule{height:.5px;background:var(--divider)}
-
-    /* quad-label (matches iOS quadLabel typography) */
-    .quad-label{
-      font-size:11px;font-weight:600;letter-spacing:.1em;
-      text-transform:uppercase;color:var(--s);padding:16px 16px 8px;
-    }
-
-    /* ── TODAY TAB ── */
-    .day-header{
-      display:flex;align-items:center;justify-content:space-between;
-      padding:20px 16px 12px;
-    }
-    .day-info{display:flex;align-items:center;gap:6px}
-    .day-label{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--s)}
+    /* ─── TODAY ─── */
+    .day-header{display:flex;align-items:center;justify-content:space-between;padding:20px 16px 12px}
+    .day-lbl{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--s)}
     .day-num{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--p)}
-    .day-date{font-size:13px;color:var(--s)}
-
-    /* hero */
     .hero-block{padding:20px 16px 24px}
-    .hero-course{
-      font-size:26px;font-weight:900;letter-spacing:-.02em;
-      text-transform:uppercase;line-height:1.08;margin-bottom:4px;
-    }
+    .hero-course{font-size:26px;font-weight:900;letter-spacing:-.02em;text-transform:uppercase;line-height:1.08;margin-bottom:4px}
     .hero-meta{font-size:13px;color:var(--s);margin-bottom:10px}
-    .hero-countdown-wrap{display:flex;align-items:baseline;gap:6px;margin-top:4px}
-    .hero-countdown{font-size:62px;font-weight:900;line-height:1;letter-spacing:-.03em}
-    .hero-countdown-unit{font-size:18px;font-weight:700;color:var(--s)}
-    .no-school-hero{padding:36px 16px;text-align:left}
-    .no-school-hero h2{font-size:28px;font-weight:800;letter-spacing:-.02em;margin-bottom:6px;color:var(--p)}
-    .no-school-hero p{font-size:14px;color:var(--s)}
-
-    /* slot rows */
-    .slot-row{display:flex;align-items:center;gap:10px;padding:13px 16px;background:transparent}
+    .hero-cd-wrap{display:flex;align-items:baseline;gap:6px}
+    .hero-cd{font-size:60px;font-weight:900;line-height:1;letter-spacing:-.03em}
+    .hero-cd-unit{font-size:18px;font-weight:700;color:var(--s)}
+    .no-school{padding:32px 16px}
+    .no-school h2{font-size:28px;font-weight:800;letter-spacing:-.02em;margin-bottom:6px}
+    .no-school p{font-size:14px;color:var(--s)}
+    .slot-row{display:flex;align-items:center;gap:10px;padding:13px 16px}
     .slot-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
     .slot-blk{font-size:12px;color:var(--s);width:12px;flex-shrink:0;font-weight:500}
     .slot-course{font-size:15px;flex:1;color:var(--p)}
     .slot-course.past{color:var(--s)}
     .slot-course.free{color:rgba(0,0,0,.22)}
-    .slot-right{font-size:12px;color:var(--s);text-align:right;flex-shrink:0}
-    .slot-now-badge{
-      font-size:10px;font-weight:700;letter-spacing:.06em;
-      padding:2px 7px;border-radius:20px;color:#fff;
-    }
+    .slot-right{font-size:12px;color:var(--s);flex-shrink:0}
+    .now-badge{font-size:10px;font-weight:700;letter-spacing:.06em;padding:2px 7px;border-radius:20px;color:#fff}
     .slot-divider{height:.5px;background:var(--divider);margin-left:16px}
 
-    /* ── WORK TAB ── */
-    .work-header{
-      display:flex;align-items:center;justify-content:space-between;
-      padding:22px 16px 12px;
-    }
-    .work-header h2{font-size:28px;font-weight:800;letter-spacing:-.02em;color:var(--p)}
-    .work-add-btn{
+    /* ─── WORK ─── */
+    .list-header{display:flex;align-items:center;justify-content:space-between;padding:22px 16px 12px}
+    .list-header h2{font-size:28px;font-weight:800;letter-spacing:-.02em}
+    .add-btn{
       width:30px;height:30px;border-radius:50%;background:var(--accent-dim);
-      border:none;color:var(--accent);font-size:20px;cursor:pointer;
+      border:none;color:var(--accent);font-size:22px;cursor:pointer;line-height:1;
       display:flex;align-items:center;justify-content:center;
       -webkit-tap-highlight-color:transparent;font-family:inherit;
     }
@@ -265,9 +247,8 @@
     .check-btn{
       width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);
       background:transparent;cursor:pointer;flex-shrink:0;
-      -webkit-tap-highlight-color:transparent;
       display:flex;align-items:center;justify-content:center;
-      transition:background .15s,border-color .15s;
+      transition:background .15s,border-color .15s;-webkit-tap-highlight-color:transparent;
     }
     .check-btn.done{background:var(--accent);border-color:var(--accent)}
     .check-btn.done::after{content:'✓';font-size:11px;color:#fff;font-weight:700}
@@ -277,67 +258,142 @@
     .assign-sub{font-size:12px;color:var(--s);margin-top:2px}
     .assign-due{font-size:12px;color:var(--s);flex-shrink:0}
     .assign-due.today{color:var(--accent);font-weight:600}
-    .empty-state{
-      display:flex;flex-direction:column;align-items:center;
-      justify-content:center;padding:64px 24px;text-align:center;gap:10px;
-    }
+    .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:64px 24px;text-align:center;gap:8px}
     .empty-state p{font-size:15px;color:var(--s)}
 
-    /* ── ME TAB ── */
-    .me-header{padding:24px 16px 16px}
-    .me-avatar{
-      width:56px;height:56px;border-radius:50%;display:flex;align-items:center;
-      justify-content:center;font-size:22px;font-weight:700;color:#fff;margin-bottom:12px;
-    }
-    .me-name{font-size:24px;font-weight:800;letter-spacing:-.02em;color:var(--p)}
-    .me-class{font-size:14px;color:var(--s);margin-top:2px}
-    .me-row{
-      display:flex;align-items:center;gap:12px;padding:14px 16px;
-      border-bottom:.5px solid var(--divider);cursor:pointer;
+    /* ─── GRADES ─── */
+    .grade-row{display:flex;align-items:center;gap:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+    .grade-band{width:4px;align-self:stretch;flex-shrink:0;border-radius:2px 0 0 2px}
+    .grade-info{flex:1;padding:16px 12px;min-width:0}
+    .grade-name{font-size:15px;color:var(--p);margin-bottom:2px}
+    .grade-sub{font-size:12px;color:var(--s)}
+    .grade-right{padding:16px 16px 16px 4px;text-align:right;flex-shrink:0}
+    .grade-letter{font-size:26px;font-weight:900;line-height:1;letter-spacing:-.01em}
+    .grade-pct{font-size:12px;color:var(--s);margin-top:1px}
+    .connect-banner{
+      margin:16px;padding:14px 16px;background:var(--surface);
+      border-radius:12px;border:1.5px solid var(--border);
+      display:flex;align-items:center;gap:12px;cursor:pointer;
       -webkit-tap-highlight-color:transparent;
     }
+    .connect-banner .cb-icon{font-size:22px;flex-shrink:0}
+    .connect-banner .cb-text strong{display:block;font-size:14px;font-weight:600;color:var(--p)}
+    .connect-banner .cb-text span{font-size:12px;color:var(--s)}
+    .connect-banner .cb-arrow{font-size:16px;color:var(--s);margin-left:auto}
+
+    /* grade detail (full-screen panel) */
+    #grade-detail{
+      display:none;position:fixed;inset:0;z-index:30;background:var(--bg);
+      flex-direction:column;max-width:480px;left:50%;transform:translateX(-50%);
+    }
+    #grade-detail.open{display:flex}
+    .detail-nav{display:flex;align-items:center;padding:16px 16px 0;gap:12px}
+    .detail-back{
+      background:none;border:none;font-size:16px;color:var(--accent);cursor:pointer;
+      font-family:inherit;padding:4px 0;display:flex;align-items:center;gap:4px;
+    }
+    .detail-body{flex:1;overflow-y:auto;padding-bottom:40px}
+    .detail-hero{padding:20px 16px 24px}
+    .detail-letter{font-size:72px;font-weight:900;letter-spacing:-.03em;line-height:1}
+    .detail-pct{font-size:20px;font-weight:600;margin-top:2px}
+    .whatif-section{
+      margin:0 16px 16px;padding:16px;background:var(--surface);
+      border-radius:14px;border:1px solid var(--border);
+    }
+    .whatif-row{display:flex;align-items:flex-end;gap:10px;margin:12px 0 8px}
+    .whatif-row .field{flex:1;margin:0}
+    .whatif-row .field label{font-size:11px}
+    .whatif-slash{font-size:20px;font-weight:700;color:var(--s);padding-bottom:10px;flex-shrink:0}
+    .whatif-result{
+      padding:10px 12px;background:var(--bg);border-radius:8px;
+      font-size:14px;color:var(--s);line-height:1.5;
+    }
+    .whatif-result strong{color:var(--accent);font-weight:700}
+    .add-grade-btn{
+      margin:0 16px 16px;padding:13px 16px;background:var(--surface);
+      border-radius:12px;border:1.5px dashed var(--border);
+      display:flex;align-items:center;gap:10px;cursor:pointer;
+      font-size:14px;color:var(--accent);font-weight:600;
+      -webkit-tap-highlight-color:transparent;font-family:inherit;width:calc(100% - 32px);
+    }
+
+    /* ─── ME ─── */
+    .me-header{padding:24px 16px 16px}
+    .me-av{width:56px;height:56px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;margin-bottom:12px}
+    .me-name{font-size:24px;font-weight:800;letter-spacing:-.02em}
+    .me-class{font-size:14px;color:var(--s);margin-top:2px}
+    .me-row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:.5px solid var(--divider);cursor:pointer;-webkit-tap-highlight-color:transparent}
     .me-row:last-child{border-bottom:none}
     .me-row-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
     .me-row-blk{font-size:12px;color:var(--s);width:14px;font-weight:500}
-    .me-row-label{font-size:15px;flex:1;color:var(--p)}
+    .me-row-label{font-size:15px;flex:1}
     .me-row-val{font-size:13px;color:var(--s)}
-    .me-actions{padding:16px}
-    .me-actions .btn{margin-bottom:10px}
-    .danger-btn{
-      background:none;border:none;cursor:pointer;font-family:inherit;
-      width:100%;padding:10px;font-size:14px;color:var(--destructive);
-      -webkit-tap-highlight-color:transparent;
+    .me-action-row{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:14px 16px;border-bottom:.5px solid var(--divider);
+      cursor:pointer;-webkit-tap-highlight-color:transparent;
     }
+    .me-action-row:last-child{border-bottom:none}
+    .me-action-label{font-size:15px;color:var(--p)}
+    .me-action-right{font-size:13px;color:var(--s)}
+    .me-action-right.connected{color:var(--green);font-weight:500}
+    .danger-btn{background:none;border:none;cursor:pointer;font-family:inherit;width:100%;padding:12px 16px;font-size:14px;color:var(--red);text-align:left}
+
+    /* ─── SHEETS ─── */
+    .sheet{display:none;position:fixed;inset:0;z-index:50;align-items:flex-end;background:rgba(0,0,0,.4);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+    .sheet.open{display:flex}
+    .sheet-body{background:var(--surface);border-radius:20px 20px 0 0;width:100%;padding:16px 20px calc(36px + env(safe-area-inset-bottom));border-top:1px solid var(--border);box-shadow:0 -4px 24px rgba(0,0,0,.08)}
+    .sheet-handle{width:36px;height:4px;background:rgba(0,0,0,.12);border-radius:2px;margin:0 auto 18px}
+    .sheet-body h3{font-size:18px;font-weight:700;margin-bottom:18px}
+    .sheet-body .field{margin-bottom:13px}
+    .sheet-actions{display:flex;gap:10px;margin-top:6px}
+    .sheet-actions .btn{flex:1}
   </style>
 </head>
 <body>
 
-<!-- ── LANDING ── -->
+<!-- ══════════════════════════════════════════
+     LANDING
+══════════════════════════════════════════ -->
 <div id="s-landing" class="screen active">
   <img src="/logo.png" alt="The Quad"/>
   <p class="eyebrow">Lexington High School</p>
-  <h1>School, without<br/>the chaos.</h1>
-  <p class="sub">Your block schedule, grades, and assignments — all in one place.</p>
-  <button class="btn" onclick="go('s-ob-name')">Get started →</button>
-  <p class="add-hint" style="margin-top:16px">Free · No account needed</p>
+  <h1>THE QUAD</h1>
+  <p class="sub">Everything LHS — schedule, grades, and assignments in one place.</p>
+  <button class="btn" style="max-width:320px" onclick="go('s-ob-lhs')">Get started</button>
+  <p style="font-size:12px;color:var(--s);margin-top:14px">Free · No account needed</p>
 </div>
 
-<!-- ── ONBOARD: NAME ── -->
+<!-- ══════════════════════════════════════════
+     OB 1: Built for LHS
+══════════════════════════════════════════ -->
+<div id="s-ob-lhs" class="screen">
+  <div class="ob">
+    <div style="flex:1;display:flex;align-items:center">
+      <div>
+        <h2 style="font-size:36px;line-height:1.1;margin-bottom:16px">Built for<br/>Lexington.</h2>
+        <p style="font-size:16px;color:var(--s);line-height:1.65">The Quad brings together your rotating block schedule, coursework, grades, and free time — built exactly for how LHS works.</p>
+      </div>
+    </div>
+    <div class="ob-foot">
+      <button class="btn" onclick="go('s-ob-name')">I'm an LHS student →</button>
+      <p style="font-size:12px;color:var(--s);text-align:center">Not affiliated with Lexington Public Schools.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     OB 2: Name + Grad Year
+══════════════════════════════════════════ -->
 <div id="s-ob-name" class="screen">
-  <div class="ob-wrap">
-    <p class="ob-step">Step 1 of 2</p>
-    <h2>What's your name?</h2>
-    <p class="hint">And when do you graduate?</p>
+  <div class="ob">
+    <p class="ob-step">Step 1 of 4</p>
+    <h2>Let's make this yours.</h2>
+    <p class="hint">Your name and class year.</p>
+    <div class="field"><label>First name</label><input id="ob-first" type="text" placeholder="e.g. Alex" autocomplete="given-name"/></div>
+    <div class="field"><label>Last name</label><input id="ob-last" type="text" placeholder="e.g. Johnson" autocomplete="family-name"/></div>
     <div class="field">
-      <label>First name</label>
-      <input id="ob-first" type="text" placeholder="e.g. Alex" autocomplete="given-name"/>
-    </div>
-    <div class="field">
-      <label>Last name</label>
-      <input id="ob-last" type="text" placeholder="e.g. Johnson" autocomplete="family-name"/>
-    </div>
-    <div class="field">
-      <label>Graduation year</label>
+      <label>Class of</label>
       <div class="grad-pills" id="grad-pills"></div>
     </div>
     <div class="ob-foot">
@@ -346,52 +402,110 @@
   </div>
 </div>
 
-<!-- ── ONBOARD: SCHEDULE ── -->
+<!-- ══════════════════════════════════════════
+     OB 3: Schedule Entry
+══════════════════════════════════════════ -->
 <div id="s-ob-sched" class="screen">
-  <div class="ob-wrap">
-    <p class="ob-step">Step 2 of 2</p>
-    <h2>Your schedule</h2>
-    <p class="hint">Have your schedule handy? Upload a photo for reference, then tap each block to enter your course.</p>
-
-    <!-- Photo upload -->
-    <input type="file" id="photo-input" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(this)"/>
+  <div class="ob">
+    <p class="ob-step">Step 2 of 4</p>
+    <h2>What's your schedule?</h2>
+    <p class="hint">Have your schedule? Upload a photo for reference, then tap each block to enter your course.</p>
+    <input type="file" id="photo-input" accept="image/*" style="display:none" onchange="handlePhoto(this)"/>
     <div class="upload-zone" onclick="document.getElementById('photo-input').click()">
       <span class="uz-icon">📷</span>
       <div class="uz-text">
-        <strong>Upload your schedule</strong>
-        Take a photo or choose from library
+        <strong>Upload or photograph your schedule</strong>
+        <span>Take a photo or choose from library</span>
       </div>
     </div>
-    <div id="photo-preview-wrap">
-      <img id="photo-preview" src="" alt="Schedule photo"/>
-      <div class="photo-hint">
-        <span>Reference photo — tap blocks below to enter courses</span>
+    <div id="photo-wrap">
+      <img id="photo-preview" src="" alt="Schedule"/>
+      <div class="photo-bar">
+        <span>Reference — tap blocks below to enter courses</span>
         <button onclick="removePhoto()">Remove</button>
       </div>
     </div>
-
     <div class="block-list" id="ob-block-list"></div>
     <div class="ob-foot">
-      <button class="btn" onclick="obSchedDone()">Done — open The Quad →</button>
-      <div style="height:10px"></div>
-      <button class="btn-ghost" onclick="obSchedDone()">Skip for now</button>
+      <button class="btn" onclick="go('s-ob-aspen')">Continue →</button>
+      <button class="btn-ghost" onclick="go('s-ob-aspen')">Skip for now</button>
     </div>
   </div>
 </div>
 
-<!-- ── APP ── -->
+<!-- ══════════════════════════════════════════
+     OB 4: Aspen Connect
+══════════════════════════════════════════ -->
+<div id="s-ob-aspen" class="screen">
+  <div class="ob">
+    <p class="ob-step">Step 3 of 4</p>
+    <h2>Connect Aspen.</h2>
+    <p class="hint">Import your grades automatically. Your credentials stay on this device — never sent to our servers.</p>
+    <div id="aspen-ob-status" style="display:none"></div>
+    <div class="field"><label>Aspen ID</label><input id="ob-aspen-user" type="text" placeholder="Student ID (e.g. s12345678)" autocomplete="username" autocorrect="off" autocapitalize="none" inputmode="email"/></div>
+    <div class="field">
+      <label>Password</label>
+      <div class="pw-wrap">
+        <input id="ob-aspen-pass" type="password" placeholder="Aspen password" autocomplete="current-password"/>
+        <button class="pw-toggle" onclick="togglePw('ob-aspen-pass',this)" type="button">👁</button>
+      </div>
+    </div>
+    <div class="privacy-note">
+      <span>🔒</span>
+      <span>Your Aspen ID and password are stored only in your browser's local storage on this device. They are never sent to The Quad's servers.</span>
+    </div>
+    <div class="ob-foot">
+      <button class="btn" id="ob-aspen-btn" onclick="obAspenConnect()">Connect to Aspen</button>
+      <button class="btn-ghost" onclick="go('s-ob-friends')">Skip — enter grades manually</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     OB 5: Invite Friends (Beli-style)
+══════════════════════════════════════════ -->
+<div id="s-ob-friends" class="screen">
+  <div class="ob">
+    <p class="ob-step">Step 4 of 4</p>
+    <h2>Invite 3 friends.</h2>
+    <p class="hint">The Quad is better with your crew. Invite 3 friends — they'll get a link to add it to their home screen.</p>
+    <div class="friend-slots" id="friend-slots"></div>
+    <p class="friends-count" id="friends-count">0 of 3 invited</p>
+    <div class="ob-foot">
+      <button class="btn" id="friends-btn" onclick="go('s-ob-done')">Continue →</button>
+      <button class="btn-ghost" onclick="go('s-ob-done')">Skip for now</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     OB 6: Done
+══════════════════════════════════════════ -->
+<div id="s-ob-done" class="screen">
+  <div style="padding:52px 28px 40px;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+    <div class="check-circle">✓</div>
+    <h2>Your Quad is ready.</h2>
+    <p class="sub" id="done-welcome">Welcome — enjoy LHS.</p>
+    <div class="preview-card" id="done-preview"></div>
+    <button class="btn" onclick="finishOnboarding()">Open The Quad →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     APP SHELL
+══════════════════════════════════════════ -->
 <div id="s-app" class="screen">
   <div class="app-body">
 
     <!-- TODAY -->
     <div id="tab-today" class="tab-panel active">
       <div class="day-header">
-        <div class="day-info">
-          <span class="day-label" id="t-weekday">—</span>
-          <span class="day-label" style="opacity:.4">·</span>
-          <span class="day-num" id="t-daynum">—</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="day-lbl" id="t-wd">—</span>
+          <span class="day-lbl" style="opacity:.4">·</span>
+          <span class="day-num" id="t-dn">—</span>
         </div>
-        <span class="day-date" id="t-date"></span>
+        <span style="font-size:13px;color:var(--s)" id="t-date"></span>
       </div>
       <div class="thin-rule"></div>
       <div id="t-hero"></div>
@@ -401,59 +515,120 @@
 
     <!-- WORK -->
     <div id="tab-work" class="tab-panel">
-      <div class="work-header">
+      <div class="list-header">
         <h2>Work</h2>
-        <button class="work-add-btn" onclick="openAddWork()">+</button>
+        <button class="add-btn" onclick="openAddWork()">+</button>
       </div>
       <div class="thin-rule"></div>
       <div id="w-list"></div>
     </div>
 
+    <!-- GRADES -->
+    <div id="tab-grades" class="tab-panel">
+      <div class="list-header">
+        <h2>Grades</h2>
+        <button class="add-btn" onclick="openAddGrade()">+</button>
+      </div>
+      <div class="thin-rule"></div>
+      <div id="g-aspen-banner"></div>
+      <div id="g-list"></div>
+    </div>
+
     <!-- ME -->
     <div id="tab-me" class="tab-panel">
       <div class="me-header">
-        <div class="me-avatar" id="me-avatar"></div>
+        <div class="me-av" id="me-av"></div>
         <div class="me-name" id="me-name">—</div>
         <div class="me-class" id="me-class">—</div>
       </div>
       <div class="thin-rule"></div>
       <div class="quad-label">My Schedule</div>
-      <div id="me-schedule"></div>
+      <div id="me-sched"></div>
       <div class="thin-rule" style="margin-top:8px"></div>
-      <div class="me-actions">
-        <button class="btn btn-outline" onclick="editSchedule()">Edit schedule</button>
+      <div class="quad-label">Connections</div>
+      <div id="me-connections"></div>
+      <div class="thin-rule" style="margin-top:8px"></div>
+      <div style="padding:8px 0">
+        <button class="me-action-row" style="width:100%;background:none;border:none;font-family:inherit" onclick="editSchedule()">
+          <span class="me-action-label">Edit schedule</span>
+          <span class="me-action-right">›</span>
+        </button>
+      </div>
+      <div class="thin-rule"></div>
+      <div style="padding:8px 0">
         <button class="danger-btn" onclick="resetApp()">Sign out &amp; reset</button>
       </div>
     </div>
 
-  </div>
+  </div><!-- /app-body -->
 
   <nav class="tab-bar">
     <button class="tab-btn active" id="tb-today" onclick="switchTab('today')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-        <polyline points="9 22 9 12 15 12 15 22"/>
-      </svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       Today
     </button>
     <button class="tab-btn" id="tb-work" onclick="switchTab('work')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <path d="M9 12l2 2 4-4"/>
-      </svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
       Work
     </button>
+    <button class="tab-btn" id="tb-grades" onclick="switchTab('grades')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Grades
+    </button>
     <button class="tab-btn" id="tb-me" onclick="switchTab('me')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-        <circle cx="12" cy="7" r="4"/>
-      </svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       Me
     </button>
   </nav>
 </div>
 
-<!-- ── BLOCK EDIT SHEET ── -->
+<!-- ══════════════════════════════════════════
+     GRADE DETAIL (full-screen panel)
+══════════════════════════════════════════ -->
+<div id="grade-detail">
+  <div class="detail-nav">
+    <button class="detail-back" onclick="closeGradeDetail()">‹ Grades</button>
+    <span style="font-size:16px;font-weight:600;flex:1;text-align:center" id="gd-title"></span>
+    <div style="width:80px"></div>
+  </div>
+  <div class="detail-body">
+    <div class="detail-hero">
+      <div class="detail-letter" id="gd-letter"></div>
+      <div class="detail-pct" id="gd-pct"></div>
+    </div>
+    <div class="thin-rule" style="margin:0 16px"></div>
+
+    <!-- What-If -->
+    <div style="padding:16px 16px 8px">
+      <div class="quad-label" style="padding:0 0 12px">WHAT IF?</div>
+      <div class="whatif-section">
+        <div class="whatif-row">
+          <div class="field">
+            <label>Score</label>
+            <input type="number" id="wi-score" placeholder="85" min="0" oninput="calcWhatIf()" style="text-align:center"/>
+          </div>
+          <span class="whatif-slash">/</span>
+          <div class="field">
+            <label>Out of</label>
+            <input type="number" id="wi-outof" placeholder="100" min="1" oninput="calcWhatIf()" style="text-align:center"/>
+          </div>
+        </div>
+        <div class="whatif-result" id="wi-result">Enter a hypothetical score above to see how it affects your grade.</div>
+      </div>
+    </div>
+
+    <!-- Entries -->
+    <div class="quad-label">GRADE ENTRIES</div>
+    <div id="gd-entries"></div>
+    <button class="add-grade-btn" onclick="openAddEntryFromDetail()">+ Add assignment</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SHEETS
+══════════════════════════════════════════ -->
+
+<!-- Block edit sheet -->
 <div class="sheet" id="block-sheet" onclick="if(event.target===this)closeBlockSheet()">
   <div class="sheet-body">
     <div class="sheet-handle"></div>
@@ -468,16 +643,13 @@
   </div>
 </div>
 
-<!-- ── ADD WORK SHEET ── -->
+<!-- Add work sheet -->
 <div class="sheet" id="work-sheet" onclick="if(event.target===this)closeWorkSheet()">
   <div class="sheet-body">
     <div class="sheet-handle"></div>
     <h3>Add assignment</h3>
     <div class="field"><label>Title</label><input id="ws-title" type="text" placeholder="e.g. Essay draft"/></div>
-    <div class="field">
-      <label>Course (optional)</label>
-      <select id="ws-course"><option value="">No course</option></select>
-    </div>
+    <div class="field"><label>Course (optional)</label><select id="ws-course"><option value="">No course</option></select></div>
     <div class="field"><label>Due date (optional)</label><input id="ws-due" type="date"/></div>
     <div class="sheet-actions">
       <button class="btn btn-outline" onclick="closeWorkSheet()">Cancel</button>
@@ -486,399 +658,625 @@
   </div>
 </div>
 
-<script>
-// ──────────────────────────────────────────────
-// CONSTANTS
-// ──────────────────────────────────────────────
+<!-- Add grade sheet -->
+<div class="sheet" id="grade-sheet" onclick="if(event.target===this)closeGradeSheet()">
+  <div class="sheet-body">
+    <div class="sheet-handle"></div>
+    <h3>Add grade</h3>
+    <div class="field"><label>Course</label><select id="gs-course"><option value="">Select course</option></select></div>
+    <div class="field" style="display:flex;gap:10px">
+      <div style="flex:1"><label>Score earned</label><input type="number" id="gs-score" placeholder="85" min="0"/></div>
+      <div style="flex:1"><label>Out of</label><input type="number" id="gs-outof" placeholder="100" min="1"/></div>
+    </div>
+    <div class="field"><label>Assignment name (optional)</label><input type="text" id="gs-name" placeholder="e.g. Quiz 3"/></div>
+    <div class="sheet-actions">
+      <button class="btn btn-outline" onclick="closeGradeSheet()">Cancel</button>
+      <button class="btn" onclick="saveGrade()">Add</button>
+    </div>
+  </div>
+</div>
 
-const BLOCKS = ['A','B','C','D','E','F','G','H'];
-const COLORS = ['#7574f2','#e8734a','#4aae78','#d4a843','#e05c8a','#4a9ee8','#8b5cf6','#14b8a6'];
+<!-- Aspen sheet (from Me tab) -->
+<div class="sheet" id="aspen-sheet" onclick="if(event.target===this)closeAspenSheet()">
+  <div class="sheet-body">
+    <div class="sheet-handle"></div>
+    <h3>Connect Aspen</h3>
+    <div id="aspen-sheet-status" style="display:none;margin-bottom:12px"></div>
+    <div class="field"><label>Aspen ID</label><input id="as-user" type="text" placeholder="Student ID (e.g. s12345678)" autocorrect="off" autocapitalize="none" inputmode="email"/></div>
+    <div class="field">
+      <label>Password</label>
+      <div class="pw-wrap">
+        <input id="as-pass" type="password" placeholder="Aspen password" autocomplete="current-password"/>
+        <button class="pw-toggle" onclick="togglePw('as-pass',this)" type="button">👁</button>
+      </div>
+    </div>
+    <div class="privacy-note" style="margin-bottom:14px">
+      <span>🔒</span>
+      <span style="font-size:12px">Credentials stored locally on your device only. Never sent to The Quad's servers.</span>
+    </div>
+    <div class="sheet-actions">
+      <button class="btn btn-outline" onclick="closeAspenSheet()">Cancel</button>
+      <button class="btn" id="as-connect-btn" onclick="aspenSheetConnect()">Connect</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════
+// CONSTANTS
+// ════════════════════════════════════════════
+
+const BLOCKS  = ['A','B','C','D','E','F','G','H'];
+const COLORS  = ['#7574f2','#e8734a','#4aae78','#d4a843','#e05c8a','#4a9ee8','#8b5cf6','#14b8a6'];
 const GRAD_YEARS = [2026,2027,2028,2029];
 
 const PERIODS = [
-  {start:8*60+30, end:9*60+30},
-  {start:9*60+35, end:10*60+35},
-  {start:10*60+40, end:11*60+40},
-  {start:12*60+15, end:13*60+10},
-  {start:13*60+15, end:14*60+10},
-  {start:14*60+15, end:15*60+10}
+  {start:8*60+30,end:9*60+30},{start:9*60+35,end:10*60+35},
+  {start:10*60+40,end:11*60+40},{start:12*60+15,end:13*60+10},
+  {start:13*60+15,end:14*60+10},{start:14*60+15,end:15*60+10}
 ];
-const LUNCH = {start:11*60+40, end:12*60+15};
+const LUNCH = {start:11*60+40,end:12*60+15};
 
 const BLOCK_ORDER = {
-  1:['A','B','C','D','E','F'],
-  2:['E','F','G','H','HR','D'],
-  3:['B','A','G','H','FL','C'],
-  4:['A','B','C','D','E','F'],
-  5:['E','F','G','H','FL','D'],
-  6:['B','A','G','H','FL','C']
+  1:['A','B','C','D','E','F'],2:['E','F','G','H','HR','D'],
+  3:['B','A','G','H','FL','C'],4:['A','B','C','D','E','F'],
+  5:['E','F','G','H','FL','D'],6:['B','A','G','H','FL','C']
 };
 
 const HOLIDAYS = new Set([
-  '2026-09-07','2026-10-12','2026-11-11',
-  '2026-11-25','2026-11-26','2026-11-27',
+  '2026-09-07','2026-10-12','2026-11-11','2026-11-25','2026-11-26','2026-11-27',
   '2026-12-23','2026-12-24','2026-12-25','2026-12-26','2026-12-27',
   '2026-12-28','2026-12-29','2026-12-30','2026-12-31','2027-01-01',
-  '2027-01-18',
-  '2027-02-15','2027-02-16','2027-02-17','2027-02-18','2027-02-19',
-  '2027-04-19','2027-04-20','2027-04-21','2027-04-22','2027-04-23',
-  '2027-05-31'
+  '2027-01-18','2027-02-15','2027-02-16','2027-02-17','2027-02-18','2027-02-19',
+  '2027-04-19','2027-04-20','2027-04-21','2027-04-22','2027-04-23','2027-05-31'
 ]);
 
-// ──────────────────────────────────────────────
+// ════════════════════════════════════════════
 // HELPERS
-// ──────────────────────────────────────────────
+// ════════════════════════════════════════════
 
-function dateKey(d) {
-  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+function dateKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+
+function getDayType(date){
+  const key=dateKey(date),wd=date.getDay();
+  const sep1=new Date(2026,8,1),end=new Date(2027,5,11);
+  if(date<sep1||date>end) return 0;
+  if(wd===0||wd===6) return 0;
+  if(key==='2026-09-01') return 'special';
+  if(HOLIDAYS.has(key)) return 0;
+  let count=0,c=new Date(2026,8,2);c.setHours(0,0,0,0);
+  const t=new Date(date);t.setHours(0,0,0,0);
+  while(c<=t){const k=dateKey(c),w=c.getDay();if(w!==0&&w!==6&&!HOLIDAYS.has(k))count++;c.setDate(c.getDate()+1)}
+  return ((count-1)%6)+1;
 }
 
-function getDayType(date) {
-  const key = dateKey(date);
-  const sep1 = new Date(2026,8,1);
-  const end  = new Date(2027,5,11);
-  const wd   = date.getDay();
-  if (date < sep1 || date > end) return 0;
-  if (wd === 0 || wd === 6) return 0;
-  if (key === '2026-09-01') return 'special';
-  if (HOLIDAYS.has(key)) return 0;
-  let count = 0;
-  const sep2 = new Date(2026,8,2);
-  let c = new Date(sep2); c.setHours(0,0,0,0);
-  let t = new Date(date); t.setHours(0,0,0,0);
-  while (c <= t) {
-    const k = dateKey(c);
-    const w = c.getDay();
-    if (w !== 0 && w !== 6 && !HOLIDAYS.has(k)) count++;
-    c.setDate(c.getDate()+1);
-  }
-  return ((count - 1) % 6) + 1;
+function fmtTime(m){const h=Math.floor(m/60),mn=m%60,ap=h<12?'AM':'PM';const hr=h>12?h-12:h===0?12:h;return hr+':'+(mn===0?'00':String(mn).padStart(2,'0'))+' '+ap}
+
+function letterGrade(pct){
+  if(pct>=97) return 'A+'; if(pct>=93) return 'A'; if(pct>=90) return 'A-';
+  if(pct>=87) return 'B+'; if(pct>=83) return 'B'; if(pct>=80) return 'B-';
+  if(pct>=77) return 'C+'; if(pct>=73) return 'C'; if(pct>=70) return 'C-';
+  if(pct>=67) return 'D+'; if(pct>=63) return 'D'; if(pct>=60) return 'D-';
+  return 'F';
 }
 
-function fmtTime(mins) {
-  const h = Math.floor(mins/60);
-  const m = mins%60;
-  const ampm = h < 12 ? 'AM' : 'PM';
-  const hr = h > 12 ? h-12 : h === 0 ? 12 : h;
-  return hr+':'+(m===0?'00':String(m).padStart(2,'0'))+' '+ampm;
+function gradeColor(pct){
+  if(pct>=90) return 'var(--green)';
+  if(pct>=80) return '#2980b9';
+  if(pct>=70) return 'var(--orange)';
+  return 'var(--red)';
 }
 
-// ──────────────────────────────────────────────
+// ════════════════════════════════════════════
 // STATE
-// ──────────────────────────────────────────────
+// ════════════════════════════════════════════
 
-let STATE = {
-  name:'', gradYear:2027,
-  courses:{},
-  assignments:[],
+let S = {
+  name:'',gradYear:2027,
+  courses:{},         // {A:{name,teacher,room},...}
+  assignments:[],     // [{id,title,courseBlock,due,done}]
+  grades:[],          // [{id,block,entries:[{id,title,earned,possible}]}]
+  aspen:{user:'',connected:false},
+  friends:['','',''],
   onboarded:false
 };
 
-function save() { localStorage.setItem('quad_state', JSON.stringify(STATE)); }
-function load() {
-  try { const s = localStorage.getItem('quad_state'); if(s) STATE=JSON.parse(s); } catch(e) {}
-}
+function save(){localStorage.setItem('quad',JSON.stringify(S))}
+function load(){try{const d=localStorage.getItem('quad');if(d)S=JSON.parse(d)}catch(e){}}
 
-// ──────────────────────────────────────────────
-// NAVIGATION
-// ──────────────────────────────────────────────
+// ════════════════════════════════════════════
+// NAV
+// ════════════════════════════════════════════
 
-function go(id) {
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  window.scrollTo(0,0);
-}
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0)}
 
-function switchTab(tab) {
+function switchTab(tab){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab-'+tab).classList.add('active');
   document.getElementById('tb-'+tab).classList.add('active');
   if(tab==='today') renderToday();
   if(tab==='work') renderWork();
+  if(tab==='grades') renderGrades();
   if(tab==='me') renderMe();
 }
 
-// ──────────────────────────────────────────────
+// ════════════════════════════════════════════
 // ONBOARDING
-// ──────────────────────────────────────────────
+// ════════════════════════════════════════════
 
-function initGradPills() {
-  const el = document.getElementById('grad-pills');
-  el.innerHTML = GRAD_YEARS.map(y=>
-    `<button class="grad-pill${STATE.gradYear===y?' sel':''}" onclick="selectGrad(${y})">'${String(y).slice(2)}</button>`
+function initGradPills(){
+  document.getElementById('grad-pills').innerHTML=GRAD_YEARS.map(y=>
+    `<button class="grad-pill${S.gradYear===y?' sel':''}" onclick="selectGrad(${y})">'${String(y).slice(2)}</button>`
   ).join('');
 }
+function selectGrad(y){S.gradYear=y;initGradPills()}
 
-function selectGrad(y) { STATE.gradYear=y; initGradPills(); }
-
-function obNameNext() {
-  const first = document.getElementById('ob-first').value.trim();
-  const last  = document.getElementById('ob-last').value.trim();
-  if(!first){ document.getElementById('ob-first').focus(); return; }
-  STATE.name = first+(last?' '+last:'');
-  save();
+function obNameNext(){
+  const f=document.getElementById('ob-first').value.trim();
+  const l=document.getElementById('ob-last').value.trim();
+  if(!f){document.getElementById('ob-first').focus();return}
+  S.name=f+(l?' '+l:'');save();
   renderBlockList('ob-block-list');
   go('s-ob-sched');
 }
 
-function renderBlockList(containerId) {
-  const el = document.getElementById(containerId);
-  el.innerHTML = BLOCKS.map((b,i)=>{
-    const c = STATE.courses[b];
+// photo upload
+function handlePhoto(input){
+  const file=input.files&&input.files[0];if(!file)return;
+  const r=new FileReader();r.onload=e=>{
+    document.getElementById('photo-preview').src=e.target.result;
+    document.getElementById('photo-wrap').style.display='block';
+  };r.readAsDataURL(file);
+}
+function removePhoto(){document.getElementById('photo-wrap').style.display='none';document.getElementById('photo-input').value=''}
+
+// Aspen onboarding
+async function obAspenConnect(){
+  const u=document.getElementById('ob-aspen-user').value.trim();
+  const p=document.getElementById('ob-aspen-pass').value;
+  if(!u||!p)return;
+  const btn=document.getElementById('ob-aspen-btn');
+  btn.textContent='Connecting…';btn.disabled=true;
+  const status=document.getElementById('aspen-ob-status');
+  status.style.display='block';
+  status.innerHTML='<div class="aspen-status loading">⏳ Connecting to Aspen…</div>';
+  const result=await tryAspenConnect(u,p);
+  if(result.ok){
+    S.aspen={user:u,connected:true};save();
+    status.innerHTML='<div class="aspen-status ok">✓ Connected — grades will sync automatically</div>';
+    btn.textContent='Continue →';btn.disabled=false;
+    btn.onclick=()=>go('s-ob-friends');
+  } else {
+    status.innerHTML=`<div class="aspen-status err">Could not connect: ${result.msg}<br><span style="font-size:12px;opacity:.8">You can enter grades manually — connect later in Me tab.</span></div>`;
+    btn.textContent='Continue anyway →';btn.disabled=false;
+    btn.onclick=()=>go('s-ob-friends');
+  }
+}
+
+async function tryAspenConnect(username,password){
+  try{
+    const resp=await fetch('https://ma-lexington.myfollett.com/app/rest/auth',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({username,password}),signal:AbortSignal.timeout(8000)
+    });
+    if(resp.ok) return {ok:true};
+    return {ok:false,msg:'Invalid credentials'};
+  }catch(e){
+    if(e.name==='TimeoutError') return {ok:false,msg:'Connection timed out'};
+    // CORS or network error — save creds anyway, iOS app will sync
+    return {ok:false,msg:'Browser security blocks direct Aspen access. Connect from the iOS app for live sync.'};
+  }
+}
+
+// Friends (Beli-style)
+function initFriendSlots(){
+  const el=document.getElementById('friend-slots');
+  el.innerHTML=[0,1,2].map(i=>`
+    <div class="friend-slot ${S.friends[i]?'filled':''}" id="fs-${i}">
+      <div class="avatar-sm" id="fs-av-${i}">${S.friends[i]?S.friends[i].trim().charAt(0).toUpperCase():'👤'}</div>
+      <input type="text" placeholder="Friend's name or number" value="${S.friends[i]||''}"
+        oninput="friendInput(${i},this.value)" style="flex:1;border:none;background:transparent;font-size:15px;color:var(--p);font-family:inherit;outline:none"/>
+      <button class="share-btn" id="fs-btn-${i}" onclick="inviteFriend(${i})">${S.friends[i]?'Sent ✓':'Invite'}</button>
+    </div>`
+  ).join('');
+  updateFriendsCount();
+}
+
+function friendInput(i,val){
+  S.friends[i]=val;save();
+  const slot=document.getElementById('fs-'+i);
+  const av=document.getElementById('fs-av-'+i);
+  const btn=document.getElementById('fs-btn-'+i);
+  const filled=!!val.trim();
+  slot.classList.toggle('filled',filled&&btn.textContent.includes('Sent'));
+  if(!btn.textContent.includes('Sent')){av.textContent=filled?val.trim().charAt(0).toUpperCase():'👤'}
+  updateFriendsCount();
+}
+
+async function inviteFriend(i){
+  const name=S.friends[i]||'';
+  const link='https://the-quad.vercel.app';
+  const msg=`Hey${name?' '+name.trim().split(' ')[0]:''}! I'm using The Quad to manage my LHS schedule and grades. Add it to your home screen: ${link}`;
+  try{
+    if(navigator.share){await navigator.share({title:'The Quad',text:msg,url:link})}
+    else{await navigator.clipboard.writeText(msg);alert('Invite link copied!')}
+    const btn=document.getElementById('fs-btn-'+i);
+    const av=document.getElementById('fs-av-'+i);
+    const slot=document.getElementById('fs-'+i);
+    btn.textContent='Sent ✓';slot.classList.add('filled');
+    if(name) av.textContent=name.trim().charAt(0).toUpperCase();
+    updateFriendsCount();
+  }catch(e){}
+}
+
+function updateFriendsCount(){
+  const sent=document.querySelectorAll('.friend-slot.filled').length;
+  document.getElementById('friends-count').textContent=`${sent} of 3 invited`;
+}
+
+function finishOnboarding(){
+  S.onboarded=true;save();
+  buildDoneScreen();
+  renderToday();renderMe();renderGrades();
+  go('s-app');
+  setInterval(renderToday,60000);
+}
+
+function buildDoneScreen(){
+  const first=S.name.split(' ')[0]||'Student';
+  document.getElementById('done-welcome').textContent=`Welcome, ${first}. Enjoy LHS.`;
+  const filled=BLOCKS.filter(b=>S.courses[b]&&S.courses[b].name).slice(0,3);
+  document.getElementById('done-preview').innerHTML=filled.length?`
+    <div class="quad-label" style="padding:0 0 10px">YOUR SCHEDULE</div>
+    ${filled.map((b,i)=>`<div class="preview-row">
+      <div class="preview-dot" style="background:${COLORS[BLOCKS.indexOf(b)]}"></div>
+      <span class="preview-blk">${b}</span>
+      <span class="preview-name">${S.courses[b].name}</span>
+    </div>`).join('')}
+  `:'<p style="font-size:14px;color:var(--s)">Add your schedule in the Me tab anytime.</p>';
+}
+
+// ════════════════════════════════════════════
+// BLOCK SHEET
+// ════════════════════════════════════════════
+
+let curBlock=null,blockCtx='ob';
+
+function renderBlockList(cid){
+  document.getElementById(cid).innerHTML=BLOCKS.map((b,i)=>{
+    const c=S.courses[b];
     return `<div class="block-row" onclick="openBlockSheet('${b}')">
       <div class="block-dot" style="background:${COLORS[i]}"></div>
-      <span class="block-label">${b}</span>
+      <span class="block-lbl">${b}</span>
       <span class="block-name ${c&&c.name?'':'empty'}">${c&&c.name?c.name:'Tap to add course'}</span>
-      <span class="block-chevron">›</span>
+      <span class="block-chev">›</span>
     </div>`;
   }).join('');
 }
 
-function obSchedDone() {
-  STATE.onboarded=true;
-  save();
-  renderToday();
-  renderMe();
-  go('s-app');
-}
-
-// Photo upload
-function handlePhoto(input) {
-  const file = input.files && input.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    document.getElementById('photo-preview').src = e.target.result;
-    document.getElementById('photo-preview-wrap').style.display = 'block';
-  };
-  reader.readAsDataURL(file);
-}
-
-function removePhoto() {
-  document.getElementById('photo-preview-wrap').style.display = 'none';
-  document.getElementById('photo-input').value = '';
-}
-
-// ──────────────────────────────────────────────
-// BLOCK SHEET
-// ──────────────────────────────────────────────
-
-let currentBlock = null;
-let blockSheetContext = 'onboard';
-
-function openBlockSheet(block, ctx) {
-  currentBlock = block;
-  blockSheetContext = ctx || 'onboard';
-  const c = STATE.courses[block] || {};
-  document.getElementById('bs-title').textContent = 'Block '+block;
-  document.getElementById('bs-name').value    = c.name    || '';
-  document.getElementById('bs-teacher').value = c.teacher || '';
-  document.getElementById('bs-room').value    = c.room    || '';
+function openBlockSheet(block,ctx){
+  curBlock=block;blockCtx=ctx||'ob';
+  const c=S.courses[block]||{};
+  document.getElementById('bs-title').textContent='Block '+block;
+  document.getElementById('bs-name').value=c.name||'';
+  document.getElementById('bs-teacher').value=c.teacher||'';
+  document.getElementById('bs-room').value=c.room||'';
   document.getElementById('block-sheet').classList.add('open');
   setTimeout(()=>document.getElementById('bs-name').focus(),120);
 }
-
-function closeBlockSheet() { document.getElementById('block-sheet').classList.remove('open'); }
-
-function saveBlock() {
-  const name    = document.getElementById('bs-name').value.trim();
-  const teacher = document.getElementById('bs-teacher').value.trim();
-  const room    = document.getElementById('bs-room').value.trim();
-  STATE.courses[currentBlock] = {name, teacher, room};
-  save();
-  closeBlockSheet();
-  if(blockSheetContext==='me'){ renderMe(); renderToday(); }
+function closeBlockSheet(){document.getElementById('block-sheet').classList.remove('open')}
+function saveBlock(){
+  S.courses[curBlock]={name:document.getElementById('bs-name').value.trim(),teacher:document.getElementById('bs-teacher').value.trim(),room:document.getElementById('bs-room').value.trim()};
+  save();closeBlockSheet();
+  if(blockCtx==='me'){renderMe();renderToday();renderGrades()}
   else renderBlockList('ob-block-list');
 }
 
-// ──────────────────────────────────────────────
+function editSchedule(){renderBlockList('ob-block-list');blockCtx='me';go('s-ob-sched')}
+
+// ════════════════════════════════════════════
 // TODAY
-// ──────────────────────────────────────────────
+// ════════════════════════════════════════════
 
-function renderToday() {
-  const now  = new Date();
-  const dt   = getDayType(now);
-  const wds  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  const mons = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-
-  document.getElementById('t-weekday').textContent = wds[now.getDay()].toUpperCase();
-  document.getElementById('t-date').textContent    = mons[now.getMonth()]+' '+now.getDate();
-
-  const hero  = document.getElementById('t-hero');
-  const slots = document.getElementById('t-slots');
-
-  if(!dt || dt===0) {
-    document.getElementById('t-daynum').textContent = 'NO SCHOOL';
-    hero.innerHTML = `<div class="no-school-hero"><h2>No School</h2><p>Enjoy your day off.</p></div>`;
-    slots.innerHTML = '';
-    return;
+function renderToday(){
+  const now=new Date(),dt=getDayType(now);
+  const WDS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const MONS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('t-wd').textContent=WDS[now.getDay()].toUpperCase();
+  document.getElementById('t-date').textContent=MONS[now.getMonth()]+' '+now.getDate();
+  const hero=document.getElementById('t-hero'),slots=document.getElementById('t-slots');
+  if(!dt||dt===0){
+    document.getElementById('t-dn').textContent='NO SCHOOL';
+    hero.innerHTML=`<div class="no-school"><h2>No School</h2><p>Enjoy your day off.</p></div>`;
+    slots.innerHTML='';return;
   }
-  if(dt==='special') {
-    document.getElementById('t-daynum').textContent = 'DAY 0';
-    hero.innerHTML = `<div class="no-school-hero"><h2>Orientation</h2><p>Welcome to LHS — Day 0.</p></div>`;
-    slots.innerHTML = '';
-    return;
+  if(dt==='special'){
+    document.getElementById('t-dn').textContent='DAY 0';
+    hero.innerHTML=`<div class="no-school"><h2>Orientation</h2><p>Welcome to LHS — Day 0.</p></div>`;
+    slots.innerHTML='';return;
   }
-
-  document.getElementById('t-daynum').textContent = 'DAY '+dt;
-  const order = BLOCK_ORDER[dt];
-  const nowMins = now.getHours()*60+now.getMinutes();
-
-  // build slots (6 periods + lunch after period 3)
-  const allSlots = [];
+  document.getElementById('t-dn').textContent='DAY '+dt;
+  const order=BLOCK_ORDER[dt],nowM=now.getHours()*60+now.getMinutes();
+  const allSlots=[];
   for(let i=0;i<6;i++){
-    allSlots.push({blk:order[i], start:PERIODS[i].start, end:PERIODS[i].end, isLunch:false});
-    if(i===2) allSlots.push({blk:'LUNCH', start:LUNCH.start, end:LUNCH.end, isLunch:true});
+    allSlots.push({blk:order[i],start:PERIODS[i].start,end:PERIODS[i].end,isLunch:false});
+    if(i===2) allSlots.push({blk:'LUNCH',start:LUNCH.start,end:LUNCH.end,isLunch:true});
   }
-
-  let currentIdx = -1;
-  allSlots.forEach((s,i)=>{ if(nowMins>=s.start && nowMins<s.end) currentIdx=i; });
-
+  let curIdx=-1;allSlots.forEach((s,i)=>{if(nowM>=s.start&&nowM<s.end)curIdx=i});
   // hero
-  if(currentIdx>=0 && !allSlots[currentIdx].isLunch) {
-    const s = allSlots[currentIdx];
-    const course = STATE.courses[s.blk];
-    const minsLeft = s.end - nowMins;
-    const color = COLORS[BLOCKS.indexOf(s.blk)] || 'var(--accent)';
-    hero.innerHTML = `<div class="hero-block" style="border-left:3px solid ${color};padding-left:19px">
-      <div class="hero-course" style="color:${color}">${course&&course.name?course.name:s.blk+' Block'}</div>
-      <div class="hero-meta">${course&&course.room?'Room '+course.room+' · ':''}${fmtTime(s.start)}–${fmtTime(s.end)}</div>
-      <div class="hero-countdown-wrap">
-        <span class="hero-countdown" style="color:${color}">${minsLeft}</span>
-        <span class="hero-countdown-unit">min left</span>
-      </div>
+  if(curIdx>=0&&!allSlots[curIdx].isLunch){
+    const s=allSlots[curIdx],c=S.courses[s.blk],left=s.end-nowM;
+    const col=COLORS[BLOCKS.indexOf(s.blk)]||'var(--accent)';
+    hero.innerHTML=`<div class="hero-block" style="border-left:3px solid ${col};padding-left:19px">
+      <div class="hero-course" style="color:${col}">${c&&c.name?c.name:s.blk+' Block'}</div>
+      <div class="hero-meta">${c&&c.room?'Room '+c.room+' · ':''}${fmtTime(s.start)}–${fmtTime(s.end)}</div>
+      <div class="hero-cd-wrap"><span class="hero-cd" style="color:${col}">${left}</span><span class="hero-cd-unit">min left</span></div>
     </div>`;
-  } else if(nowMins < PERIODS[0].start) {
-    const first = allSlots[0];
-    const course = STATE.courses[first.blk];
-    const color = COLORS[BLOCKS.indexOf(first.blk)] || 'var(--accent)';
-    hero.innerHTML = `<div class="hero-block">
-      <div class="hero-course" style="color:var(--s);font-size:20px;text-transform:none;font-weight:700">Good morning</div>
-      <div class="hero-meta" style="margin-top:4px">First up — <span style="color:${color};font-weight:600">${course&&course.name?course.name:first.blk+' Block'}</span> at ${fmtTime(PERIODS[0].start)}</div>
-    </div>`;
-  } else if(nowMins >= PERIODS[5].end) {
-    hero.innerHTML = `<div class="no-school-hero"><h2>After school</h2><p>That's a wrap on Day ${dt}.</p></div>`;
-  } else if(currentIdx>=0 && allSlots[currentIdx].isLunch) {
-    hero.innerHTML = `<div class="hero-block">
-      <div class="hero-course" style="color:var(--s);font-size:20px;text-transform:none;font-weight:700">Lunch</div>
-      <div class="hero-meta">${fmtTime(LUNCH.start)}–${fmtTime(LUNCH.end)}</div>
-    </div>`;
+  } else if(curIdx>=0&&allSlots[curIdx].isLunch){
+    hero.innerHTML=`<div class="hero-block"><div class="hero-course" style="color:var(--s);font-size:20px;text-transform:none;font-weight:700">Lunch</div><div class="hero-meta">${fmtTime(LUNCH.start)}–${fmtTime(LUNCH.end)}</div></div>`;
+  } else if(nowM<PERIODS[0].start){
+    const first=allSlots[0],c=S.courses[first.blk],col=COLORS[BLOCKS.indexOf(first.blk)]||'var(--accent)';
+    hero.innerHTML=`<div class="hero-block"><div class="hero-course" style="color:var(--s);font-size:20px;text-transform:none;font-weight:700">Good morning</div><div class="hero-meta">First up — <span style="color:${col};font-weight:600">${c&&c.name?c.name:first.blk+' Block'}</span> at ${fmtTime(PERIODS[0].start)}</div></div>`;
+  } else if(nowM>=PERIODS[5].end){
+    hero.innerHTML=`<div class="no-school"><h2>After school</h2><p>That's a wrap on Day ${dt}.</p></div>`;
   } else {
-    hero.innerHTML = `<div class="hero-block"><div class="hero-course" style="color:var(--s);font-size:18px;text-transform:none;font-weight:700">Passing period</div></div>`;
+    hero.innerHTML=`<div class="hero-block"><div class="hero-course" style="color:var(--s);font-size:18px;text-transform:none;font-weight:700">Passing period</div></div>`;
   }
-
-  // slot list
-  slots.innerHTML = allSlots.map((s,i)=>{
-    if(s.isLunch){
-      return `<div class="slot-row">
-        <div class="slot-dot" style="background:rgba(0,0,0,.18)"></div>
-        <span class="slot-blk"></span>
-        <span class="slot-course" style="color:var(--s)">Lunch</span>
-        <span class="slot-right">${fmtTime(s.start)}–${fmtTime(s.end)}</span>
-      </div>${i<allSlots.length-1?'<div class="slot-divider"></div>':''}`;
-    }
-    const course = STATE.courses[s.blk];
-    const isCur  = i===currentIdx;
-    const isPast = !isCur && nowMins >= s.end;
-    const color  = COLORS[BLOCKS.indexOf(s.blk)] || 'var(--accent)';
-    const courseLabel = course&&course.name ? course.name : 'Free';
-    const isFree = !(course&&course.name);
-    const rightHtml = isCur
-      ? `<span class="slot-now-badge" style="background:${color}">NOW</span>`
-      : isPast
-        ? `<span style="opacity:.35">✓</span>`
-        : fmtTime(s.start);
-    return `<div class="slot-row" style="${isCur?'background:'+color+'0d;':''}">
-      <div class="slot-dot" style="background:${color};opacity:${isCur?1:isPast?.22:.5}"></div>
+  // slots
+  slots.innerHTML=allSlots.map((s,i)=>{
+    if(s.isLunch) return `<div class="slot-row"><div class="slot-dot" style="background:rgba(0,0,0,.18)"></div><span class="slot-blk"></span><span class="slot-course" style="color:var(--s)">Lunch</span><span class="slot-right">${fmtTime(s.start)}–${fmtTime(s.end)}</span></div>${i<allSlots.length-1?'<div class="slot-divider"></div>':''}`;
+    const c=S.courses[s.blk],isCur=i===curIdx,isPast=!isCur&&nowM>=s.end;
+    const col=COLORS[BLOCKS.indexOf(s.blk)]||'var(--accent)';
+    const label=c&&c.name?c.name:'Free',isFree=!(c&&c.name);
+    const right=isCur?`<span class="now-badge" style="background:${col}">NOW · ${s.end-nowM}m</span>`:isPast?`<span style="opacity:.3">✓</span>`:fmtTime(s.start);
+    return `<div class="slot-row" style="${isCur?'background:'+col+'0d;':''}">
+      <div class="slot-dot" style="background:${col};opacity:${isCur?1:isPast?.2:.5}"></div>
       <span class="slot-blk">${s.blk}</span>
-      <span class="slot-course${isCur?'':isPast?' past':isFree?' free':''}" style="${isCur?'font-weight:600;color:'+color:''}">${courseLabel}</span>
-      <span class="slot-right" style="${isCur?'':''}${isPast?'opacity:.35':''}">${rightHtml}</span>
+      <span class="slot-course${isFree?' free':isPast&&!isCur?' past':''}" style="${isCur?'font-weight:600;color:'+col:''}">${label}</span>
+      <span class="slot-right" style="${isPast?'opacity:.3':''}">${right}</span>
     </div>${i<allSlots.length-1?'<div class="slot-divider"></div>':''}`;
   }).join('');
 }
 
-// ──────────────────────────────────────────────
+// ════════════════════════════════════════════
 // WORK
-// ──────────────────────────────────────────────
+// ════════════════════════════════════════════
 
-function renderWork() {
-  const list = document.getElementById('w-list');
-  const items = STATE.assignments;
-  if(!items.length){
-    list.innerHTML=`<div class="empty-state"><p>Nothing due — you're all caught up.</p></div>`;
-    return;
-  }
-  const sorted = [...items].sort((a,b)=>{
-    if(!a.due&&!b.due) return 0;
-    if(!a.due) return 1;
-    if(!b.due) return -1;
-    return a.due<b.due?-1:1;
-  });
-  const todayKey = dateKey(new Date());
-  list.innerHTML = sorted.map((a,i)=>{
-    const dueLabel = a.due?(a.due===todayKey?'Today':a.due):'';
-    const isToday  = a.due===todayKey;
-    return `<div>
-      <div class="assign-row">
-        <button class="check-btn ${a.done?'done':''}" onclick="toggleWork('${a.id}')"></button>
-        <div class="assign-info">
-          <div class="assign-title ${a.done?'done':''}">${a.title}</div>
-          ${a.courseBlock&&STATE.courses[a.courseBlock]&&STATE.courses[a.courseBlock].name
-            ?`<div class="assign-sub">${STATE.courses[a.courseBlock].name}</div>`:''}
-        </div>
-        ${dueLabel?`<span class="assign-due ${isToday?'today':''}">${dueLabel}</span>`:''}
+function renderWork(){
+  const list=document.getElementById('w-list');
+  if(!S.assignments.length){list.innerHTML='<div class="empty-state"><p>Nothing due — you\'re all caught up.</p></div>';return}
+  const tk=dateKey(new Date());
+  const sorted=[...S.assignments].sort((a,b)=>{if(!a.due&&!b.due)return 0;if(!a.due)return 1;if(!b.due)return -1;return a.due<b.due?-1:1});
+  list.innerHTML=sorted.map((a,i)=>{
+    const dl=a.due?(a.due===tk?'Today':a.due):'',it=a.due===tk;
+    return `<div><div class="assign-row">
+      <button class="check-btn ${a.done?'done':''}" onclick="toggleWork('${a.id}')"></button>
+      <div class="assign-info">
+        <div class="assign-title ${a.done?'done':''}">${a.title}</div>
+        ${a.courseBlock&&S.courses[a.courseBlock]&&S.courses[a.courseBlock].name?`<div class="assign-sub">${S.courses[a.courseBlock].name}</div>`:''}
       </div>
-      ${i<sorted.length-1?'<div class="slot-divider"></div>':''}
+      ${dl?`<span class="assign-due ${it?'today':''}">${dl}</span>`:''}
+    </div>${i<sorted.length-1?'<div class="slot-divider"></div>':''}</div>`;
+  }).join('');
+}
+
+function toggleWork(id){const a=S.assignments.find(x=>x.id===id);if(a){a.done=!a.done;save();renderWork()}}
+
+function openAddWork(){
+  document.getElementById('ws-course').innerHTML='<option value="">No course</option>'+
+    BLOCKS.filter(b=>S.courses[b]&&S.courses[b].name).map(b=>`<option value="${b}">${S.courses[b].name}</option>`).join('');
+  document.getElementById('ws-title').value='';document.getElementById('ws-due').value='';
+  document.getElementById('work-sheet').classList.add('open');
+  setTimeout(()=>document.getElementById('ws-title').focus(),120);
+}
+function closeWorkSheet(){document.getElementById('work-sheet').classList.remove('open')}
+function saveWork(){
+  const t=document.getElementById('ws-title').value.trim();if(!t)return;
+  S.assignments.push({id:Date.now().toString(36),title:t,courseBlock:document.getElementById('ws-course').value||null,due:document.getElementById('ws-due').value||null,done:false});
+  save();closeWorkSheet();renderWork();
+}
+
+// ════════════════════════════════════════════
+// GRADES
+// ════════════════════════════════════════════
+
+function getGradeForBlock(block){return S.grades.find(g=>g.block===block)}
+
+function calcPct(entries){
+  const valid=entries.filter(e=>e.earned!==null&&e.earned!==''&&e.possible>0);
+  if(!valid.length) return null;
+  const earned=valid.reduce((s,e)=>s+parseFloat(e.earned),0);
+  const possible=valid.reduce((s,e)=>s+parseFloat(e.possible),0);
+  return possible>0?(earned/possible*100):null;
+}
+
+function renderGrades(){
+  const banner=document.getElementById('g-aspen-banner');
+  const list=document.getElementById('g-list');
+  // Aspen banner
+  if(!S.aspen.connected){
+    banner.innerHTML=`<div class="connect-banner" onclick="openAspenSheet()">
+      <span class="cb-icon">📊</span>
+      <div class="cb-text"><strong>Connect Aspen</strong><span>Import grades automatically</span></div>
+      <span class="cb-arrow">›</span>
+    </div>`;
+  } else {
+    banner.innerHTML=`<div style="padding:8px 16px 0;font-size:12px;color:var(--green)">✓ Connected to Aspen as ${S.aspen.user}</div>`;
+  }
+  // Grade rows
+  const coursesWithGrades=BLOCKS.filter(b=>S.courses[b]&&S.courses[b].name);
+  if(!coursesWithGrades.length){
+    list.innerHTML='<div class="empty-state"><p>Add your schedule first — then add grades here.</p></div>';return;
+  }
+  list.innerHTML=coursesWithGrades.map((b,i)=>{
+    const c=S.courses[b],g=getGradeForBlock(b);
+    const pct=g?calcPct(g.entries):null;
+    const letter=pct!==null?letterGrade(pct):'—';
+    const col=COLORS[BLOCKS.indexOf(b)];
+    const gCol=pct!==null?gradeColor(pct):'var(--s)';
+    return `<div>
+      <div class="grade-row" onclick="openGradeDetail('${b}')">
+        <div class="grade-band" style="background:${col}"></div>
+        <div class="grade-info">
+          <div class="grade-name">${c.name}</div>
+          <div class="grade-sub">Block ${b}${g&&g.entries.length?' · '+g.entries.length+' entr'+(g.entries.length===1?'y':'ies'):'· No grades yet'}</div>
+        </div>
+        <div class="grade-right">
+          <div class="grade-letter" style="color:${gCol}">${letter}</div>
+          ${pct!==null?`<div class="grade-pct">${pct.toFixed(1)}%</div>`:''}
+        </div>
+      </div>
+      ${i<coursesWithGrades.length-1?'<div class="slot-divider" style="margin-left:20px"></div>':''}
     </div>`;
   }).join('');
 }
 
-function toggleWork(id) {
-  const a = STATE.assignments.find(x=>x.id===id);
-  if(a){ a.done=!a.done; save(); renderWork(); }
+// Grade detail panel
+let curGradeBlock=null;
+
+function openGradeDetail(block){
+  curGradeBlock=block;
+  const c=S.courses[block],g=getGradeForBlock(block);
+  const pct=g?calcPct(g.entries):null;
+  const col=COLORS[BLOCKS.indexOf(block)];
+  const gCol=pct!==null?gradeColor(pct):'var(--s)';
+  document.getElementById('gd-title').textContent=c?c.name:'';
+  document.getElementById('gd-letter').style.color=gCol;
+  document.getElementById('gd-letter').textContent=pct!==null?letterGrade(pct):'No grades';
+  document.getElementById('gd-pct').style.color=gCol+'bb';
+  document.getElementById('gd-pct').textContent=pct!==null?pct.toFixed(1)+'%':'Add assignments below';
+  document.getElementById('wi-score').value='';
+  document.getElementById('wi-outof').value='';
+  document.getElementById('wi-result').textContent='Enter a hypothetical score above to see how it affects your grade.';
+  renderDetailEntries(block);
+  document.getElementById('grade-detail').classList.add('open');
 }
 
-function openAddWork() {
-  const sel = document.getElementById('ws-course');
-  sel.innerHTML='<option value="">No course</option>'+
-    BLOCKS.filter(b=>STATE.courses[b]&&STATE.courses[b].name)
-          .map(b=>`<option value="${b}">${STATE.courses[b].name}</option>`).join('');
-  document.getElementById('ws-title').value='';
-  document.getElementById('ws-due').value='';
-  document.getElementById('work-sheet').classList.add('open');
-  setTimeout(()=>document.getElementById('ws-title').focus(),120);
+function closeGradeDetail(){
+  document.getElementById('grade-detail').classList.remove('open');
+  renderGrades();
 }
 
-function closeWorkSheet(){ document.getElementById('work-sheet').classList.remove('open'); }
-
-function saveWork() {
-  const title = document.getElementById('ws-title').value.trim();
-  if(!title) return;
-  STATE.assignments.push({
-    id: Date.now().toString(36)+Math.random().toString(36).slice(2,5),
-    title,
-    courseBlock: document.getElementById('ws-course').value||null,
-    due: document.getElementById('ws-due').value||null,
-    done: false
-  });
-  save(); closeWorkSheet(); renderWork();
+function renderDetailEntries(block){
+  const g=getGradeForBlock(block);
+  const el=document.getElementById('gd-entries');
+  if(!g||!g.entries.length){
+    el.innerHTML='<div style="padding:16px;font-size:14px;color:var(--s)">No entries yet — add your first assignment below.</div>';return;
+  }
+  el.innerHTML=g.entries.map((e,i)=>{
+    const pct=e.possible>0?((parseFloat(e.earned)/parseFloat(e.possible))*100).toFixed(0)+'%':'—';
+    const col=e.possible>0?gradeColor(parseFloat(e.earned)/parseFloat(e.possible)*100):'var(--s)';
+    return `<div style="display:flex;align-items:center;padding:12px 16px">
+      <div style="flex:1"><div style="font-size:15px">${e.title||'Assignment'}</div></div>
+      <div style="text-align:right;font-size:13px;color:${col}">${e.earned}/${e.possible} · ${pct}</div>
+    </div>${i<g.entries.length-1?'<div class="slot-divider"></div>':''}`;
+  }).join('');
 }
 
-// ──────────────────────────────────────────────
+function calcWhatIf(){
+  const score=parseFloat(document.getElementById('wi-score').value);
+  const outof=parseFloat(document.getElementById('wi-outof').value);
+  const el=document.getElementById('wi-result');
+  if(isNaN(score)||isNaN(outof)||outof<=0){el.textContent='Enter a hypothetical score above to see how it affects your grade.';return}
+  const g=getGradeForBlock(curGradeBlock);
+  const existing=g?g.entries.filter(e=>e.earned!==null&&e.possible>0):[];
+  const oldE=existing.reduce((s,e)=>s+parseFloat(e.earned),0);
+  const oldP=existing.reduce((s,e)=>s+parseFloat(e.possible),0);
+  const newE=oldE+score,newP=oldP+outof;
+  const newPct=newP>0?(newE/newP*100):score/outof*100;
+  const letter=letterGrade(newPct);
+  const col=gradeColor(newPct);
+  el.innerHTML=`Your grade would be <strong style="color:${col}">${newPct.toFixed(1)}% (${letter})</strong>`;
+  if(g&&calcPct(g.entries)!==null){
+    const old=calcPct(g.entries),diff=newPct-old;
+    el.innerHTML+=`<br><span style="font-size:13px;color:var(--s)">${diff>=0?'+':''}${diff.toFixed(1)}% from your current ${old.toFixed(1)}%</span>`;
+  }
+}
+
+function openAddEntryFromDetail(){
+  if(!curGradeBlock) return;
+  document.getElementById('gs-course').innerHTML=`<option value="${curGradeBlock}" selected>${S.courses[curGradeBlock]&&S.courses[curGradeBlock].name}</option>`;
+  document.getElementById('gs-score').value='';
+  document.getElementById('gs-outof').value='';
+  document.getElementById('gs-name').value='';
+  document.getElementById('grade-sheet').classList.add('open');
+  setTimeout(()=>document.getElementById('gs-score').focus(),120);
+}
+
+function openAddGrade(){
+  const opts=BLOCKS.filter(b=>S.courses[b]&&S.courses[b].name);
+  document.getElementById('gs-course').innerHTML='<option value="">Select course</option>'+opts.map(b=>`<option value="${b}">${S.courses[b].name}</option>`).join('');
+  document.getElementById('gs-score').value='';
+  document.getElementById('gs-outof').value='';
+  document.getElementById('gs-name').value='';
+  document.getElementById('grade-sheet').classList.add('open');
+  setTimeout(()=>document.getElementById('gs-course').focus(),60);
+}
+function closeGradeSheet(){document.getElementById('grade-sheet').classList.remove('open')}
+
+function saveGrade(){
+  const block=document.getElementById('gs-course').value;
+  const earned=document.getElementById('gs-score').value;
+  const possible=document.getElementById('gs-outof').value;
+  const title=document.getElementById('gs-name').value.trim()||'Assignment';
+  if(!block||!earned||!possible||parseFloat(possible)<=0) return;
+  let g=S.grades.find(x=>x.block===block);
+  if(!g){g={id:Date.now().toString(36),block,entries:[]};S.grades.push(g)}
+  g.entries.push({id:Date.now().toString(36)+'e',title,earned:parseFloat(earned),possible:parseFloat(possible)});
+  save();closeGradeSheet();
+  if(curGradeBlock===block) renderDetailEntries(block);
+  renderGrades();
+}
+
+// ════════════════════════════════════════════
+// ASPEN (from Me tab)
+// ════════════════════════════════════════════
+
+function openAspenSheet(){
+  document.getElementById('as-user').value=S.aspen.user||'';
+  document.getElementById('as-pass').value='';
+  document.getElementById('aspen-sheet-status').style.display='none';
+  document.getElementById('as-connect-btn').textContent='Connect';
+  document.getElementById('as-connect-btn').disabled=false;
+  document.getElementById('aspen-sheet').classList.add('open');
+  setTimeout(()=>document.getElementById('as-user').focus(),120);
+}
+function closeAspenSheet(){document.getElementById('aspen-sheet').classList.remove('open')}
+
+async function aspenSheetConnect(){
+  const u=document.getElementById('as-user').value.trim();
+  const p=document.getElementById('as-pass').value;
+  if(!u||!p) return;
+  const btn=document.getElementById('as-connect-btn');
+  btn.textContent='Connecting…';btn.disabled=true;
+  const st=document.getElementById('aspen-sheet-status');
+  st.style.display='block';
+  st.innerHTML='<div class="aspen-status loading">⏳ Connecting…</div>';
+  const result=await tryAspenConnect(u,p);
+  if(result.ok){
+    S.aspen={user:u,connected:true};save();
+    st.innerHTML='<div class="aspen-status ok">✓ Connected</div>';
+    setTimeout(()=>{closeAspenSheet();renderMe();renderGrades()},1200);
+  } else {
+    st.innerHTML=`<div class="aspen-status err">${result.msg}</div>`;
+    btn.textContent='Try again';btn.disabled=false;
+  }
+}
+
+function togglePw(id,btn){const el=document.getElementById(id);el.type=el.type==='password'?'text':'password';btn.textContent=el.type==='password'?'👁':'🙈'}
+
+// ════════════════════════════════════════════
 // ME
-// ──────────────────────────────────────────────
+// ════════════════════════════════════════════
 
-function renderMe() {
-  const initials = STATE.name.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2)||'?';
-  const av = document.getElementById('me-avatar');
-  av.textContent = initials;
-  av.style.background = 'var(--accent)';
-  document.getElementById('me-name').textContent  = STATE.name||'Student';
-  document.getElementById('me-class').textContent = "Class of '"+String(STATE.gradYear).slice(2)+' · LHS';
-  const sched = document.getElementById('me-schedule');
-  sched.innerHTML = BLOCKS.map((b,i)=>{
-    const c = STATE.courses[b];
+function renderMe(){
+  const initials=S.name.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2)||'?';
+  const av=document.getElementById('me-av');av.textContent=initials;
+  document.getElementById('me-name').textContent=S.name||'Student';
+  document.getElementById('me-class').textContent=`Class of '${String(S.gradYear).slice(2)} · LHS`;
+  document.getElementById('me-sched').innerHTML=BLOCKS.map((b,i)=>{
+    const c=S.courses[b];
     return `<div class="me-row" onclick="openBlockSheet('${b}','me')">
       <div class="me-row-dot" style="background:${COLORS[i]}"></div>
       <span class="me-row-blk">${b}</span>
@@ -886,31 +1284,36 @@ function renderMe() {
       <span class="me-row-val">${c&&c.room?c.room:''}</span>
     </div>`;
   }).join('');
+  document.getElementById('me-connections').innerHTML=`
+    <div class="me-action-row" onclick="${S.aspen.connected?'openAspenSheet()':'openAspenSheet()'}">
+      <span class="me-action-label">Aspen Grades</span>
+      <span class="me-action-right ${S.aspen.connected?'connected':''}">${S.aspen.connected?'Connected ✓':'Connect →'}</span>
+    </div>`;
 }
 
-function editSchedule() {
-  renderBlockList('ob-block-list');
-  blockSheetContext='me';
-  go('s-ob-sched');
-}
+// ════════════════════════════════════════════
+// RESET
+// ════════════════════════════════════════════
 
-function resetApp() {
-  if(!confirm('Reset The Quad and start over?')) return;
-  localStorage.removeItem('quad_state');
-  STATE={name:'',gradYear:2027,courses:{},assignments:[],onboarded:false};
+function resetApp(){
+  if(!confirm('Reset The Quad and start over?'))return;
+  localStorage.removeItem('quad');
+  S={name:'',gradYear:2027,courses:{},assignments:[],grades:[],aspen:{user:'',connected:false},friends:['','',''],onboarded:false};
   go('s-landing');
 }
 
-// ──────────────────────────────────────────────
+// ════════════════════════════════════════════
 // BOOT
-// ──────────────────────────────────────────────
+// ════════════════════════════════════════════
 
 load();
 initGradPills();
-if(STATE.onboarded) {
-  renderToday(); renderMe();
+initFriendSlots();
+
+if(S.onboarded){
+  renderToday();renderMe();renderGrades();
   go('s-app');
-  setInterval(renderToday, 60000);
+  setInterval(renderToday,60000);
 }
 </script>
 </body>
