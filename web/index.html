@@ -147,29 +147,74 @@
     }
 
     /* friends invite (Beli-style) */
-    .friend-slots{display:flex;flex-direction:column;gap:12px;margin-bottom:8px}
+    .contacts-btn{
+      display:flex;align-items:center;gap:10px;padding:13px 16px;
+      background:var(--surface);border:1.5px solid var(--border);border-radius:12px;
+      cursor:pointer;width:100%;font-family:inherit;-webkit-tap-highlight-color:transparent;
+      margin-bottom:16px;
+    }
+    .contacts-btn:active{opacity:.75}
+    .contacts-btn .cb-icon{font-size:20px;flex-shrink:0}
+    .contacts-btn .cb-label{font-size:15px;font-weight:600;color:var(--p);flex:1;text-align:left}
+    .contacts-btn .cb-sub{font-size:12px;color:var(--s)}
+    .friend-slots{display:flex;flex-direction:column;gap:10px;margin-bottom:4px}
     .friend-slot{
       display:flex;align-items:center;gap:12px;padding:12px 14px;
       background:var(--surface);border:1.5px solid var(--border);border-radius:12px;
     }
-    .friend-slot .avatar-sm{
+    .friend-slot .av-sm{
       width:36px;height:36px;border-radius:50%;background:var(--accent-dim);
       display:flex;align-items:center;justify-content:center;
       font-size:16px;flex-shrink:0;color:var(--s);
     }
-    .friend-slot.filled .avatar-sm{background:var(--accent);color:#fff;font-size:14px;font-weight:700}
+    .friend-slot.filled .av-sm{background:var(--accent);color:#fff;font-size:14px;font-weight:700}
     .friend-slot input{
       flex:1;border:none;background:transparent;font-size:15px;color:var(--p);
       font-family:inherit;outline:none;padding:0;
     }
-    .friend-slot .share-btn{
+    .friend-slot .f-btn{
       background:var(--accent-dim);color:var(--accent);border:none;
       padding:6px 12px;border-radius:8px;font-size:13px;font-weight:600;
-      cursor:pointer;-webkit-tap-highlight-color:transparent;font-family:inherit;
-      flex-shrink:0;
+      cursor:pointer;-webkit-tap-highlight-color:transparent;font-family:inherit;flex-shrink:0;
     }
-    .friend-slot.filled .share-btn{background:rgba(39,174,96,.1);color:var(--green)}
-    .friends-count{font-size:13px;color:var(--s);text-align:center;margin-top:4px}
+    .friend-slot.sent .f-btn{background:rgba(39,174,96,.1);color:var(--green)}
+    .on-app-section{margin-bottom:12px}
+    .on-app-row{
+      display:flex;align-items:center;gap:12px;padding:11px 0;
+      border-bottom:.5px solid var(--divider);
+    }
+    .on-app-row:last-child{border-bottom:none}
+    .on-app-av{
+      width:38px;height:38px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      font-size:14px;font-weight:700;color:#fff;flex-shrink:0;
+    }
+    .on-app-info{flex:1;min-width:0}
+    .on-app-name{font-size:15px;font-weight:500}
+    .on-app-sub{font-size:12px;color:var(--s)}
+    .on-app-add{
+      background:var(--accent);color:#fff;border:none;padding:6px 14px;
+      border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;
+      -webkit-tap-highlight-color:transparent;font-family:inherit;flex-shrink:0;
+    }
+    .on-app-add.added{background:rgba(39,174,96,.12);color:var(--green)}
+    .friends-count{font-size:13px;color:var(--s);text-align:center;margin-top:6px}
+
+    /* OCR parse */
+    .parse-btn{
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      padding:11px 16px;background:var(--accent);color:#fff;border:none;
+      border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;
+      width:100%;font-family:inherit;margin-bottom:12px;-webkit-tap-highlight-color:transparent;
+    }
+    .parse-btn:disabled{opacity:.5}
+    .parse-status{font-size:13px;color:var(--s);text-align:center;margin-bottom:8px;min-height:18px}
+    .parse-result{
+      background:rgba(39,174,96,.08);border:1px solid rgba(39,174,96,.2);
+      border-radius:10px;padding:10px 14px;margin-bottom:12px;display:none;
+    }
+    .parse-result .pr-title{font-size:12px;font-weight:600;color:var(--green);margin-bottom:6px;letter-spacing:.06em;text-transform:uppercase}
+    .parse-result .pr-row{font-size:13px;color:var(--p);padding:2px 0}
 
     /* done screen */
     #s-ob-done{align-items:center;justify-content:center;padding:40px 28px;text-align:center}
@@ -421,9 +466,15 @@
     <div id="photo-wrap">
       <img id="photo-preview" src="" alt="Schedule"/>
       <div class="photo-bar">
-        <span>Reference — tap blocks below to enter courses</span>
+        <span>Schedule uploaded</span>
         <button onclick="removePhoto()">Remove</button>
       </div>
+    </div>
+    <button class="parse-btn" id="parse-btn" style="display:none" onclick="parseSchedule()">✨ Read my schedule automatically</button>
+    <div class="parse-status" id="parse-status"></div>
+    <div class="parse-result" id="parse-result">
+      <div class="pr-title">✓ Courses found — review below</div>
+      <div id="parse-result-rows"></div>
     </div>
     <div class="block-list" id="ob-block-list"></div>
     <div class="ob-foot">
@@ -469,10 +520,20 @@
     <p class="ob-step">Step 4 of 4</p>
     <h2>Invite 3 friends.</h2>
     <p class="hint">The Quad is better with your crew. Invite 3 friends — they'll get a link to add it to their home screen.</p>
+    <!-- People already on The Quad -->
+    <div class="quad-label" style="padding:0 0 8px">ALREADY ON THE QUAD</div>
+    <div class="on-app-section" id="on-app-section"></div>
+
+    <div class="quad-label" style="padding:8px 0">INVITE FRIENDS</div>
+    <button class="contacts-btn" onclick="pickContacts()">
+      <span class="cb-icon">👥</span>
+      <span class="cb-label">Choose from Contacts</span>
+      <span class="cb-sub">›</span>
+    </button>
     <div class="friend-slots" id="friend-slots"></div>
-    <p class="friends-count" id="friends-count">0 of 3 invited</p>
+    <p class="friends-count" id="friends-count"></p>
     <div class="ob-foot">
-      <button class="btn" id="friends-btn" onclick="go('s-ob-done')">Continue →</button>
+      <button class="btn" onclick="go('s-ob-done')">Continue →</button>
       <button class="btn-ghost" onclick="go('s-ob-done')">Skip for now</button>
     </div>
   </div>
@@ -821,15 +882,107 @@ function obNameNext(){
   go('s-ob-sched');
 }
 
-// photo upload
+// photo upload + OCR
 function handlePhoto(input){
   const file=input.files&&input.files[0];if(!file)return;
   const r=new FileReader();r.onload=e=>{
     document.getElementById('photo-preview').src=e.target.result;
     document.getElementById('photo-wrap').style.display='block';
+    document.getElementById('parse-btn').style.display='flex';
+    document.getElementById('parse-status').textContent='';
+    document.getElementById('parse-result').style.display='none';
   };r.readAsDataURL(file);
 }
-function removePhoto(){document.getElementById('photo-wrap').style.display='none';document.getElementById('photo-input').value=''}
+function removePhoto(){
+  document.getElementById('photo-wrap').style.display='none';
+  document.getElementById('parse-btn').style.display='none';
+  document.getElementById('parse-status').textContent='';
+  document.getElementById('parse-result').style.display='none';
+  document.getElementById('photo-input').value='';
+}
+
+async function parseSchedule(){
+  const btn=document.getElementById('parse-btn');
+  const status=document.getElementById('parse-status');
+  const img=document.getElementById('photo-preview');
+  btn.disabled=true;btn.textContent='Reading schedule…';
+  status.textContent='Loading OCR engine…';
+  try{
+    // Load Tesseract.js lazily
+    if(!window.Tesseract){
+      await new Promise((res,rej)=>{
+        const s=document.createElement('script');
+        s.src='https://unpkg.com/tesseract.js@4/dist/tesseract.min.js';
+        s.onload=res;s.onerror=rej;document.head.appendChild(s);
+      });
+    }
+    status.textContent='Scanning image…';
+    const {data:{text}}=await Tesseract.recognize(img,'eng',{
+      logger:m=>{if(m.status==='recognizing text')status.textContent='Reading… '+Math.round(m.progress*100)+'%'}
+    });
+    status.textContent='Parsing courses…';
+    const found=parseBlocksFromText(text);
+    const count=Object.keys(found).length;
+    if(count===0){
+      status.textContent='Couldn\'t read this schedule format — enter courses manually below.';
+    } else {
+      // pre-fill state
+      Object.entries(found).forEach(([b,name])=>{
+        if(!S.courses[b]) S.courses[b]={name:'',teacher:'',room:''};
+        S.courses[b].name=name;
+      });
+      save();renderBlockList('ob-block-list');
+      document.getElementById('parse-result').style.display='block';
+      document.getElementById('parse-result-rows').innerHTML=
+        Object.entries(found).map(([b,n])=>`<div class="pr-row">Block ${b}: <strong>${n}</strong></div>`).join('');
+      status.textContent=`Found ${count} course${count!==1?'s':''}. Review and edit below.`;
+    }
+  }catch(e){
+    status.textContent='Could not read image. Please enter courses manually.';
+    console.error(e);
+  }
+  btn.disabled=false;btn.textContent='✨ Read my schedule automatically';
+}
+
+function parseBlocksFromText(raw){
+  const found={};
+  // Normalise
+  const text=raw.replace(/\r/g,'').replace(/\t/g,' ');
+  // Pattern 1: "Block A: Course Name" or "Block A - Course Name"
+  const p1=/[Bb]lock\s+([A-Ha-h])\s*[:\-–]\s*([^\n]+)/g;
+  let m;
+  while((m=p1.exec(text))!==null){
+    const blk=m[1].toUpperCase(),name=cleanCourseName(m[2]);
+    if(name&&BLOCKS.includes(blk)) found[blk]=name;
+  }
+  // Pattern 2: standalone "A: Course" at line start
+  if(Object.keys(found).length<3){
+    const p2=/^([A-Ha-h])\s*[:\-–]\s*([^\n]+)/gm;
+    while((m=p2.exec(text))!==null){
+      const blk=m[1].toUpperCase(),name=cleanCourseName(m[2]);
+      if(name&&BLOCKS.includes(blk)&&!found[blk]) found[blk]=name;
+    }
+  }
+  // Pattern 3: Aspen table — "A AP Calculus BC" (block letter followed by course)
+  if(Object.keys(found).length<3){
+    const lines=text.split('\n');
+    for(const line of lines){
+      const t=line.trim();
+      const p3=/^([A-H])\s+([A-Z][^]{4,})/;
+      const mm=p3.exec(t);
+      if(mm){const blk=mm[1],name=cleanCourseName(mm[2]);if(name&&!found[blk])found[blk]=name;}
+    }
+  }
+  return found;
+}
+
+function cleanCourseName(raw){
+  return raw.trim()
+    .replace(/[|\\\/\[\]{}]/g,'')
+    .replace(/\s{2,}/g,' ')
+    .replace(/[^\x20-\x7E]/g,'')
+    .slice(0,60).trim();
+}
 
 // Aspen onboarding
 async function obAspenConnect(){
@@ -869,50 +1022,107 @@ async function tryAspenConnect(username,password){
   }
 }
 
-// Friends (Beli-style)
+// ── FRIENDS (Beli-style with Contacts API + "already on app") ──
+
+// Simulated users already on The Quad (would come from backend in production)
+const QUAD_USERS = [
+  {name:'Maya Patel',   initials:'MP', color:'#7574f2', year:2028},
+  {name:'Jordan Kim',   initials:'JK', color:'#e8734a', year:2027},
+  {name:'Alex Rivera',  initials:'AR', color:'#4aae78', year:2029},
+];
+let friendedUsers=new Set();
+
 function initFriendSlots(){
+  // Render "already on The Quad" section
+  const onApp=document.getElementById('on-app-section');
+  onApp.innerHTML=QUAD_USERS.map(u=>`
+    <div class="on-app-row" id="oar-${u.initials}">
+      <div class="on-app-av" style="background:${u.color}">${u.initials}</div>
+      <div class="on-app-info">
+        <div class="on-app-name">${u.name}</div>
+        <div class="on-app-sub">Class of '${String(u.year).slice(2)} · LHS</div>
+      </div>
+      <button class="on-app-add ${friendedUsers.has(u.initials)?'added':''}" onclick="addQuadFriend('${u.initials}')">
+        ${friendedUsers.has(u.initials)?'Friends ✓':'+ Friend'}
+      </button>
+    </div>`).join('');
+
+  // Render invite slots
   const el=document.getElementById('friend-slots');
-  el.innerHTML=[0,1,2].map(i=>`
-    <div class="friend-slot ${S.friends[i]?'filled':''}" id="fs-${i}">
-      <div class="avatar-sm" id="fs-av-${i}">${S.friends[i]?S.friends[i].trim().charAt(0).toUpperCase():'👤'}</div>
-      <input type="text" placeholder="Friend's name or number" value="${S.friends[i]||''}"
-        oninput="friendInput(${i},this.value)" style="flex:1;border:none;background:transparent;font-size:15px;color:var(--p);font-family:inherit;outline:none"/>
-      <button class="share-btn" id="fs-btn-${i}" onclick="inviteFriend(${i})">${S.friends[i]?'Sent ✓':'Invite'}</button>
-    </div>`
-  ).join('');
+  el.innerHTML=[0,1,2].map(i=>{
+    const val=S.friends[i]||'';
+    const sent=S.friendsSent&&S.friendsSent[i];
+    return `<div class="friend-slot${sent?' sent':''}" id="fs-${i}">
+      <div class="av-sm" id="fs-av-${i}">${val?val.trim().charAt(0).toUpperCase():'+'}</div>
+      <input type="text" placeholder="Name or phone number" value="${val}"
+        oninput="friendInput(${i},this.value)"/>
+      <button class="f-btn" id="fs-btn-${i}" onclick="inviteFriend(${i})">${sent?'Sent ✓':'Invite'}</button>
+    </div>`;
+  }).join('');
   updateFriendsCount();
+}
+
+function addQuadFriend(initials){
+  friendedUsers.add(initials);
+  const btn=document.querySelector(`#oar-${initials} .on-app-add`);
+  if(btn){btn.textContent='Friends ✓';btn.classList.add('added')}
+  updateFriendsCount();
+}
+
+async function pickContacts(){
+  try{
+    if('contacts' in navigator&&'ContactsManager' in window){
+      const contacts=await navigator.contacts.select(['name'],{multiple:true});
+      contacts.slice(0,3).forEach((c,i)=>{
+        const name=(c.name&&c.name[0])||'';
+        if(name){
+          S.friends[i]=name;
+          const input=document.querySelector(`#fs-${i} input`);
+          const av=document.getElementById('fs-av-'+i);
+          if(input) input.value=name;
+          if(av) av.textContent=name.charAt(0).toUpperCase();
+        }
+      });
+      save();updateFriendsCount();
+    } else {
+      // Fallback — prompt user
+      alert('Open this in Safari on iPhone to access your contacts directly.');
+    }
+  }catch(e){
+    if(e.name!=='AbortError') alert('Could not access contacts. You can type names manually.');
+  }
 }
 
 function friendInput(i,val){
   S.friends[i]=val;save();
-  const slot=document.getElementById('fs-'+i);
   const av=document.getElementById('fs-av-'+i);
-  const btn=document.getElementById('fs-btn-'+i);
-  const filled=!!val.trim();
-  slot.classList.toggle('filled',filled&&btn.textContent.includes('Sent'));
-  if(!btn.textContent.includes('Sent')){av.textContent=filled?val.trim().charAt(0).toUpperCase():'👤'}
+  if(av) av.textContent=val.trim()?val.trim().charAt(0).toUpperCase():'+';
   updateFriendsCount();
 }
 
 async function inviteFriend(i){
-  const name=S.friends[i]||'';
+  const name=(S.friends[i]||'').trim();
   const link='https://the-quad.vercel.app';
-  const msg=`Hey${name?' '+name.trim().split(' ')[0]:''}! I'm using The Quad to manage my LHS schedule and grades. Add it to your home screen: ${link}`;
+  const msg=`Hey${name?' '+name.split(' ')[0]:''}! I use The Quad for my LHS schedule and grades. Add it to your home screen: ${link}`;
   try{
-    if(navigator.share){await navigator.share({title:'The Quad',text:msg,url:link})}
+    if(navigator.share) await navigator.share({title:'The Quad',text:msg,url:link});
     else{await navigator.clipboard.writeText(msg);alert('Invite link copied!')}
+    if(!S.friendsSent) S.friendsSent={};
+    S.friendsSent[i]=true;save();
     const btn=document.getElementById('fs-btn-'+i);
-    const av=document.getElementById('fs-av-'+i);
     const slot=document.getElementById('fs-'+i);
-    btn.textContent='Sent ✓';slot.classList.add('filled');
-    if(name) av.textContent=name.trim().charAt(0).toUpperCase();
+    if(btn) btn.textContent='Sent ✓';
+    if(slot) slot.classList.add('sent');
     updateFriendsCount();
   }catch(e){}
 }
 
 function updateFriendsCount(){
-  const sent=document.querySelectorAll('.friend-slot.filled').length;
-  document.getElementById('friends-count').textContent=`${sent} of 3 invited`;
+  const invited=(S.friendsSent?Object.keys(S.friendsSent).length:0);
+  const friended=friendedUsers.size;
+  const total=invited+friended;
+  const el=document.getElementById('friends-count');
+  if(el) el.textContent=total>0?`${total} friend${total!==1?'s':''} added`:'Invite friends or add people already on The Quad';
 }
 
 function finishOnboarding(){
