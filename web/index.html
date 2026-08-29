@@ -920,7 +920,13 @@ async function parseSchedule(){
     const valid=Object.fromEntries(Object.entries(found).filter(([,n])=>looksLikeCourse(n)));
     const count=Object.keys(valid).length;
     if(count===0){
-      status.textContent='Couldn\'t read courses from this image. Upload your personal Aspen schedule (not the general block schedule), or enter courses manually below.';
+      // Show raw OCR text so user can see what was extracted and enter manually
+      const rawLines=text.split('\n').map(l=>l.trim()).filter(l=>l.length>3).slice(0,30).join('\n');
+      status.innerHTML='Couldn\'t auto-detect courses. Make sure to screenshot your <strong>personal Aspen schedule</strong> (log in → My Schedule), not the general block schedule grid. Raw text found:';
+      document.getElementById('parse-result').style.display='block';
+      document.getElementById('parse-result').style.background='rgba(0,0,0,.04)';
+      document.getElementById('parse-result').style.borderColor='var(--border)';
+      document.getElementById('parse-result-rows').innerHTML=`<pre style="font-size:11px;white-space:pre-wrap;color:var(--s);max-height:140px;overflow-y:auto">${rawLines||'(no text found — try a clearer photo)'}</pre>`;
     } else {
       Object.entries(valid).forEach(([b,name])=>{
         if(!S.courses[b]) S.courses[b]={name:'',teacher:'',room:''};
@@ -952,66 +958,72 @@ const DAY_BLOCKS={
 function parseBlocksFromText(raw){
   const found={};
   const text=raw.replace(/\r/g,'').replace(/\t/g,' ');
+  const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
   let m;
 
-  // Pattern 1: explicit "Block A: Course" or "A Block — Course"
-  const p1=/[Bb]lock\s+([A-Ha-h])\s*[:\-–]+\s*([^\n]+)/g;
-  while((m=p1.exec(text))!==null){
-    const blk=m[1].toUpperCase(),name=cleanCourseName(m[2]);
-    if(name.length>2&&BLOCKS.includes(blk)) found[blk]=name;
-  }
-  const p1b=/([A-Ha-h])\s+[Bb]lock\s*[:\-–]+\s*([^\n]+)/g;
-  while((m=p1b.exec(text))!==null){
-    const blk=m[1].toUpperCase(),name=cleanCourseName(m[2]);
-    if(name.length>2&&BLOCKS.includes(blk)&&!found[blk]) found[blk]=name;
+  // ── Pattern 1 (highest confidence): Aspen "Course Name   A   Teacher   Room"
+  // Block letter appears as a standalone word AFTER the course name on a line.
+  // e.g. "AP Calculus BC  A  Mr. Smith  201"
+  for(const line of lines){
+    // Find standalone A-H block letter with word boundaries
+    const am=line.match(/^(.+?)\s+\b([A-H])\b\s*(.*)$/);
+    if(!am) continue;
+    const blk=am[2], rawCourse=am[1].trim();
+    const name=cleanCourseName(rawCourse);
+    if(name.length>=4&&BLOCKS.includes(blk)&&!found[blk]&&looksLikeCourse(name)){
+      found[blk]=name;
+    }
   }
 
-  // Pattern 2: Aspen row format — line starts with single block letter
+  // ── Pattern 2: "Block A: Course" or "A Block — Course" (explicit prefix)
   if(Object.keys(found).length<3){
-    const p2=/^([A-Ha-h])\s*[:\-–]\s*([^\n]{5,})/gm;
-    while((m=p2.exec(text))!==null){
+    const p2a=/[Bb]lock\s+([A-Ha-h])\s*[:\-–]+\s*([^\n]+)/g;
+    while((m=p2a.exec(text))!==null){
       const blk=m[1].toUpperCase(),name=cleanCourseName(m[2]);
-      if(name.length>2&&BLOCKS.includes(blk)&&!found[blk]) found[blk]=name;
+      if(name.length>=4&&BLOCKS.includes(blk)&&!found[blk]) found[blk]=name;
+    }
+    const p2b=/([A-Ha-h])\s+[Bb]lock\s*[:\-–]+\s*([^\n]+)/g;
+    while((m=p2b.exec(text))!==null){
+      const blk=m[1].toUpperCase(),name=cleanCourseName(m[2]);
+      if(name.length>=4&&BLOCKS.includes(blk)&&!found[blk]) found[blk]=name;
     }
   }
 
-  // Pattern 3: Day+Period layout — "Day 1" section header then lines of courses
-  // Map position within each day's period list to block letter using LHS rotation
+  // ── Pattern 3: line starts with block letter "A  Course Name"
   if(Object.keys(found).length<3){
-    const dayMatch=text.match(/[Dd]ay\s*[1-6]/);
-    if(dayMatch){
-      for(let day=1;day<=6;day++){
-        const dayRe=new RegExp(`[Dd]ay\\s*${day}([\\s\\S]{0,400}?)(?:[Dd]ay\\s*[1-6]|$)`);
-        const dm=text.match(dayRe);
-        if(!dm) continue;
-        const dayText=dm[1];
-        // Extract non-empty course-like lines from this day's section
-        const courseLines=dayText.split('\n')
-          .map(l=>cleanCourseName(l))
-          .filter(l=>l.length>4&&!/^\d+$/.test(l)&&!/^[0-9:]+/.test(l)&&!/lunch|homeroom|i block|flex/i.test(l));
-        const order=DAY_BLOCKS[day];
-        courseLines.slice(0,6).forEach((name,i)=>{
-          const blk=order[i];
-          if(blk&&BLOCKS.includes(blk)&&!found[blk]&&name.length>4) found[blk]=name;
-        });
-      }
+    for(const line of lines){
+      const sm=line.match(/^([A-Ha-h])\s{2,}([^\n]{4,})/);
+      if(!sm) continue;
+      const blk=sm[1].toUpperCase(),name=cleanCourseName(sm[2]);
+      if(name.length>=4&&BLOCKS.includes(blk)&&!found[blk]&&looksLikeCourse(name)) found[blk]=name;
     }
   }
 
-  // Pattern 4: if we see time ranges followed by course names, use Day 1 slot order
-  // e.g. "8:30 AP Calculus" → slot 1 → Block A
+  // ── Pattern 4: "A - Course" at line start (dash separator)
   if(Object.keys(found).length<3){
-    const timeLines=[];
-    const timeRe=/\b\d{1,2}:\d{2}\s*[-–]?\s*(?:\d{1,2}:\d{2})?\s*([A-Za-z][^\n]{4,})/g;
-    while((m=timeRe.exec(text))!==null){
-      const name=cleanCourseName(m[1]);
-      if(name.length>4&&!/homeroom|flex|lunch|advisory/i.test(name)) timeLines.push(name);
+    const p4=/^([A-Ha-h])\s*[-–:]\s*([^\n]{4,})/gm;
+    while((m=p4.exec(text))!==null){
+      const blk=m[1].toUpperCase(),name=cleanCourseName(m[2]);
+      if(name.length>=4&&BLOCKS.includes(blk)&&!found[blk]&&looksLikeCourse(name)) found[blk]=name;
     }
-    const order1=DAY_BLOCKS[1];
-    timeLines.slice(0,6).forEach((name,i)=>{
-      const blk=order1[i];
-      if(blk&&BLOCKS.includes(blk)&&!found[blk]) found[blk]=name;
-    });
+  }
+
+  // ── Pattern 5: Aspen schedule with Day sections — map period position to block
+  if(Object.keys(found).length<3){
+    for(let day=1;day<=6;day++){
+      const dayRe=new RegExp(`[Dd]ay\\s*0?${day}([\\s\\S]{0,600}?)(?:[Dd]ay\\s*[1-6]|$)`);
+      const dm=text.match(dayRe);
+      if(!dm) continue;
+      const courseLines=dm[1].split('\n')
+        .map(l=>cleanCourseName(l.trim()))
+        .filter(n=>n.length>=4&&looksLikeCourse(n)&&!/lunch|homeroom|flex|advisory/i.test(n));
+      const order=DAY_BLOCKS[day];
+      courseLines.slice(0,6).forEach((name,i)=>{
+        const blk=order[i];
+        if(blk&&BLOCKS.includes(blk)&&!found[blk]) found[blk]=name;
+      });
+      if(Object.keys(found).length>=4) break;
+    }
   }
 
   return found;
