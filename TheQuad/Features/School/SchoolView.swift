@@ -330,100 +330,111 @@ struct FriendDetailView: View {
         let startStr = fmt.string(from: interval.start)
         fmt.dateFormat = "h:mm a"
         let endStr = fmt.string(from: interval.end)
-        return "\(startStr) – \(endStr) · \(interval.durationMinutes) min"
+        return "\(startStr)–\(endStr)"
+    }
+
+    private var thinRule: some View {
+        Rectangle()
+            .fill(DesignTokens.Colors.secondary.opacity(0.15))
+            .frame(height: 0.5)
     }
 
     var body: some View {
         ZStack {
             DesignTokens.Colors.background.ignoresSafeArea()
             ScrollView {
-                VStack(alignment: .leading, spacing: DesignTokens.Spacing.xl) {
-                    // Header
+                VStack(spacing: 0) {
+                    // Flat header
                     HStack(spacing: DesignTokens.Spacing.lg) {
-                        InitialsAvatar(name: friend.displayName, size: 72)
-                        VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
+                        InitialsAvatar(name: friend.displayName, size: 64)
+                        VStack(alignment: .leading, spacing: 4) {
                             Text(friend.displayName)
                                 .font(DesignTokens.Typography.quadTitle)
                                 .foregroundStyle(DesignTokens.Colors.primary)
                             Text(classOfLabel(friend.graduationYear))
-                                .font(DesignTokens.Typography.quadBody)
+                                .font(DesignTokens.Typography.quadCaption)
                                 .foregroundStyle(DesignTokens.Colors.secondary)
                         }
                         Spacer()
                     }
-                    .padding(DesignTokens.Spacing.lg)
-                    .background(DesignTokens.Colors.surface)
-                    .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.extraLarge))
+                    .padding(.horizontal, DesignTokens.Spacing.lg)
+                    .padding(.vertical, DesignTokens.Spacing.xl)
 
-                    // Shared free time today
-                    detailSection(title: "Shared Free Time Today", icon: "clock.badge.checkmark") {
-                        let shared = model.sharedFreeBlocks(with: friend)
+                    thinRule
+
+                    // Shared free time section
+                    let shared = model.sharedFreeBlocks(with: friend)
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text("SHARED FREE TODAY")
+                            .font(DesignTokens.Typography.quadLabel)
+                            .foregroundStyle(DesignTokens.Colors.secondary)
+                            .padding(.horizontal, DesignTokens.Spacing.lg)
+                            .padding(.vertical, DesignTokens.Spacing.md)
+
                         if shared.isEmpty {
                             Text("No shared free blocks today.")
                                 .font(DesignTokens.Typography.quadBody)
                                 .foregroundStyle(DesignTokens.Colors.secondary)
+                                .padding(.horizontal, DesignTokens.Spacing.lg)
+                                .padding(.bottom, DesignTokens.Spacing.lg)
                         } else {
-                            ForEach(shared) { interval in
+                            ForEach(Array(shared.enumerated()), id: \.element.id) { idx, interval in
                                 HStack {
-                                    Image(systemName: "clock")
-                                        .foregroundStyle(DesignTokens.Colors.accent)
-                                        .frame(width: 20)
                                     Text(formatInterval(interval))
                                         .font(DesignTokens.Typography.quadBody)
                                         .foregroundStyle(DesignTokens.Colors.primary)
                                     Spacer()
+                                    Text("\(interval.durationMinutes)m free")
+                                        .font(DesignTokens.Typography.quadCaption.weight(.semibold))
+                                        .foregroundStyle(DesignTokens.Colors.accent)
+                                }
+                                .padding(.horizontal, DesignTokens.Spacing.lg)
+                                .padding(.vertical, DesignTokens.Spacing.md)
+                                if idx < shared.count - 1 {
+                                    Divider().padding(.leading, DesignTokens.Spacing.lg)
                                 }
                             }
                         }
                     }
 
-                    // Classes together (if they share block info)
+                    // Classes together
                     if friend.showClassesInDirectory {
-                        let shared = model.sharedBlocks(with: friend)
-                        if !shared.isEmpty {
-                            detailSection(title: "Classes Together", icon: "book.fill") {
-                                ForEach(shared, id: \.self) { block in
-                                    HStack {
-                                        ZStack {
-                                            RoundedRectangle(cornerRadius: 6)
-                                                .fill(CourseColors.color(for: block))
-                                                .frame(width: 28, height: 28)
-                                            Text(block.rawValue)
-                                                .font(.system(size: 12, weight: .bold))
-                                                .foregroundStyle(.white)
-                                        }
+                        let sharedBlocks = model.sharedBlocks(with: friend)
+                        if !sharedBlocks.isEmpty {
+                            thinRule
+
+                            VStack(alignment: .leading, spacing: 0) {
+                                Text("CLASSES TOGETHER")
+                                    .font(DesignTokens.Typography.quadLabel)
+                                    .foregroundStyle(DesignTokens.Colors.secondary)
+                                    .padding(.horizontal, DesignTokens.Spacing.lg)
+                                    .padding(.vertical, DesignTokens.Spacing.md)
+
+                                ForEach(Array(sharedBlocks.enumerated()), id: \.offset) { idx, block in
+                                    HStack(spacing: DesignTokens.Spacing.md) {
+                                        Circle()
+                                            .fill(CourseColors.color(for: block))
+                                            .frame(width: 8, height: 8)
                                         Text("\(block.rawValue) Block")
                                             .font(DesignTokens.Typography.quadBody)
                                             .foregroundStyle(DesignTokens.Colors.primary)
                                         Spacer()
+                                    }
+                                    .padding(.horizontal, DesignTokens.Spacing.lg)
+                                    .padding(.vertical, DesignTokens.Spacing.md)
+                                    if idx < sharedBlocks.count - 1 {
+                                        Divider().padding(.leading, DesignTokens.Spacing.lg)
                                     }
                                 }
                             }
                         }
                     }
                 }
-                .padding(DesignTokens.Spacing.lg)
                 .padding(.bottom, DesignTokens.Spacing.xxxl)
             }
         }
         .navigationTitle(friend.displayName)
         .navigationBarTitleDisplayMode(.inline)
-    }
-
-    @ViewBuilder
-    private func detailSection<Content: View>(title: String, icon: String, @ViewBuilder content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
-            Label(title, systemImage: icon)
-                .font(DesignTokens.Typography.quadHeadline.weight(.semibold))
-                .foregroundStyle(DesignTokens.Colors.primary)
-            VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
-                content()
-            }
-        }
-        .padding(DesignTokens.Spacing.lg)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(DesignTokens.Colors.surface)
-        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.large))
     }
 }
 

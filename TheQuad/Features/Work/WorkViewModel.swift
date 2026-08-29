@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import UIKit
 
 enum WorkFilter: String, CaseIterable {
     case all = "All"
@@ -80,6 +81,11 @@ final class WorkViewModel {
     func toggleComplete(_ assignment: Assignment) {
         if let idx = AppState.shared.assignments.firstIndex(where: { $0.id == assignment.id }) {
             AppState.shared.assignments[idx].isCompleted.toggle()
+            if AppState.shared.assignments[idx].isCompleted {
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+            } else {
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            }
         }
     }
 

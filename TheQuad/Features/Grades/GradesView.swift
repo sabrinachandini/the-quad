@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 // MARK: - Main Grades View
 
@@ -173,6 +174,14 @@ struct CourseGradeDetailView: View {
         }
         .navigationTitle(course?.name ?? "Grade Detail")
         .navigationBarTitleDisplayMode(.large)
+        .onChange(of: model.whatIfGrade) { old, new in
+            guard let new else { return }
+            if old == nil {
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            } else if let old, GradeEngine.letterGrade(from: old) != GradeEngine.letterGrade(from: new) {
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+            }
+        }
         .onAppear {
             model.selectedCourseGradeId = grade.id
             if model.hypotheticalCategoryId == nil {
@@ -277,6 +286,7 @@ struct CourseGradeDetailView: View {
                             .focused($focusedField, equals: .score)
                             .padding(DesignTokens.Spacing.sm)
                             .background(DesignTokens.Colors.surface)
+                            .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.small))
                             .font(DesignTokens.Typography.quadBody)
                             .foregroundStyle(DesignTokens.Colors.primary)
                     }
@@ -293,6 +303,7 @@ struct CourseGradeDetailView: View {
                             .focused($focusedField, equals: .possible)
                             .padding(DesignTokens.Spacing.sm)
                             .background(DesignTokens.Colors.surface)
+                            .clipShape(RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.small))
                             .font(DesignTokens.Typography.quadBody)
                             .foregroundStyle(DesignTokens.Colors.primary)
                     }
