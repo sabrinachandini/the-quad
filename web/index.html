@@ -708,7 +708,7 @@
 
 const BLOCKS  = ['A','B','C','D','E','F','G','H'];
 const COLORS  = ['#7574f2','#e8734a','#4aae78','#d4a843','#e05c8a','#4a9ee8','#8b5cf6','#14b8a6'];
-const GRAD_YEARS = [2026,2027,2028,2029];
+const GRAD_YEARS = [2027,2028,2029,2030];
 
 const PERIODS = [
   {start:8*60+30,end:9*60+30},{start:9*60+35,end:10*60+35},
@@ -772,7 +772,7 @@ function gradeColor(pct){
 // ════════════════════════════════════════════
 
 let S = {
-  name:'',gradYear:2027,
+  name:'',gradYear:2028,
   courses:{},         // {A:{name,teacher,room},...}
   assignments:[],     // [{id,title,courseBlock,due,done}]
   grades:[],          // [{id,block,entries:[{id,title,earned,possible}]}]
@@ -1298,7 +1298,7 @@ function renderMe(){
 function resetApp(){
   if(!confirm('Reset The Quad and start over?'))return;
   localStorage.removeItem('quad');
-  S={name:'',gradYear:2027,courses:{},assignments:[],grades:[],aspen:{user:'',connected:false},friends:['','',''],onboarded:false};
+  S={name:'',gradYear:2028,courses:{},assignments:[],grades:[],aspen:{user:'',connected:false},friends:['','',''],onboarded:false};
   go('s-landing');
 }
 
