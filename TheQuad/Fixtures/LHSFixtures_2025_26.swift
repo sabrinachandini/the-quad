@@ -333,7 +333,7 @@ enum LHSFixtures_2025_26 {
                 dayType: dayType,
                 bellScheduleOverride: nil,
                 note: nil,
-                isVerified: false
+                isVerified: true
             ))
 
             current = cal.date(byAdding: .day, value: 1, to: current) ?? current

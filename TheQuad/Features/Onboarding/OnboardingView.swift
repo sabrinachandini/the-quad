@@ -279,71 +279,24 @@ private struct ScheduleImportStep: View {
                         .font(QFont.quadTitle)
                         .foregroundStyle(QColor.primary)
                         .lineSpacing(4)
-                    Text("Add it however you have it.")
+                    Text("Enter your 6 blocks — takes about 30 seconds.")
                         .font(QFont.quadCaption)
                         .foregroundStyle(QColor.secondary)
                 }
                 .padding(.horizontal, QSpace.xl)
                 .padding(.top, QSpace.xxxl)
 
-                Spacer().frame(height: QSpace.xxl)
-
-                VStack(spacing: 0) {
-                    ImportOptionRow(icon: "camera", label: "Take a photo of your schedule") {
-                        withAnimation(.easeInOut(duration: 0.3)) { model.currentStep = 4 }
-                    }
-                    Rectangle()
-                        .fill(QColor.surface)
-                        .frame(height: 1)
-                        .padding(.horizontal, QSpace.xl)
-                    ImportOptionRow(icon: "doc", label: "Choose a file or screenshot") {
-                        withAnimation(.easeInOut(duration: 0.3)) { model.currentStep = 4 }
-                    }
-                }
-
-                Spacer().frame(height: QSpace.xl)
-
-                HStack {
-                    Spacer()
-                    Button { showManualEntry = true } label: {
-                        Text("Enter manually instead →")
-                            .font(QFont.quadBody)
-                            .foregroundStyle(QColor.accent)
-                    }
-                    Spacer()
-                }
-
                 Spacer()
+
+                PrimaryButton(label: "Enter my schedule →", enabled: true) {
+                    showManualEntry = true
+                }
+
+                Spacer().frame(height: QSpace.xxl)
             }
         }
         .sheet(isPresented: $showManualEntry) {
             ManualScheduleSheet(model: model)
-        }
-    }
-}
-
-private struct ImportOptionRow: View {
-    let icon: String
-    let label: String
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: QSpace.lg) {
-                Image(systemName: icon)
-                    .font(.system(size: 22, weight: .medium))
-                    .foregroundStyle(QColor.accent)
-                    .frame(width: 32)
-                Text(label)
-                    .font(QFont.quadHeadline)
-                    .foregroundStyle(QColor.primary)
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundStyle(QColor.secondary)
-            }
-            .padding(.horizontal, QSpace.xl)
-            .padding(.vertical, QSpace.lg)
         }
     }
 }
