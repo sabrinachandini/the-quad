@@ -298,9 +298,11 @@ enum LHSFixtures_2025_26 {
         var rotationIndex = 0
 
         guard
-            let startDate = cal.date(from: DateComponents(year: 2026, month: 9, day: 8)),
+            let startDate = cal.date(from: DateComponents(year: 2026, month: 9, day: 1)),
             let endDate   = cal.date(from: DateComponents(year: 2027, month: 6, day: 11))
         else { return [] }
+
+        let orientationDay = cal.date(from: DateComponents(year: 2026, month: 9, day: 1))!
 
         var current = startDate
         let formatter = DateFormatter()
@@ -316,7 +318,9 @@ enum LHSFixtures_2025_26 {
             }
 
             let dayType: DayType
-            if holidays.contains(key) {
+            if cal.isDate(current, inSameDayAs: orientationDay) {
+                dayType = .special  // Day 0 — orientation
+            } else if holidays.contains(key) {
                 dayType = .noSchool
             } else {
                 dayType = rotationDays[rotationIndex % 6]
