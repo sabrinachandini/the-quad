@@ -454,13 +454,13 @@
   <div class="ob">
     <p class="ob-step">Step 2 of 4</p>
     <h2>What's your schedule?</h2>
-    <p class="hint">Have your schedule? Upload a photo for reference, then tap each block to enter your course.</p>
+    <p class="hint">Screenshot your personal schedule from Aspen (log in → My Schedule), then upload it below to auto-fill your courses.</p>
     <input type="file" id="photo-input" accept="image/*" style="display:none" onchange="handlePhoto(this)"/>
     <div class="upload-zone" onclick="document.getElementById('photo-input').click()">
-      <span class="uz-icon">📷</span>
+      <span class="uz-icon">📋</span>
       <div class="uz-text">
-        <strong>Upload or photograph your schedule</strong>
-        <span>Take a photo or choose from library</span>
+        <strong>Upload Aspen schedule screenshot</strong>
+        <span>Log in to Aspen → My Schedule → screenshot</span>
       </div>
     </div>
     <div id="photo-wrap">
@@ -962,11 +962,12 @@ function parseBlocksFromText(raw){
   let m;
 
   // ── Pattern 1 (highest confidence): Aspen "Course Name   A   Teacher   Room"
-  // Block letter appears as a standalone word AFTER the course name on a line.
-  // e.g. "AP Calculus BC  A  Mr. Smith  201"
+  // Block letter is separated from course name by 2+ spaces (OCR table columns).
+  // Require 2+ spaces BEFORE the block letter to avoid matching letters inside names
+  // like "AP" (A in AP), "BC" (B/C in BC), etc.
   for(const line of lines){
-    // Find standalone A-H block letter with word boundaries
-    const am=line.match(/^(.+?)\s+\b([A-H])\b\s*(.*)$/);
+    // Must have 4+ chars (course name), then 2+ spaces, then single A-H, then 2+ spaces or end
+    const am=line.match(/^(.{4,}?)\s{2,}([A-H])(?:\s{2,}|$)/);
     if(!am) continue;
     const blk=am[2], rawCourse=am[1].trim();
     const name=cleanCourseName(rawCourse);
@@ -1142,10 +1143,8 @@ async function inviteFriend(i){
 
 function updateFriendsCount(){
   const invited=(S.friendsSent?Object.keys(S.friendsSent).length:0);
-  const friended=friendedUsers.size;
-  const total=invited+friended;
   const el=document.getElementById('friends-count');
-  if(el) el.textContent=total>0?`${total} friend${total!==1?'s':''} added`:'Invite friends or add people already on The Quad';
+  if(el) el.textContent=invited>0?`${invited} friend${invited!==1?'s':''} invited`:'Invite friends to The Quad';
 }
 
 function finishOnboarding(){
